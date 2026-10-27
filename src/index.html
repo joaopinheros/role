@@ -136,6 +136,7 @@ p{margin:0}
 .hud-right .px{background:var(--shell);color:var(--text)}
 .hud-right .px.hot{background:var(--berry);color:#000}
 .hud-right .px[aria-pressed="true"]{background:var(--kiwi);color:#000}
+.hud-right #rMute[aria-pressed="true"]{background:var(--berry);color:#000}
 .hud-right .grp{display:flex;gap:10px}
 @media (min-width:761px){.hud-right{width:172px;align-items:stretch}.hud-right .px{justify-content:flex-start}.hud-right .grp{display:grid;grid-template-columns:auto 1fr}.hud-right .grp:last-child{grid-template-columns:1fr 1fr}.hud-right .grp:last-child .px{justify-content:center}}
 .chat-dock{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(540px,calc(100% - 32px));display:flex;flex-direction:column;gap:10px;z-index:2;pointer-events:none}
@@ -350,6 +351,8 @@ p{margin:0}
       <button class="px hot" id="wardBtn" aria-expanded="false" aria-controls="wardrobe" data-i="shirt"><span>Visual</span></button>
       <button class="px" id="rInvite" data-i="link"><span>Convidar</span></button>
       <button class="px" id="rSom" aria-pressed="false" data-i="note"><span>Som</span></button>
+      <button class="px" id="rVoz" hidden aria-pressed="false" aria-label="Entrar no chat de voz" data-i="mic"><span>Voz</span></button>
+      <button class="px" id="rMute" hidden aria-pressed="false" aria-label="Silenciar meu microfone" data-i="mic"><span>Mudo</span></button>
       <button class="px" id="rDay" hidden data-i="sun"><span>Dia</span></button>
       <div class="grp"><button class="px icon" id="zOut" aria-label="Afastar" data-i="minus"></button><button class="px icon" id="zIn" aria-label="Aproximar" data-i="plus"></button></div>
     </div>

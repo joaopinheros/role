@@ -24,6 +24,9 @@ try {
 const env = process.env;
 const url = (env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '');
 const key = env.SUPABASE_PUBLISHABLE_KEY || env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+// servidores STUN/TURN do chat de voz (opcional). Ex.: [{"urls":"turn:turn.exemplo.com:3478","username":"u","credential":"s"}]
+let ice;
+try { ice = env.ICE_SERVERS_JSON ? JSON.parse(env.ICE_SERVERS_JSON) : undefined; } catch (_) { console.warn('[pages] ICE_SERVERS_JSON inválido, ignorando'); }
 
 require('./build.js');
 fs.rmSync(OUT, { recursive: true, force: true });
@@ -36,7 +39,7 @@ if (url && key) {
     entryPoints: [path.join(ROOT, 'src', 'supabase', 'client.js')], outfile: path.join(OUT, 'role-supabase.js'),
     bundle: true, minify: true, format: 'iife', globalName: 'RoleSupabase', target: 'es2019', platform: 'browser', legalComments: 'none',
   });
-  const cfg = JSON.stringify({ url, key }).replace(/</g, '\u003c');
+  const cfg = JSON.stringify({ url, key, ice }).replace(/</g, '\u003c');
   html = html.replace('</head>', `<script>window.ROLE_SUPABASE=${cfg}</script><script src="/role-supabase.js"></script></head>`);
   console.log('[pages] Supabase ligado em ' + url);
 } else {

@@ -101,7 +101,7 @@ async function initCaps(){
   if(window.ROLE_SERVER){SRV=REMOTE=true;NET=Net();DB=ServerDB(NET);ROOMCAP={join:n=>NET.join(n)};
     const a=LS.get('role-auth',null);if(a&&a.token){try{const r=await NET.hello(a.token);UID=r.uid;}catch(e){if(e.code!=='timeout')LS.del('role-auth');}}
     if(!UID)UID='anon';return;}
-  if(window.ROLE_SUPABASE&&window.RoleSupabase){try{const s=await RoleSupabase.connect(window.ROLE_SUPABASE);SRV=REMOTE=true;NET=s.net;DB=s.db;UID=s.uid||'anon';ROOMCAP={join:s.room};if(s.conta)sessao.set(s.conta);return;}
+  if(window.ROLE_SUPABASE&&window.RoleSupabase){try{const s=await RoleSupabase.connect(window.ROLE_SUPABASE);SRV=REMOTE=true;NET=s.net;DB=s.db;UID=s.uid||'anon';ROOMCAP={join:s.room,voice:s.voice};if(s.conta)sessao.set(s.conta);return;}
     catch(e){console.warn('supabase',e);toast('Sem conexão com o servidor. Usando o modo local.',5000);}}
   try{if(window.claude&&claude.use){
     const t=new Promise(r=>setTimeout(()=>r([null,null,null]),9000));
@@ -273,7 +273,7 @@ $('#c3Enter').addEventListener('click',()=>enterRoom(draft.eid));
 async function openInvite(eid){go('#scrInvite');errOn('#invErr');$('#invName').textContent='…';$('#invMeta').innerHTML='';$('#invBy').textContent='';show($('#invAccept'));
   let r=null;try{r=await DB.get('roles/'+eid);}catch(e){}
   if(!r){$('#invName').textContent='Convite não encontrado';errOn('#invErr','Esse link não leva a nenhum rolê. Confere com quem te mandou.');show($('#invAccept'),false);LS.del('role-convite');PENDING_INVITE=null;vitrine('parque',true);return;}
-  $('#invName').textContent=r.nome;chipsFor($('#invMeta'),r);
+  $('#invName').textContent=r.nome;chipsFor($('#invMeta'),r);PENDING_INVITE={eid,nome:r.nome,cena:r.cena,noite:r.noite};
   let n=0;try{n=(await DB.list(`roles/${eid}/gente`)).length;}catch(e){}
   $('#invBy').textContent=`${r.donoNome||'@'+r.dono} te chamou.`+(n>1?` ${n} pessoas já confirmaram.`:'');$('#invCart').style.setProperty('--cc',cartColor(r.cena));
   sceneThumb(r.cena,r.noite,$('#invThumb'));vitrine(r.cena,r.noite);
@@ -308,12 +308,14 @@ async function enterRoom(eid,fresh){
   // presença ao vivo
   try{live=ROOMCAP?await ROOMCAP.join('role-'+eid):LocalRoom('role-'+eid);}catch(e){if(e&&e.code==='full')return salaCheia();console.warn('room',e);live=LocalRoom('role-'+eid);}
   if(mode!=='sala'||!CUR||CUR.eid!==eid){live&&live.leave();return;}
-  live.onPeers(ch=>syncPeers(ch.peers));pushPres(true);live.start&&live.start();syncPeers(live.peers());
+  live.onPeers(ch=>syncPeers(ch.peers));setupVoz(eid);let wasDown=false;live.onStatus&&live.onStatus(st=>{if(st==='down'&&!wasDown){wasDown=true;toast('Sem conexão com a sala ao vivo. Reconectando…',4500);}else if(st==='up'&&wasDown){wasDown=false;toast('Reconectado.');}});pushPres(true);live.start&&live.start();syncPeers(live.peers());
+  /* nasceu em cima de alguém que já estava aqui (com o visual padrão parece um boneco só): sai do lugar */
+  {const o=avatars.find(v=>v!==me&&Math.round(v.gx)===me.gx&&Math.round(v.gy)===me.gy);if(o){const[x,y]=freeNear(me.gx,me.gy,me);me.gx=me.fx=x;me.gy=me.fy=y;me.path=[];pushPres(true);}}
   setTimeout(()=>{if(mode==='sala'&&avatars.length===1)addLog(null,'Só você por aqui por enquanto. Toca em “Convidar” e manda o link pra galera.');},2500);
 }
 function salaCheia(){if(live){try{live.leave()}catch(e){}live=null;}toast('Essa sala tá cheia agora. Tenta de novo daqui a pouco.',4200);openHome();}
 function spawnTile(){const[x0,y0]=SCN.sc.spawn;for(let i=0;i<60;i++){const x=x0+ri(5)-2,y=y0+ri(5)-2;if(walkable(x,y,-1,-1)&&!occupied(x,y,null))return[x,y];}return freeNear(x0,y0,null);}
-function leaveRoom(){mode='vitrine';MUSIC.stop();updSom&&updSom();unsubRole&&unsubRole();unsubChat&&unsubChat();unsubRole=unsubChat=null;if(live){try{live.leave()}catch(e){}live=null;}avatars=[];peerAvs.clear();me=null;CUR=null;vitrine.k=null;seedBots();}
+function leaveRoom(){vozStop();mode='vitrine';MUSIC.stop();updSom&&updSom();unsubRole&&unsubRole();unsubChat&&unsubChat();unsubRole=unsubChat=null;if(live){try{live.leave()}catch(e){}live=null;}avatars=[];peerAvs.clear();me=null;CUR=null;vitrine.k=null;seedBots();}
 function presObj(){const t=me.path.length?me.path[me.path.length-1]:[me.gx,me.gy];return{u:ME.usuario,n:ME.nome,j:joinedAt,f:encode(me.fig),x:t[0],y:t[1],a:me.action||'',b:me.back?1:0,m:me.mirror?1:0};}
 function pushPres(force){if(!live||!me)return;const p=presObj(),s=JSON.stringify(p);if(!force&&s===lastPres)return;lastPres=s;live.presence(p).catch(e=>console.warn(e));}
 function syncPeers(peers){if(mode!=='sala')return;const seen=new Set();
@@ -479,6 +481,36 @@ cv.addEventListener('pointerup',e=>{const wasPinch=!!pinch;dropPt(e);if(!pts.siz
 function updSom(){const b=$('#rSom');if(!b)return;b.setAttribute('aria-pressed',String(MUSIC.on));setBtn(b,'note',MUSIC.on?MUSIC.name():'Som');}
 function toggleSom(){const on=MUSIC.toggle();updSom();addLog(null,on?`Som ligado: ${MUSIC.name()}.`:'Som desligado.');}
 $('#rSom').addEventListener('click',toggleSom);
+
+/* ---------- chat de voz (modo Supabase): áudio direto entre as pessoas, até 8 por vez ---------- */
+let voz=null,vozSt={active:false,muted:false,members:[]},vozOff=null,vozPrev=new Set();
+function setupVoz(eid){show($('#rVoz'),false);show($('#rMute'),false);vozStop();
+  if(!ROOMCAP||!ROOMCAP.voice)return;voz=ROOMCAP.voice(eid);
+  vozOff=voz.onChange(st=>{vozSt=st;updVoz();
+    if(st.full)toast('A conversa de voz está cheia (8 pessoas). Tenta de novo daqui a pouco.',4200);
+    const cur=new Set(st.members.filter(m=>!m.isMe).map(m=>m.user));
+    if(st.active){cur.forEach(u=>{if(!vozPrev.has(u))addLog(null,u?'@'+u+' entrou na voz.':'Alguém entrou na voz.');});vozPrev.forEach(u=>{if(!cur.has(u))addLog(null,'@'+u+' saiu da voz.');});}
+    vozPrev=st.active?cur:new Set();});
+  show($('#rVoz'));updVoz();}
+function updVoz(){const b=$('#rVoz'),m=$('#rMute');if(!b)return;
+  b.setAttribute('aria-pressed',String(vozSt.active));setBtn(b,'mic',vozSt.active?'Voz · '+vozSt.members.length:'Voz');
+  b.setAttribute('aria-label',vozSt.active?'Sair do chat de voz':'Entrar no chat de voz');
+  show(m,vozSt.active);m.setAttribute('aria-pressed',String(vozSt.muted));setBtn(m,vozSt.muted?'micoff':'mic','Mudo');
+  m.setAttribute('aria-label',vozSt.muted?'Ligar meu microfone':'Silenciar meu microfone');}
+function vozStop(){if(vozOff){vozOff();vozOff=null;}if(voz){voz.leave().catch(()=>{});voz=null;}vozSt={active:false,muted:false,members:[]};vozPrev=new Set();}
+$('#rVoz').addEventListener('click',async()=>{if(!voz)return;const b=$('#rVoz');
+  if(vozSt.active){await voz.leave();addLog(null,'Você saiu da voz.');return;}
+  b.disabled=true;
+  try{await voz.join(ME.usuario);addLog(null,'Você entrou na voz. Quem estiver na voz te ouve.');}
+  catch(e){toast({mic_denied:'Libera o microfone no navegador pra entrar na voz.',mic_none:'Não achei um microfone neste aparelho.',timeout:'Não deu pra conectar a voz agora. Tenta de novo.',rt:'Não deu pra conectar a voz agora. Tenta de novo.'}[e&&e.code]||'Não deu pra entrar na voz.',4200);}
+  b.disabled=false;});
+$('#rMute').addEventListener('click',()=>{if(voz)voz.setMuted(!vozSt.muted);});
+addEventListener('pagehide',()=>{if(voz)voz.leave();});
+function speakMark(a){if(!a.user||!vozSt.active)return;const m=vozSt.members.find(x=>x.user===a.user);if(!m||!m.speaking)return;
+  const[x0,y0]=toScreen(a.sx,headWorld(a)),t=now/110;
+  sc.fillStyle='#8fd42a';sc.strokeStyle='#000';sc.lineWidth=2;rr(sc,x0+12,y0-18,22,16,5);sc.fill();sc.stroke();
+  sc.fillStyle='#000';for(let i=0;i<3;i++){const h=RM?7:3+Math.abs(Math.sin(t+i*1.7))*7;sc.fillRect(x0+17+i*5,y0-10-h/2,3,h);}}
+
 cv.addEventListener('pointerleave',()=>{hover=null;hoverAv=null;});
 
 /* ================= guarda-roupa ================= */
@@ -544,7 +576,7 @@ function frameLoop(t){
     sc.imageSmoothingEnabled=zoom<1;sc.setTransform(bs,0,0,bs,-Math.round(camX*scale),-Math.round(camY*scale));sc.drawImage(wb,V[0],V[1],V[2],V[3],V[0],V[1],V[2],V[3]);
     sc.setTransform(dpr,0,0,dpr,0,0);
     pets.forEach(petBubble);
-    if(mode==='sala'){avatars.forEach(bubble);avatars.forEach(a=>{if(a===hoverAv&&!a.bubble&&!drag)tag(a,a===me);else if(a===me&&!a.bubble&&avatars.length>1)tag(a,true);});}
+    if(mode==='sala'){avatars.forEach(bubble);avatars.forEach(speakMark);avatars.forEach(a=>{if(a===hoverAv&&!a.bubble&&!drag)tag(a,a===me);else if(a===me&&!a.bubble&&avatars.length>1)tag(a,true);});}
   }
   requestAnimationFrame(frameLoop);
 }

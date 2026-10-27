@@ -4,6 +4,7 @@
  *   net  login por código (authStart / authVerify / hello / logout), igual ao protocolo do server/server.js
  *   db   get / set / update / list / add / watchDoc / watchColl
  *   room sala ao vivo (Realtime Presence)
+ *   voice chat de voz da sala (WebRTC; veja voice.js)
  * Quem decide o que pode é o banco (RLS e funções). Aqui só traduzimos.
  *
  * Mapa dos caminhos:
@@ -15,6 +16,7 @@
  *   roles/<id>/chat                mensagens                      chat_messages / rpc enviar_mensagem
  */
 import { createClient } from '@supabase/supabase-js';
+import { makeVoice } from './voice.js';
 
 const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const coded = code => Object.assign(new Error(code), { code });
@@ -33,7 +35,7 @@ function arrange(rows, o = {}) {
   return l;
 }
 
-export async function connect({ url, key }) {
+export async function connect({ url, key, ice }) {
   const sb = createClient(url, key, { realtime: { params: { eventsPerSecond: 20 } } });
 
   /* o navegador entra como anônimo; o usuário de verdade é ligado a essa sessão pelo código (auth_verify) */
@@ -193,34 +195,63 @@ export async function connect({ url, key }) {
     },
   };
 
-  /* ---------- sala ao vivo: quem está no canal aparece em "peers"; o Realtime remove quem cai */
+  /* ---------- sala ao vivo: quem está no canal aparece em "peers"; o Realtime remove quem cai.
+     A sala se mantém sozinha: reconecta se o canal cair, refaz o canal que não conectou, reenvia a presença
+     a cada poucos segundos e ao voltar para a aba. Nunca desiste: se a conexão falhar, avisa e segue tentando. */
   function room(name) {
     const key = rid();
-    const ch = sb.channel(name, { config: { presence: { key } } });
-    const hs = new Set();
-    let mine = {};
-    const peers = () => Object.entries(ch.presenceState()).map(([peer, metas]) => {
+    const hs = new Set(), ss = new Set();
+    let ch = null, mine = {}, dead = false, up = false, watchdog = 0;
+
+    const peers = () => (ch ? Object.entries(ch.presenceState()) : []).map(([peer, metas]) => {
       const m = metas[metas.length - 1] || {};
       return { peer, isMe: peer === key, presence: m.d || {}, updatedAt: m.at || 0 };
     });
-    ch.on('presence', { event: 'sync' }, () => { const l = peers(); hs.forEach(h => h({ peers: l, joined: [], left: [], updated: [] })); });
-    const track = () => ch.track({ d: mine, at: Date.now() });
+    const fire = () => { const l = peers(); hs.forEach(h => h({ peers: l, joined: [], left: [], updated: [] })); };
+    const setUp = v => { if (up !== v) { up = v; ss.forEach(f => f(v ? 'up' : 'down')); } };
 
-    return new Promise((res, rej) => {
-      const timer = setTimeout(() => rej(new Error('timeout')), 10000);
-      ch.subscribe(status => {
-        if (status === 'SUBSCRIBED') {
-          clearTimeout(timer);
-          track().then(() => res({
-            async presence(d) { mine = { ...mine, ...d }; await track(); },
-            peers,
-            onPeers(h) { hs.add(h); return () => hs.delete(h); },
-            async leave() { hs.clear(); await sb.removeChannel(ch); },
-          }), rej);
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') { clearTimeout(timer); rej(new Error(status)); }
+    const track = () => {
+      if (!ch || !up) return;
+      ch.track({ d: mine, at: Date.now() }).then(r => { if (r === 'timed out' && !dead) { setUp(false); open(); } }, () => {});
+    };
+
+    function open() {
+      if (dead) return;
+      if (ch) sb.removeChannel(ch);
+      const c = ch = sb.channel(name, { config: { presence: { key } } });
+      c.on('presence', { event: 'sync' }, fire);
+      clearTimeout(watchdog);
+      watchdog = setTimeout(() => { if (!dead && c === ch && !up) open(); }, 12000);
+      c.subscribe(status => {
+        if (dead || c !== ch) return;
+        if (status === 'SUBSCRIBED') { clearTimeout(watchdog); setUp(true); track(); }
+        else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') setUp(false);
       });
+    }
+
+    const beat = setInterval(() => { if (up) track(); }, 12000);
+    const wake = () => { if (dead || (typeof document !== 'undefined' && document.hidden)) return; if (up) track(); else open(); };
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', wake);
+    if (typeof window !== 'undefined') window.addEventListener('online', wake);
+
+    const api = {
+      async presence(d) { mine = { ...mine, ...d }; track(); },
+      peers,
+      onPeers(h) { hs.add(h); return () => hs.delete(h); },
+      onStatus(h) { ss.add(h); h(up ? 'up' : 'down'); return () => ss.delete(h); },
+      async leave() {
+        dead = true; clearInterval(beat); clearTimeout(watchdog); hs.clear(); ss.clear();
+        if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', wake);
+        if (typeof window !== 'undefined') window.removeEventListener('online', wake);
+        if (ch) await sb.removeChannel(ch);
+      },
+    };
+    open();
+    return new Promise(res => {   // entra na sala mesmo se o Realtime demorar; segue conectando por trás
+      const off = api.onStatus(st => { if (st === 'up') { off && off(); res(api); } });
+      setTimeout(() => res(api), 6000);
     });
   }
 
-  return { uid: state.uid, conta: hello ? hello.conta : null, net, db, room };
+  return { uid: state.uid, conta: hello ? hello.conta : null, net, db, room, voice: id => makeVoice(sb, id, ice) };
 }
