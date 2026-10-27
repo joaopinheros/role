@@ -121,7 +121,8 @@ const mailOk=m=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m);
 const userOk=u=>/^[a-z0-9._]{3,16}$/.test(u);
 function fmtWhen(data,hora){try{const[y,m,d]=data.split('-').map(Number),dt=new Date(y,m-1,d);
   const s=dt.toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'}).replace(/\./g,'');return s+', '+(hora||'').replace(':','h').replace('h00','h');}catch(e){return data+' '+hora;}}
-const inviteLink=eid=>SRV?location.origin+'/r/'+eid:ARTIFACT_URL+'#r-'+eid;
+const ownOrigin=()=>/^https?:$/.test(location.protocol)&&!(window.claude&&claude.use);
+const inviteLink=eid=>SRV||ownOrigin()?location.origin+'/r/'+eid:ARTIFACT_URL+'#r-'+eid;
 async function copyText(text,btn){const done=()=>{if(btn){const o=btn.innerHTML;setBtn(btn,'check','Copiado');setTimeout(()=>btn.innerHTML=o,1500);}toast('Link copiado. Agora é só colar no grupo.');};
   try{await navigator.clipboard.writeText(text);done();}catch(e){const i=document.createElement('textarea');i.value=text;document.body.append(i);i.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}i.remove();ok?done():toast('Não deu pra copiar sozinho. Seleciona o link e copia.');}}
 const CART={churrasco:'#8fd42a',festa:'#ff3d8b',pijama:'#c9a5ff',parque:'#13b3c4',boate:'#6c3ce0',boteco:'#ffd23f',piscina:'#4fc3f7',vulcao:'#ff6a3d',templo:'#ff5a5a',praia:'#ffd23f',rooftop:'#6c3ce0'};
