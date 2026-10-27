@@ -14,5 +14,5 @@ require('./build.js');
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.cpSync(path.join(ROOT, 'public'), OUT, { recursive: true });
 fs.copyFileSync(path.join(ROOT, 'dist', 'local.html'), path.join(OUT, 'index.html'));
-fs.writeFileSync(path.join(OUT, '_redirects'), '/r/* /index.html 200\n');
+fs.writeFileSync(path.join(OUT, '_redirects'), '/r/* / 200\n');
 console.log('[pages] dist-pages/ pronto');
