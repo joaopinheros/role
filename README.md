@@ -77,14 +77,28 @@ O mesmo código roda em três modos, escolhidos automaticamente:
 
 ### Cloudflare Pages + Supabase (fase de testes, sem servidor Node)
 
-Dá para publicar o app só com o Pages e o banco no Supabase. Serve para testar com amigos antes da VPS.
+Dá para publicar o app só com o Pages e o banco no Supabase (Postgres). Serve para testar com amigos antes da VPS.
 
-1. No Supabase, abra **SQL Editor** e rode `supabase/schema.sql` (pode rodar mais de uma vez).
+1. No Supabase, abra **SQL Editor** e rode `supabase/schema.sql` (pode rodar mais de uma vez). Se você rodou a versão antiga, rode depois `supabase/limpar-docs.sql`.
 2. Em **Authentication → Sign In / Providers**, ligue **Allow anonymous sign-ins**.
 3. No Pages, em **Settings → Variables and Secrets**, crie `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY`.
 4. Build: `npm ci && npm run build:pages`, saída `dist-pages`.
 
-Limites deste modo: o login é anônimo e fica no navegador (outro aparelho vira outra conta), o código do cadastro é simulado na tela, a lotação de 50 pessoas é só do lado do cliente e o chat não é podado. O servidor Node com Postgres próprio segue sendo o caminho de produção.
+**Tabelas:** `users`, `sessions`, `otp_codes`, `roles`, `role_members`, `chat_messages`, `reports` e `app_config`, com chaves estrangeiras e índices.
+
+**Como o acesso é protegido:**
+- Ninguém escreve direto nas tabelas. Toda escrita passa por funções do banco que validam tudo (`auth_start`, `auth_verify`, `criar_role`, `entrar_role`, `enviar_mensagem`…).
+- A leitura é por RLS: só quem está no rolê vê o rolê, os membros e o chat. E-mail e celular não saem pela API.
+- O código de verificação é gerado e conferido no banco: só o hash é guardado, vale 10 minutos, aceita 5 tentativas e é de uso único. Há limite por celular, por IP e por dia.
+- O navegador entra como anônimo do Supabase, e a tabela `sessions` liga essa sessão ao usuário. Por isso "Entrar" funciona em outro aparelho, e dá para sair de todos.
+
+**Ainda falta neste modo:**
+- O SMS é simulado: `app_config.sms_dev = 1` devolve o código na tela. Para SMS de verdade, envie o código por uma Edge Function e ponha `sms_dev = 0`.
+- A lotação de 50 pessoas só vale no cliente.
+- A sala ao vivo (canal de presença) não exige ser membro.
+- Painel admin, expulsar e banir pelo app, excluir conta e baixar dados (LGPD).
+
+O servidor Node com Postgres próprio segue sendo o caminho de produção.
 
 ### Docker
 
