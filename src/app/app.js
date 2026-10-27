@@ -101,6 +101,8 @@ async function initCaps(){
   if(window.ROLE_SERVER){SRV=REMOTE=true;NET=Net();DB=ServerDB(NET);ROOMCAP={join:n=>NET.join(n)};
     const a=LS.get('role-auth',null);if(a&&a.token){try{const r=await NET.hello(a.token);UID=r.uid;}catch(e){if(e.code!=='timeout')LS.del('role-auth');}}
     if(!UID)UID='anon';return;}
+  if(window.ROLE_SUPABASE&&window.RoleSupabase){try{const s=await RoleSupabase.connect(window.ROLE_SUPABASE);DB=s.db;UID=s.uid;REMOTE=true;ROOMCAP={join:s.room};return;}
+    catch(e){console.warn('supabase',e);toast('Sem conexão com o servidor. Usando o modo local.',5000);}}
   try{if(window.claude&&claude.use){
     const t=new Promise(r=>setTimeout(()=>r([null,null,null]),9000));
     const [db,user,room]=await Promise.race([Promise.all([claude.use('db'),claude.use('user'),claude.use('room')]),t]);

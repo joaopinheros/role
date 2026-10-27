@@ -75,6 +75,17 @@ O mesmo código roda em três modos, escolhidos automaticamente:
 
 ## Colocar no ar
 
+### Cloudflare Pages + Supabase (fase de testes, sem servidor Node)
+
+Dá para publicar o app só com o Pages e o banco no Supabase. Serve para testar com amigos antes da VPS.
+
+1. No Supabase, abra **SQL Editor** e rode `supabase/schema.sql` (pode rodar mais de uma vez).
+2. Em **Authentication → Sign In / Providers**, ligue **Allow anonymous sign-ins**.
+3. No Pages, em **Settings → Variables and Secrets**, crie `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY`.
+4. Build: `npm ci && npm run build:pages`, saída `dist-pages`.
+
+Limites deste modo: o login é anônimo e fica no navegador (outro aparelho vira outra conta), o código do cadastro é simulado na tela, a lotação de 50 pessoas é só do lado do cliente e o chat não é podado. O servidor Node com Postgres próprio segue sendo o caminho de produção.
+
 ### Docker
 
 ```bash
