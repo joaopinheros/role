@@ -1,0 +1,464 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-27T14:29:19.852336+00:00",
+  "title": "Design System: Rolê",
+  "extensions": {
+    "colorMeta": {
+      "berry": {
+        "role": "primary",
+        "displayName": "Berry",
+        "canonical": "#ff3d8b",
+        "tonalRamp": [
+          "oklch(15% 0.083 2)",
+          "oklch(26% 0.146 2)",
+          "oklch(38% 0.209 2)",
+          "oklch(49% 0.233 2)",
+          "oklch(61% 0.233 2)",
+          "oklch(72% 0.209 2)",
+          "oklch(84% 0.146 2)",
+          "oklch(95% 0.083 2)"
+        ]
+      },
+      "grape": {
+        "role": "tertiary",
+        "displayName": "Grape",
+        "canonical": "#6c3ce0",
+        "tonalRamp": [
+          "oklch(15% 0.082 289)",
+          "oklch(26% 0.144 289)",
+          "oklch(38% 0.206 289)",
+          "oklch(49% 0.231 289)",
+          "oklch(61% 0.231 289)",
+          "oklch(72% 0.206 289)",
+          "oklch(84% 0.144 289)",
+          "oklch(95% 0.082 289)"
+        ]
+      },
+      "kiwi": {
+        "role": "secondary",
+        "displayName": "Kiwi",
+        "canonical": "#8fd42a",
+        "tonalRamp": [
+          "oklch(15% 0.071 130)",
+          "oklch(26% 0.126 130)",
+          "oklch(38% 0.180 130)",
+          "oklch(49% 0.201 130)",
+          "oklch(61% 0.201 130)",
+          "oklch(72% 0.180 130)",
+          "oklch(84% 0.126 130)",
+          "oklch(95% 0.071 130)"
+        ]
+      },
+      "sun": {
+        "role": "secondary",
+        "displayName": "Sun",
+        "canonical": "#ffd23f",
+        "tonalRamp": [
+          "oklch(15% 0.057 91)",
+          "oklch(26% 0.101 91)",
+          "oklch(38% 0.145 91)",
+          "oklch(49% 0.162 91)",
+          "oklch(61% 0.162 91)",
+          "oklch(72% 0.145 91)",
+          "oklch(84% 0.101 91)",
+          "oklch(95% 0.057 91)"
+        ]
+      },
+      "teal": {
+        "role": "tertiary",
+        "displayName": "Teal",
+        "canonical": "#13b3c4",
+        "tonalRamp": [
+          "oklch(15% 0.042 207)",
+          "oklch(26% 0.074 207)",
+          "oklch(38% 0.105 207)",
+          "oklch(49% 0.118 207)",
+          "oklch(61% 0.118 207)",
+          "oklch(72% 0.105 207)",
+          "oklch(84% 0.074 207)",
+          "oklch(95% 0.042 207)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "oklch(15% 0.000 0)",
+          "oklch(26% 0.000 0)",
+          "oklch(38% 0.000 0)",
+          "oklch(49% 0.000 0)",
+          "oklch(61% 0.000 0)",
+          "oklch(72% 0.000 0)",
+          "oklch(84% 0.000 0)",
+          "oklch(95% 0.000 0)"
+        ]
+      },
+      "shell": {
+        "role": "neutral",
+        "displayName": "Shell",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(26% 0.000 90)",
+          "oklch(38% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(72% 0.000 90)",
+          "oklch(84% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "shell-2": {
+        "role": "neutral",
+        "displayName": "Shell 2",
+        "canonical": "#f3eefe",
+        "tonalRamp": [
+          "oklch(15% 0.008 300)",
+          "oklch(26% 0.014 300)",
+          "oklch(38% 0.020 300)",
+          "oklch(49% 0.022 300)",
+          "oklch(61% 0.022 300)",
+          "oklch(72% 0.020 300)",
+          "oklch(84% 0.014 300)",
+          "oklch(95% 0.008 300)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#4f4670",
+        "tonalRamp": [
+          "oklch(15% 0.025 293)",
+          "oklch(26% 0.043 293)",
+          "oklch(38% 0.062 293)",
+          "oklch(49% 0.069 293)",
+          "oklch(61% 0.069 293)",
+          "oklch(72% 0.062 293)",
+          "oklch(84% 0.043 293)",
+          "oklch(95% 0.025 293)"
+        ]
+      },
+      "label-muted": {
+        "role": "neutral",
+        "displayName": "Label Muted",
+        "canonical": "#3b3355",
+        "tonalRamp": [
+          "oklch(15% 0.021 294)",
+          "oklch(26% 0.037 294)",
+          "oklch(38% 0.053 294)",
+          "oklch(49% 0.059 294)",
+          "oklch(61% 0.059 294)",
+          "oklch(72% 0.053 294)",
+          "oklch(84% 0.037 294)",
+          "oklch(95% 0.021 294)"
+        ]
+      },
+      "shell-night": {
+        "role": "neutral",
+        "displayName": "Shell Night",
+        "canonical": "#241452",
+        "tonalRamp": [
+          "oklch(15% 0.038 288)",
+          "oklch(26% 0.066 288)",
+          "oklch(38% 0.095 288)",
+          "oklch(49% 0.106 288)",
+          "oklch(61% 0.106 288)",
+          "oklch(72% 0.095 288)",
+          "oklch(84% 0.066 288)",
+          "oklch(95% 0.038 288)"
+        ]
+      },
+      "shell-2-night": {
+        "role": "neutral",
+        "displayName": "Shell 2 Night",
+        "canonical": "#33206e",
+        "tonalRamp": [
+          "oklch(15% 0.045 288)",
+          "oklch(26% 0.080 288)",
+          "oklch(38% 0.114 288)",
+          "oklch(49% 0.128 288)",
+          "oklch(61% 0.128 288)",
+          "oklch(72% 0.114 288)",
+          "oklch(84% 0.080 288)",
+          "oklch(95% 0.045 288)"
+        ]
+      },
+      "muted-night": {
+        "role": "neutral",
+        "displayName": "Muted Night",
+        "canonical": "#d4c9ff",
+        "tonalRamp": [
+          "oklch(15% 0.027 294)",
+          "oklch(26% 0.047 294)",
+          "oklch(38% 0.067 294)",
+          "oklch(49% 0.075 294)",
+          "oklch(61% 0.075 294)",
+          "oklch(72% 0.067 294)",
+          "oklch(84% 0.047 294)",
+          "oklch(95% 0.027 294)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Wordmark",
+        "purpose": "Rolê wordmark only; berry fill, 2px ink stroke, 4px hard text shadow."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Panel questions and screen titles."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Cartridge names, section titles, wardrobe header."
+      },
+      "button": {
+        "displayName": "Key",
+        "purpose": "Button and segment labels."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Copy and inputs (17px in fields)."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form labels."
+      },
+      "chip": {
+        "displayName": "Chip",
+        "purpose": "Status pills."
+      }
+    },
+    "shadows": [
+      {
+        "name": "key",
+        "value": "4px 4px 0 #000",
+        "purpose": "Buttons, cartridges, dock field, toasts, SMS, stage."
+      },
+      {
+        "name": "panel",
+        "value": "7px 7px 0 #000",
+        "purpose": "Console panels, insert-cartridge animation."
+      },
+      {
+        "name": "hover-lift",
+        "value": "5px 5px 0 #000",
+        "purpose": "Key and cartridge hover, with translate(-1px,-1px)."
+      },
+      {
+        "name": "pressed",
+        "value": "0 0 0 #000",
+        "purpose": "Key :active, with translate(4px,4px)."
+      },
+      {
+        "name": "chosen",
+        "value": "8px 8px 0 #000",
+        "purpose": "Selected place cartridge, with translate(-3px,-3px) and 4px sun outline."
+      },
+      {
+        "name": "small",
+        "value": "2px 2px 0 #000",
+        "purpose": "Chat bubbles, swatches."
+      },
+      {
+        "name": "small-raised",
+        "value": "3px 3px 0 #000",
+        "purpose": "Wardrobe option hover, selected rail tab."
+      },
+      {
+        "name": "drawer-edge",
+        "value": "-6px 0 0 #000",
+        "purpose": "Wardrobe drawer."
+      },
+      {
+        "name": "focus-ring-field",
+        "value": "0 0 0 4px #ffd23f",
+        "purpose": "Field focus."
+      },
+      {
+        "name": "field-inset",
+        "value": "inset 0 3px 0 rgba(0,0,0,.08)",
+        "purpose": "Recessed field top."
+      }
+    ],
+    "motion": [
+      {
+        "name": "press",
+        "value": ".08s ease-out",
+        "purpose": "Key transform and shadow on hover and press."
+      },
+      {
+        "name": "fill",
+        "value": ".12s",
+        "purpose": "Key background changes, tooltip fade."
+      },
+      {
+        "name": "drawer",
+        "value": ".22s cubic-bezier(.2,.9,.3,1)",
+        "purpose": "Wardrobe slide-in."
+      },
+      {
+        "name": "cart-drop",
+        "value": ".42s cubic-bezier(.3,1.4,.5,1)",
+        "purpose": "Insert-cartridge drop, followed by .3s scene-colour flash."
+      },
+      {
+        "name": "blink",
+        "value": "1.1s steps(1) infinite",
+        "purpose": "Live chip dot."
+      },
+      {
+        "name": "bob",
+        "value": ".6s steps(2) infinite",
+        "purpose": "Loading wordmark."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "760px"
+      },
+      {
+        "name": "desktop",
+        "value": "761px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Key",
+      "kind": "button",
+      "refersTo": "button-primary-big",
+      "description": "The one forward action per panel; berry, full width, sinks on press.",
+      "html": "<button class=\"ds-key ds-hot ds-big\"><svg viewBox=\"0 0 10 10\" shape-rendering=\"crispEdges\" fill=\"currentColor\" aria-hidden=\"true\"><rect x=\"4\" y=\"1\" width=\"2\" height=\"3\"/><rect x=\"1\" y=\"4\" width=\"8\" height=\"2\"/><rect x=\"4\" y=\"6\" width=\"2\" height=\"3\"/></svg><span>Criar um rolê</span></button>",
+      "css": ":host{--berry:#ff3d8b;--grape:#6c3ce0;--kiwi:#8fd42a;--sun:#ffd23f;--teal:#13b3c4;--ink:#000;--shell:#fff;--shell-2:#f3eefe;--text:#000;--muted:#4f4670;--line:3px;--sh:4px 4px 0 var(--ink);--sh-lg:7px 7px 0 var(--ink);--display:'Anybody','Arial Narrow',sans-serif;--body:'Atkinson Hyperlegible Next',system-ui,sans-serif} .ds-key{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:var(--line) solid var(--ink);border-radius:12px;background:var(--shell);color:var(--text);font-family:var(--display);font-stretch:112%;font-weight:800;font-size:15px;letter-spacing:.005em;box-shadow:var(--sh);cursor:pointer;transition:transform .08s ease-out,box-shadow .08s ease-out,background-color .12s} .ds-key:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink)} .ds-key:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)} .ds-key:focus-visible{outline:3px solid var(--sun);outline-offset:3px} .ds-key svg{width:18px;height:18px} .ds-hot{background:var(--berry);color:#000} .ds-hot:hover{background:#ff5c9d} .ds-big{min-height:56px;font-size:17px;width:100%}"
+    },
+    {
+      "name": "Default Key",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "Shell-coloured key for secondary actions; sun variant for positive secondary actions.",
+      "html": "<div style=\"display:flex;gap:10px\"><button class=\"ds-key\">Convidar</button><button class=\"ds-key ds-alt\">Copiar</button></div>",
+      "css": ":host{--berry:#ff3d8b;--grape:#6c3ce0;--kiwi:#8fd42a;--sun:#ffd23f;--teal:#13b3c4;--ink:#000;--shell:#fff;--shell-2:#f3eefe;--text:#000;--muted:#4f4670;--line:3px;--sh:4px 4px 0 var(--ink);--sh-lg:7px 7px 0 var(--ink);--display:'Anybody','Arial Narrow',sans-serif;--body:'Atkinson Hyperlegible Next',system-ui,sans-serif} .ds-key{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:var(--line) solid var(--ink);border-radius:12px;background:var(--shell);color:var(--text);font-family:var(--display);font-stretch:112%;font-weight:800;font-size:15px;letter-spacing:.005em;box-shadow:var(--sh);cursor:pointer;transition:transform .08s ease-out,box-shadow .08s ease-out,background-color .12s} .ds-key:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink)} .ds-key:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)} .ds-key:focus-visible{outline:3px solid var(--sun);outline-offset:3px} .ds-key svg{width:18px;height:18px} .ds-alt{background:var(--sun);color:#000}"
+    },
+    {
+      "name": "Icon Key",
+      "kind": "button",
+      "refersTo": "button-icon",
+      "description": "48px square key carrying a 10x10 pixel icon.",
+      "html": "<button class=\"ds-key ds-icon ds-hot\" aria-label=\"Enviar\"><svg viewBox=\"0 0 10 10\" shape-rendering=\"crispEdges\" fill=\"currentColor\" aria-hidden=\"true\"><rect x=\"0\" y=\"0\" width=\"1\" height=\"1\"/><rect x=\"0\" y=\"1\" width=\"3\" height=\"1\"/><rect x=\"0\" y=\"2\" width=\"5\" height=\"1\"/><rect x=\"0\" y=\"3\" width=\"7\" height=\"1\"/><rect x=\"0\" y=\"4\" width=\"9\" height=\"1\"/><rect x=\"0\" y=\"5\" width=\"7\" height=\"1\"/><rect x=\"0\" y=\"6\" width=\"5\" height=\"1\"/><rect x=\"0\" y=\"7\" width=\"3\" height=\"1\"/><rect x=\"0\" y=\"8\" width=\"1\" height=\"1\"/></svg></button>",
+      "css": ":host{--berry:#ff3d8b;--grape:#6c3ce0;--kiwi:#8fd42a;--sun:#ffd23f;--teal:#13b3c4;--ink:#000;--shell:#fff;--shell-2:#f3eefe;--text:#000;--muted:#4f4670;--line:3px;--sh:4px 4px 0 var(--ink);--sh-lg:7px 7px 0 var(--ink);--display:'Anybody','Arial Narrow',sans-serif;--body:'Atkinson Hyperlegible Next',system-ui,sans-serif} .ds-key{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:var(--line) solid var(--ink);border-radius:12px;background:var(--shell);color:var(--text);font-family:var(--display);font-stretch:112%;font-weight:800;font-size:15px;letter-spacing:.005em;box-shadow:var(--sh);cursor:pointer;transition:transform .08s ease-out,box-shadow .08s ease-out,background-color .12s} .ds-key:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink)} .ds-key:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)} .ds-key:focus-visible{outline:3px solid var(--sun);outline-offset:3px} .ds-key svg{width:18px;height:18px} .ds-icon{width:48px;min-height:48px;padding:0} .ds-icon svg{width:20px;height:20px} .ds-hot{background:var(--berry);color:#000}"
+    },
+    {
+      "name": "Link Action",
+      "kind": "button",
+      "refersTo": "button-link",
+      "description": "Dismissive action with no box.",
+      "html": "<button class=\"ds-link\">Agora não</button>",
+      "css": ":host{--berry:#ff3d8b;--grape:#6c3ce0;--kiwi:#8fd42a;--sun:#ffd23f;--teal:#13b3c4;--ink:#000;--shell:#fff;--shell-2:#f3eefe;--text:#000;--muted:#4f4670;--line:3px;--sh:4px 4px 0 var(--ink);--sh-lg:7px 7px 0 var(--ink);--display:'Anybody','Arial Narrow',sans-serif;--body:'Atkinson Hyperlegible Next',system-ui,sans-serif} .ds-link{background:none;border:0;min-height:40px;padding:0 6px;font-family:var(--body);font-weight:600;font-size:15px;color:var(--text);text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px;cursor:pointer} .ds-link:hover{color:var(--berry)} .ds-link:focus-visible{outline:3px solid var(--sun);outline-offset:3px}"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "52px white field with 3px outline; focus is a 4px sun ring.",
+      "html": "<label class=\"ds-field\"><span>Nome do evento</span><input placeholder=\"Niver da Bia, churras de sábado…\"></label>",
+      "css": ":host{--berry:#ff3d8b;--grape:#6c3ce0;--kiwi:#8fd42a;--sun:#ffd23f;--teal:#13b3c4;--ink:#000;--shell:#fff;--shell-2:#f3eefe;--text:#000;--muted:#4f4670;--line:3px;--sh:4px 4px 0 var(--ink);--sh-lg:7px 7px 0 var(--ink);--display:'Anybody','Arial Narrow',sans-serif;--body:'Atkinson Hyperlegible Next',system-ui,sans-serif} .ds-field{display:flex;flex-direction:column;gap:6px;font-family:var(--body)} .ds-field span{font-weight:800;font-size:15px} .ds-field input{font:inherit;font-size:17px;color:#000;background:#fff;border:var(--line) solid var(--ink);border-radius:12px;padding:0 14px;height:52px;box-sizing:border-box;box-shadow:inset 0 3px 0 rgba(0,0,0,.08)} .ds-field input::placeholder{color:#5f5878} .ds-field input:focus{outline:none;box-shadow:0 0 0 4px var(--sun)}"
+    },
+    {
+      "name": "Segmented Toggle",
+      "kind": "chip",
+      "refersTo": "segment-selected",
+      "description": "Two-up choice; selected segment turns sun and stands up.",
+      "html": "<div class=\"ds-seg\" role=\"radiogroup\"><button class=\"ds-segb\" role=\"radio\" aria-checked=\"false\">Dia</button><button class=\"ds-segb\" role=\"radio\" aria-checked=\"true\">Noite</button></div>",
+      "css": ":host{--berry:#ff3d8b;--grape:#6c3ce0;--kiwi:#8fd42a;--sun:#ffd23f;--teal:#13b3c4;--ink:#000;--shell:#fff;--shell-2:#f3eefe;--text:#000;--muted:#4f4670;--line:3px;--sh:4px 4px 0 var(--ink);--sh-lg:7px 7px 0 var(--ink);--display:'Anybody','Arial Narrow',sans-serif;--body:'Atkinson Hyperlegible Next',system-ui,sans-serif} .ds-seg{display:grid;grid-template-columns:1fr 1fr;gap:8px} .ds-segb{min-height:46px;border:var(--line) solid var(--ink);border-radius:12px;background:var(--shell-2);color:var(--text);font-family:var(--display);font-stretch:112%;font-weight:800;font-size:15px;cursor:pointer} .ds-segb[aria-checked=true]{background:var(--sun);color:#000;box-shadow:var(--sh)} .ds-segb:focus-visible{outline:3px solid var(--sun);outline-offset:3px}"
+    },
+    {
+      "name": "Event Chips",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Pill chips for room status; live chip carries a blinking square.",
+      "html": "<div style=\"display:flex;gap:6px;flex-wrap:wrap\"><span class=\"ds-chip ds-live\">Ao vivo</span><span class=\"ds-chip ds-name\">Churras do João</span><span class=\"ds-chip\">sáb, 31 de out, 20h</span><span class=\"ds-chip ds-moon\">Noite</span></div>",
+      "css": ":host{--berry:#ff3d8b;--grape:#6c3ce0;--kiwi:#8fd42a;--sun:#ffd23f;--teal:#13b3c4;--ink:#000;--shell:#fff;--shell-2:#f3eefe;--text:#000;--muted:#4f4670;--line:3px;--sh:4px 4px 0 var(--ink);--sh-lg:7px 7px 0 var(--ink);--display:'Anybody','Arial Narrow',sans-serif;--body:'Atkinson Hyperlegible Next',system-ui,sans-serif} .ds-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--body);font-weight:800;font-size:13px;line-height:1;padding:6px 10px;border:2px solid var(--ink);border-radius:999px;background:#fff;color:#000;white-space:nowrap} .ds-live{background:var(--kiwi)} .ds-live::before{content:'';width:8px;height:8px;background:#000;animation:ds-blink 1.1s steps(1) infinite} @keyframes ds-blink{50%{opacity:0}} @media (prefers-reduced-motion:reduce){.ds-live::before{animation:none}} .ds-name{background:var(--berry)} .ds-moon{background:var(--grape);color:#fff}"
+    },
+    {
+      "name": "Console Panel",
+      "kind": "card",
+      "refersTo": "console-panel",
+      "description": "Screen container: shell body, grip corner, grille hatch, 7px shadow.",
+      "html": "<div class=\"ds-panel\"><h1>Bora pro rolê?</h1><p>Cada rolê vira um lugar pra galera chegar antes da hora.</p></div>",
+      "css": ":host{--berry:#ff3d8b;--grape:#6c3ce0;--kiwi:#8fd42a;--sun:#ffd23f;--teal:#13b3c4;--ink:#000;--shell:#fff;--shell-2:#f3eefe;--text:#000;--muted:#4f4670;--line:3px;--sh:4px 4px 0 var(--ink);--sh-lg:7px 7px 0 var(--ink);--display:'Anybody','Arial Narrow',sans-serif;--body:'Atkinson Hyperlegible Next',system-ui,sans-serif} .ds-panel{position:relative;width:min(440px,100%);background:var(--shell);color:var(--text);border:var(--line) solid var(--ink);border-radius:22px 22px 56px 22px;padding:26px 26px 30px;box-sizing:border-box;display:flex;flex-direction:column;gap:18px;box-shadow:var(--sh-lg);font-family:var(--body);font-size:16px;line-height:1.45} .ds-panel::after{content:'';position:absolute;right:26px;bottom:14px;width:46px;height:14px;background:repeating-linear-gradient(115deg,var(--ink) 0 3px,transparent 3px 9px);opacity:.75} .ds-panel h1{font-family:var(--display);font-stretch:125%;font-weight:850;font-size:30px;line-height:1.02;letter-spacing:-.015em;margin:0} .ds-panel p{margin:0;color:var(--muted)}"
+    },
+    {
+      "name": "Cartridge",
+      "kind": "custom",
+      "refersTo": "cartridge",
+      "description": "Signature container for a rolê or place: scene-coloured shell, grip ridges, notched corner, white label.",
+      "html": "<div class=\"ds-cart\" style=\"--cc:#8fd42a\"><div class=\"ds-label\"><div class=\"ds-art\"></div><div class=\"ds-lt\"><b>Churras do João</b><span class=\"ds-chip\">sáb, 20h</span></div></div></div>",
+      "css": ":host{--berry:#ff3d8b;--grape:#6c3ce0;--kiwi:#8fd42a;--sun:#ffd23f;--teal:#13b3c4;--ink:#000;--shell:#fff;--shell-2:#f3eefe;--text:#000;--muted:#4f4670;--line:3px;--sh:4px 4px 0 var(--ink);--sh-lg:7px 7px 0 var(--ink);--display:'Anybody','Arial Narrow',sans-serif;--body:'Atkinson Hyperlegible Next',system-ui,sans-serif} .ds-cart{position:relative;width:220px;background:var(--cc,var(--grape));border:var(--line) solid var(--ink);border-radius:10px 10px 6px 6px;padding:20px 10px 10px;box-shadow:var(--sh);transition:transform .08s ease-out,box-shadow .08s ease-out} .ds-cart:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink)} .ds-cart::before{content:'';position:absolute;left:14px;right:14px;top:6px;height:8px;background:repeating-linear-gradient(90deg,rgba(0,0,0,.45) 0 3px,transparent 3px 7px)} .ds-cart::after{content:'';position:absolute;top:-3px;right:-3px;width:26px;height:26px;background:linear-gradient(to bottom left,#fff calc(50% - 1px),var(--ink) calc(50% - 1px) calc(50% + 2.5px),transparent calc(50% + 2.5px))} .ds-label{background:#fff;color:#000;border:2px solid var(--ink);border-radius:6px;overflow:hidden} .ds-art{aspect-ratio:6/5;background:linear-gradient(#6fb8e8,#cfe9f5 60%,#8fd42a 60%)} .ds-lt{padding:8px 10px 10px;display:flex;flex-direction:column;gap:6px} .ds-lt b{font-family:var(--display);font-stretch:125%;font-weight:850;font-size:22px;line-height:1.05} .ds-chip{align-self:flex-start;font-family:var(--body);font-weight:800;font-size:13px;line-height:1;padding:6px 10px;border:2px solid var(--ink);border-radius:999px;background:#fff}"
+    },
+    {
+      "name": "Toast",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Sun system confirmation, bottom centre.",
+      "html": "<div class=\"ds-toast\" role=\"status\">Link copiado. Agora é só colar no grupo.</div>",
+      "css": ":host{--berry:#ff3d8b;--grape:#6c3ce0;--kiwi:#8fd42a;--sun:#ffd23f;--teal:#13b3c4;--ink:#000;--shell:#fff;--shell-2:#f3eefe;--text:#000;--muted:#4f4670;--line:3px;--sh:4px 4px 0 var(--ink);--sh-lg:7px 7px 0 var(--ink);--display:'Anybody','Arial Narrow',sans-serif;--body:'Atkinson Hyperlegible Next',system-ui,sans-serif} .ds-toast{display:inline-block;background:var(--sun);color:#000;border:var(--line) solid var(--ink);border-radius:12px;padding:12px 16px;font-family:var(--body);font-weight:700;box-shadow:var(--sh)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Cartridge Console",
+    "overview": "The interface is the body of a Game Boy Color era handheld laid over a living pixel-art room. Panels are the console shell, each rolê and each place is a cartridge, and every button is a physical key that sinks when pressed. Structure is neo-brutalist (pure black 3px outlines, hard offset shadows, flat fills) and colour is spent on key points: berry for the action that moves you forward, sun for selection and system voice, kiwi for live.\n\nDensity is low and thumb-sized. One console panel sits over the scene (left on desktop, bottom sheet on mobile); in the room the UI shrinks to a top chip strip, a right column of keys and a bottom chat dock, so the pixel world stays the hero. Pixel lives in the world canvas and in a hand-drawn 10x10 pixel icon set, never in type: titles are wide, heavy Anybody, body copy is Atkinson Hyperlegible Next.\n\nThe shell follows the scene's clock: white bodies by day, deep grape bodies by night. Outlines, shadows and the accent palette never change.",
+    "keyCharacteristics": [
+      "3px pure black outlines on every interactive or containing surface.",
+      "Hard, unblurred offset shadows that collapse to zero on press.",
+      "Cartridge silhouette: grip ridges on top, notched top-right corner, white label carrying scene art.",
+      "Day/night shell swap driven by the scene, not by OS preference.",
+      "Wide display type (Anybody, 112 to 150% width) against a hyperlegible body face.",
+      "Pixel-grid SVG icons rendered crisp, inheriting text colour."
+    ],
+    "rules": [
+      {
+        "name": "The Black-On-Colour Rule",
+        "body": "Text on berry, sun, kiwi and white labels is pure black. White text appears only on grape and night shells.",
+        "section": "colors"
+      },
+      {
+        "name": "The Clock Rule",
+        "body": "Only `--shell`, `--shell-2`, `--text` and `--muted` change between day and night (`body[data-time]`). Cartridge labels, chips, fields, toasts and the SMS stay white or coloured in both.",
+        "section": "colors"
+      },
+      {
+        "name": "The Pixel-Lives-In-The-World Rule",
+        "body": "No pixel or bitmap font in UI type. Pixel appears in the canvas and the icon set only.",
+        "section": "typography"
+      },
+      {
+        "name": "The Width-Is-Rank Rule",
+        "body": "Anybody's width axis encodes importance: 150% wordmark, 125% headlines, 112–118% keys and card names. Body face never stretches.",
+        "section": "typography"
+      },
+      {
+        "name": "The Press-In Rule",
+        "body": "A raised key moves exactly the length of its shadow on press, and the shadow goes to zero. 80ms ease-out. No blur, ever.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** outline every interactive and containing surface in 3px pure black; 2px only for nested parts (labels, chips, bubbles, options).",
+      "**Do** use the hard offset shadow scale (4px keys, 7px panels) and collapse it on press with a matching translate.",
+      "**Do** give each panel one berry forward action; use sun for selection, focus and system messages, kiwi for live/on.",
+      "**Do** colour new cartridges from the scene map via `--cc`, keeping the white label and black text.",
+      "**Do** keep text on colour black, and touch targets at 44px minimum (48px for icon keys).",
+      "**Do** honour `prefers-reduced-motion`: no drawer slide, no blink, no key motion, no insert animation."
+    ],
+    "donts": [
+      "**Don't** use blurred or tinted shadows, glass, or translucency on UI surfaces.",
+      "**Don't** set UI type in a pixel or bitmap font; pixel belongs to the canvas and the icon grid.",
+      "**Don't** use stroke-style line icons; icons are filled 10x10 pixel grids.",
+      "**Don't** use warm dark panels or a dark glass HUD; night is the grape shell, not black glass.",
+      "**Don't** let the panel or HUD cover the room's centre; UI anchors to edges."
+    ]
+  }
+}

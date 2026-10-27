@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Rolê: dev (build + servidor)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/dev.js",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Rolê: só servidor",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server/server.js",
+      "env": { "NODE_ENV": "development" },
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Rolê: teste ponta a ponta",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/test/smoke.js",
+      "console": "integratedTerminal"
+    }
+  ]
+}

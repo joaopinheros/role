@@ -1,0 +1,5 @@
+{
+  "files.exclude": { "dist": false, "node_modules": true },
+  "search.exclude": { "dist": true, "src/fonts.css": true },
+  "editor.formatOnSave": false
+}

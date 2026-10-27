@@ -1,0 +1,23 @@
+{
+  "name": "role",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rolê: crie o rolê, mande o link e a galera se encontra numa sala em pixel art com avatar, chat, pets e house tocando.",
+  "license": "UNLICENSED",
+  "main": "server/server.js",
+  "engines": { "node": ">=18.17" },
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "build": "node scripts/build.js",
+    "start": "node server/server.js",
+    "assets": "node scripts/assets.js",
+    "test": "node test/smoke.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "playwright": "^1.48.0"
+  }
+}
