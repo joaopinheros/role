@@ -87,8 +87,11 @@ export async function connect({ url, key }) {
     });
   }
 
-  const roleChanges = (filter, table, onEvent) => sb.channel(table + ':' + rid())
-    .on('postgres_changes', { event: '*', schema: 'public', table, filter }, onEvent).subscribe();
+  /* onReady roda quando o canal fica ativo (e de novo se ele reconectar): buscar o histórico só aí não deixa
+     buraco entre "li o que já existia" e "comecei a ouvir", que perderia mensagens de quem escreve nesse intervalo */
+  const roleChanges = (filter, table, onEvent, onReady) => sb.channel(table + ':' + rid())
+    .on('postgres_changes', { event: '*', schema: 'public', table, filter }, onEvent)
+    .subscribe(status => { if (status === 'SUBSCRIBED') onReady(); });
 
   const perm = () => { throw coded('perm'); };
   const seg = p => p.split('/');
@@ -166,7 +169,7 @@ export async function connect({ url, key }) {
       if (!(s[0] === 'roles' && s.length === 2)) { cb(null); return () => {}; }
       let on = true;
       const load = () => rpc('ver_role', { p_id: s[1] }).then(v => { if (on) cb(v); }).catch(e => console.warn('db', e));
-      const ch = roleChanges('id=eq.' + s[1], 'roles', load);
+      const ch = roleChanges('id=eq.' + s[1], 'roles', load, load);
       load();
       return () => { on = false; sb.removeChannel(ch); };
     },
@@ -177,14 +180,15 @@ export async function connect({ url, key }) {
       let on = true;
       const map = new Map();
       const emit = () => { if (on) cb(arrange([...map].map(([id, data]) => ({ id, data })), o)); };
+      const sync = () => listChat(s[1], o).then(l => { l.forEach(x => { if (!map.has(x.id)) map.set(x.id, x.data); }); emit(); }).catch(e => console.warn('db', e));
       const ch = roleChanges('role_id=eq.' + s[1], 'chat_messages', async e => {
         const row = e.new;
         if (!row || !row.id) return;
         if (row.deleted_at) map.delete(String(row.id));
         else map.set(String(row.id), chatDoc(row, await nameOf(row.user_id)));
         emit();
-      });
-      listChat(s[1], o).then(l => { l.forEach(x => { if (!map.has(x.id)) map.set(x.id, x.data); }); emit(); }).catch(e => console.warn('db', e));
+      }, sync);
+      sync();
       return () => { on = false; sb.removeChannel(ch); };
     },
   };
