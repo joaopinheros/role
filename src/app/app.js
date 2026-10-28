@@ -100,10 +100,10 @@ function LocalRoom(name){
 let DB=LocalDB(),UID=null,ROOMCAP=null,REMOTE=false,SRV=false,NET=null;
 const MAX_SALA=50;
 async function initCaps(){
-  if(window.ROLE_SERVER){SRV=REMOTE=true;NET=Net();DB=ServerDB(NET);ROOMCAP={join:n=>NET.join(n)};
+  if(window.ROLE_SERVER){SRV=REMOTE=true;NET=Net();DB=ServerDB(NET);ROOMCAP={join:n=>NET.join(n),fm:NET.fm};
     const a=LS.get('role-auth',null);if(a&&a.token){try{const r=await NET.hello(a.token);UID=r.uid;}catch(e){if(e.code!=='timeout')LS.del('role-auth');}}
     if(!UID)UID='anon';return;}
-  if(window.ROLE_SUPABASE&&window.RoleSupabase){try{const s=await RoleSupabase.connect(window.ROLE_SUPABASE);SRV=REMOTE=true;NET=s.net;DB=s.db;UID=s.uid||'anon';ROOMCAP={join:s.room,voice:s.voice};if(s.conta)sessao.set(s.conta);return;}
+  if(window.ROLE_SUPABASE&&window.RoleSupabase){try{const s=await RoleSupabase.connect(window.ROLE_SUPABASE);SRV=REMOTE=true;NET=s.net;DB=s.db;UID=s.uid||'anon';ROOMCAP={join:s.room,voice:s.voice,fm:s.fm};if(s.conta)sessao.set(s.conta);return;}
     catch(e){console.warn('supabase',e);toast('Sem conexão com o servidor. Usando o modo local.',5000);}}
   try{if(window.claude&&claude.use){
     const t=new Promise(r=>setTimeout(()=>r([null,null,null]),9000));
@@ -306,18 +306,19 @@ async function enterRoom(eid,fresh){
   addLog(null,fresh?`Você entrou em ${r.nome}. Bem-vindo!`:`Você está em ${r.nome}.`);spawnPets(eid);if(SCN.mixer)addLog(null,`Toca na mesa de som (ou no botão Som) pra soltar o ${MUSIC.name()}. Tem ${pets.map(p=>p.name).join(' e ')} passeando por aí.`);updSom();
   unsubRole=DB.watchDoc('roles/'+eid,d=>{if(!d||mode!=='sala')return;const ch=d.cena!==CUR.cena||!!d.noite!==!!CUR.noite;CUR={eid,...d};if(ch){SCN=getScene(d.cena,d.noite);setTime(d.noite);updDayBtn();avatars.forEach(a=>{if(!walkable(a.gx,a.gy,a.gx,a.gy)){const[x,y]=freeNear(a.gx,a.gy,a);a.gx=a.fx=x;a.gy=a.fy=y;a.path=[];}});}});
   unsubChat=DB.watchColl(`roles/${eid}/chat`,list=>{list.forEach(({id,data:m})=>{if(chatSeen.has(id))return;chatSeen.add(id);
+      if(m.k==='bot'){fmBotFromChat(m,m.at>=joinedAt-2000);return;}   // Rolê FM
       const a=avatars.find(v=>v.user===m.u);addLog(m.n||m.u,m.t,a?logColor(a):'#ffb347');if(a&&m.at>=joinedAt-2000)a.bubble={text:m.t,t:now};});},{order:'at',limit:60});
   // presença ao vivo
   try{live=ROOMCAP?await ROOMCAP.join('role-'+eid):LocalRoom('role-'+eid);}catch(e){if(e&&e.code==='full')return salaCheia();console.warn('room',e);live=LocalRoom('role-'+eid);}
   if(mode!=='sala'||!CUR||CUR.eid!==eid){live&&live.leave();return;}
-  live.onPeers(ch=>syncPeers(ch.peers));setupVoz(eid);gamesSetup();let wasDown=false;live.onStatus&&live.onStatus(st=>{if(st==='down'&&!wasDown){wasDown=true;toast('Sem conexão com a sala ao vivo. Reconectando…',4500);}else if(st==='up'&&wasDown){wasDown=false;toast('Reconectado.');}});pushPres(true);live.start&&live.start();syncPeers(live.peers());
+  live.onPeers(ch=>syncPeers(ch.peers));setupVoz(eid);gamesSetup();fmSetup(eid);let wasDown=false;live.onStatus&&live.onStatus(st=>{if(st==='down'&&!wasDown){wasDown=true;toast('Sem conexão com a sala ao vivo. Reconectando…',4500);}else if(st==='up'&&wasDown){wasDown=false;toast('Reconectado.');}});pushPres(true);live.start&&live.start();syncPeers(live.peers());
   /* nasceu em cima de alguém que já estava aqui (com o visual padrão parece um boneco só): sai do lugar */
   {const o=avatars.find(v=>v!==me&&Math.round(v.gx)===me.gx&&Math.round(v.gy)===me.gy);if(o){const[x,y]=freeNear(me.gx,me.gy,me);me.gx=me.fx=x;me.gy=me.fy=y;me.path=[];pushPres(true);}}
   setTimeout(()=>{if(mode==='sala'&&avatars.length===1)addLog(null,'Só você por aqui por enquanto. Toca em “Convidar” e manda o link pra galera.');},2500);
 }
 function salaCheia(){if(live){try{live.leave()}catch(e){}live=null;}toast('Essa sala tá cheia agora. Tenta de novo daqui a pouco.',4200);openHome();}
 function spawnTile(){const[x0,y0]=SCN.sc.spawn;for(let i=0;i<60;i++){const x=x0+ri(5)-2,y=y0+ri(5)-2;if(walkable(x,y,-1,-1)&&!occupied(x,y,null))return[x,y];}return freeNear(x0,y0,null);}
-function leaveRoom(){vozStop();gamesStop();mode='vitrine';MUSIC.stop();updSom&&updSom();unsubRole&&unsubRole();unsubChat&&unsubChat();unsubRole=unsubChat=null;if(live){try{live.leave()}catch(e){}live=null;}avatars=[];peerAvs.clear();me=null;CUR=null;vitrine.k=null;seedBots();}
+function leaveRoom(){vozStop();gamesStop();fmStop();mode='vitrine';MUSIC.stop();updSom&&updSom();unsubRole&&unsubRole();unsubChat&&unsubChat();unsubRole=unsubChat=null;if(live){try{live.leave()}catch(e){}live=null;}avatars=[];peerAvs.clear();me=null;CUR=null;vitrine.k=null;seedBots();}
 function presObj(){const t=me.path.length?me.path[me.path.length-1]:[me.gx,me.gy];return{u:ME.usuario,n:ME.nome,j:joinedAt,f:encode(me.fig),x:t[0],y:t[1],a:me.action||'',b:me.back?1:0,m:me.mirror?1:0};}
 function pushPres(force){if(!live||!me)return;const p=presObj(),s=JSON.stringify(p);if(!force&&s===lastPres)return;lastPres=s;live.presence(p).catch(e=>console.warn(e));}
 function syncPeers(peers){if(mode!=='sala')return;const seen=new Set();
@@ -353,6 +354,7 @@ function doAct(act){if(!me)return;
   else me.action=null;pushPres();}
 document.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>doAct(b.dataset.act)));
 $('#chatForm').addEventListener('submit',async e=>{e.preventDefault();const t=$('#msg').value.trim();if(!t||!CUR)return;$('#msg').value='';const c=t.toLowerCase();
+  if(t[0]==='/'){fmHint('');fmCommand(t);return;}   // comandos do Rolê FM
   if([':dançar',':dancar'].includes(c))return doAct('dance');if(c===':acenar')return doAct('wave');if(c===':sentar')return doAct('sit');if(c===':levantar')return doAct('stop');
   me.bubble={text:t,t:now};
   try{await DB.add(`roles/${CUR.eid}/chat`,{u:ME.usuario,n:ME.nome,t,at:Date.now()});}
@@ -433,6 +435,7 @@ function sky(){
       if(shoot){const k=(now-shoot.t)/700;if(k>1)shoot=null;else{const x=shoot.x+k*W*.18,y=shoot.y+k*H*.08,gr=sc.createLinearGradient(x,y,x-W*.08,y-H*.035);gr.addColorStop(0,`rgba(255,255,255,${1-k})`);gr.addColorStop(1,'rgba(255,255,255,0)');sc.strokeStyle=gr;sc.lineWidth=px*1.5;sc.beginPath();sc.moveTo(x,y);sc.lineTo(x-W*.08,y-H*.035);sc.stroke();}}}}
   if(out){sc.imageSmoothingEnabled=false;cloudSet(!day).forEach(cl=>{const s=cl.s*px,w=cl.c.width*s,span=W+w*2,X=((cl.x*span+now*.004*cl.v*px+pxX*cl.p)%span+span)%span-w,Y=cl.y*H+pxY*cl.p*.6;
     sc.globalAlpha=cl.a*(skc?.8:1);sc.drawImage(cl.c,Math.round(X),Math.round(Y),w,cl.c.height*s);});sc.globalAlpha=1;}
+  fmSky();   // Rolê FM: o dirigível, atrás da ilha
   if(!out){const cx=(WW/2-camX)*scale,cy=(WHt/2-camY)*scale,n1=sc.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.65);
     n1.addColorStop(0,day?'rgba(255,248,225,.18)':'rgba(255,236,200,.07)');n1.addColorStop(1,'rgba(0,0,0,0)');sc.fillStyle=n1;sc.fillRect(0,0,W,H);}
 }
@@ -478,6 +481,7 @@ cv.addEventListener('pointermove',e=>{if(mode!=='sala')return;if(pts.has(e.point
 cv.addEventListener('pointerup',e=>{const wasPinch=!!pinch;dropPt(e);if(!pts.size)pinch=null;const d=drag;drag=null;cv.classList.remove('grab');if(wasPinch||!d||d.moved||!me)return;
   if(me.burnUntil>now)return;   // queimando na lava: 1,5 s parado
   const[x,y]=toWorld(e),[tx,ty]=tileAt(x,y);const pt=petAt(x,y);
+  if(fmHit(e,x,y))return;
   if(pt){pt.heart=now+1400;pt.bubble={text:PET_ART[pt.type].talk,t:now};pt.path=[];return;}
   if(SCN.mixer&&tx===SCN.mixer[0]&&ty===SCN.mixer[1]){toggleSom();const[fx,fy]=freeNear(tx,ty+1,me);if(Math.abs(me.gx-tx)+Math.abs(me.gy-ty)>2)walkTo(me,fx,fy);pushPres();return;}
   if(gClickTile(tx,ty))return;
@@ -580,7 +584,7 @@ function frameLoop(t){
     sc.imageSmoothingEnabled=zoom<1;sc.setTransform(bs,0,0,bs,-Math.round(camX*scale),-Math.round(camY*scale));sc.drawImage(wb,V[0],V[1],V[2],V[3],V[0],V[1],V[2],V[3]);
     sc.setTransform(dpr,0,0,dpr,0,0);
     pets.forEach(petBubble);
-    if(mode==='sala'){lavaOverlay();avatars.forEach(bubble);avatars.forEach(speakMark);gOverlay();avatars.forEach(a=>{if(a===hoverAv&&!a.bubble&&!drag)tag(a,a===me);else if(a===me&&!a.bubble&&avatars.length>1)tag(a,true);});}
+    if(mode==='sala'){lavaOverlay();avatars.forEach(bubble);avatars.forEach(speakMark);gOverlay();fmOverlay();avatars.forEach(a=>{if(a===hoverAv&&!a.bubble&&!drag)tag(a,a===me);else if(a===me&&!a.bubble&&avatars.length>1)tag(a,true);});}
   }
   requestAnimationFrame(frameLoop);
 }
@@ -596,6 +600,10 @@ window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loa
   games:()=>Object.values(G.acts).map(s=>({id:s.id,status:s.status,turn:s.m&&s.m.turn,shot:s.m&&s.m.shotN,rolando:!!(s.m&&s.m.sim),bolas:s.m&&s.m.balls&&s.m.balls.filter(b=>!b.in).length,pos:s.m&&s.m.balls&&s.m.balls.slice(0,4).map(b=>[+b.x.toFixed(2),+b.y.toFixed(2)]),grupos:s.m&&s.m.groups,fen:s.m&&s.m.eng?s.m.eng.fen():undefined,seat:gMine(s),tmine:s.m&&s.m.mine?s.m.mine.c.slice().sort((x,y)=>trStrength(y)-trStrength(x)):undefined,fase:s.m&&s.m.phase,stake:s.m&&s.m.stake,placar:s.m&&s.m.score,mao:s.m&&s.m.hand,jogadas:s.m&&s.m.plays?s.m.plays.flat().length:undefined,rodadas:s.m&&s.m.rounds?s.m.rounds.length:undefined,players:s.players.length,venceu:s.winners,over:s.over,eu:me?{x:me.gx,y:me.gy}:null,
     d:(df=>df&&df.dbg&&s.m?df.dbg(s.m,s):undefined)(G.defs[s.id.split('@')[0]])})),
   lava:c=>lavaDbg(c),
+  fm:()=>fmDbg(),
+  fmPerf:()=>{FMVIS.perf={sky:0,stage:0,n:0};},
+  fmHide:h=>{FMV.hide=!!h;},
+  lookStage:()=>{const sp=SCN&&SCN.sc.stageSpot;if(sp){const[wx,wy]=S(sp.x+1.5,-.6);centerOn(wx,wy-30);}},
   /* para os testes: escolhe direto (vôlei: posição do meu jogador; pesca: fisga já) */
   act:(type,cmd,arg)=>{const d=G.defs[type];return d&&d.test?d.test(cmd,arg):null;}};
 (async function boot(){

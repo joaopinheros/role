@@ -16,7 +16,7 @@ function plankBridge(gx,gy){B.ground.push(()=>{for(let k=0;k<5;k++){const fy=gy+
   for(const sx of[-.05,1.05]){const a=up(S(gx+sx,gy),14),b=up(S(gx+sx,gy+1),14);ctx.strokeStyle='#c9a26a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.stroke();[S(gx+sx,gy),S(gx+sx,gy+1)].forEach(p=>R(p[0]-1,p[1]-14,3,14,'#6a4a2a'));}});}
 function pizza(gx,gy){addF(gx,gy,()=>{bx(gx+.2,gy+.25,.6,.5,3,0,'#c9a26a');const c=up(S(gx+.5,gy+.5),3);ell(c[0],c[1],13,6.5,'#e8a84a');ell(c[0],c[1],11,5.5,'#d84a2a');[[-4,-1],[3,1],[0,-3],[5,-2],[-2,2]].forEach(([dx,dy])=>circ(c[0]+dx,c[1]+dy,1.4,'#8a2a1a'));},{block:false});}
 const SCENES=[
- {id:'churrasco',nome:'Quintal com varanda',desc:'Varanda com rede, churrasqueira, mesão e fogueira',outdoor:true,spawn:[6,10],build(){
+ {id:'churrasco',stageSpot:{x:8.6,len:3},nome:'Quintal com varanda',desc:'Varanda com rede, churrasqueira, mesão e fogueira',outdoor:true,spawn:[6,10],build(){
    B.floorAt=(x,y)=>y<=2?'terrace':(x===5||x===6)&&y<=6?'stonepath':'grass';
    B.walls=()=>{houseWall('#e8d6b4',150);fenceB('#b8704e',44);};
    pergola(2.7,112);
@@ -27,7 +27,7 @@ const SCENES=[
    campfire(8,8,[[7,8,'x'],[9,8,'nx'],[8,7,'y'],[8,9,'ny']]);
    tree(1,10);tree(11,10,['#2a5a2e','#3a7a3c','#5a9a4c','#8ac062']);bush(0,7);bush(11,8);planter(0,5,true);tuft(4,10);tuft(6,11);tuft(10,6);
    stringLights([[0,3],[6,7],[12,3]],96,12);}},
- {id:'festa',nome:'Festa em casa',desc:'Sala com sofá, estante, pista e mesa de comida',outdoor:false,spawn:[6,10],build(){
+ {id:'festa',stageSpot:{x:8.4,len:3},nome:'Festa em casa',desc:'Sala com sofá, estante, pista e mesa de comida',outdoor:false,spawn:[6,10],build(){
    B.floorAt=()=>'wood';
    B.walls=()=>roomWalls('#d8c6a8',150,()=>{const n=night();R(36,-128,150,76,'#3a3330');const g=ctx.createLinearGradient(0,-124,0,-56);g.addColorStop(0,n?'#1b2442':'#bfe3fa');g.addColorStop(1,n?'#2c3458':'#e6f4fc');ctx.fillStyle=g;ctx.fillRect(40,-124,142,68);
        if(n){const r=rng(5);for(let k=0;k<10;k++){const x=46+k*14,h=14+r()*36;R(x,-56-h,12,h,'#141a30');for(let w=0;w<3;w++)if(r()<.6)R(x+3+(w%2)*4,-52-h+w*8,2,3,'#ffd890');}}
@@ -40,7 +40,7 @@ const SCENES=[
    vaso(11,10,true);vaso(0,10,true);balloons(11,6,['#c23b3b','#f0c24a','#2f6fd6']);balloons(1,8,['#e8708a','#8e5ac8','#43d9e8']);
    discoBall(7,5,140);glowG(6,6,140,'#ff8fc7',.14,1);glowG(8,4,120,'#7fe7ff',.14,1);
    stringLights([[0,0],[12,0]],138,6);stringLights([[0,0],[0,12]],138,6);}},
- {id:'pijama',nome:'Noite do pijama',desc:'Quarto com cabana de lençol, colchões, pizza e videogame',outdoor:false,spawn:[6,10],build(){
+ {id:'pijama',stageSpot:{x:7.4,len:3},nome:'Noite do pijama',desc:'Quarto com cabana de lençol, colchões, pizza e videogame',outdoor:false,spawn:[6,10],build(){
    B.cfg.carpet='#c9b4d6';B.floorAt=()=>'carpet';
    B.walls=()=>roomWalls('#e6c9d6',140,()=>{const n=night();[90,250].forEach(x=>{win(x,-112,46,58,n?'dark':'day');R(x-10,-118,10,70,'#b86a8a');R(x+46,-118,10,70,'#b86a8a');});poster(0,170,-110,32,44,'#2a2630','#ffd84a');poster(0,330,-104,30,36,'#43d9e8','#f2efe9');},
      ()=>{poster(0,80,-104,36,46,'#2f4f7a','#e8708a');poster(0,130,-100,26,34,'#f2efe9','#8e5ac8');R(180,-96,52,30,'#f2efe9');R(186,-90,40,4,'#c23b3b');R(186,-82,30,4,'#2f6fd6');R(250,-110,60,110,'#efe6d4');R(254,-106,26,104,'#d8c8e0');R(282,-106,26,104,'#d8c8e0');});
@@ -49,7 +49,7 @@ const SCENES=[
    tv(6,0);pizza(6,6);pizza(5,5);
    memoryTable(9,4);zabuton(8,4,'#ff8fc7');zabuton(10,4,'#43d9e8');   // jogo da memória na frente da cabanalampTable(0,1);lampTable(11,1);mixer(11,5,'radio');vaso(11,11);
    stringLights([[0,0],[12,0]],128,6);stringLights([[0,0],[0,12]],128,6);stringLights([[9,1],[12,4]],80,6);}},
- {id:'parque',nome:'Parque com lago',desc:'Lago com patos, food truck, sorvete, balanço e piquenique',outdoor:true,spawn:[5,11],build(){
+ {id:'parque',stageSpot:{x:5,len:3},nome:'Parque com lago',desc:'Lago com patos, food truck, sorvete, balanço e piquenique',outdoor:true,spawn:[5,11],build(){
    B.floorAt=(x,y)=>(x===5||y===5)?'dirt':'grass';
    B.walls=()=>{};
    water(7,7,4,4,'pond');
@@ -58,7 +58,7 @@ const SCENES=[
    picnicTable(2,9);rug(8,0,2,2,'#e8708a','#f2efe9',true);mixer(10,1);
    dominoTable(5,9);stool(4,9,'x','#8a5a3a');stool(6,9,'nx','#8a5a3a');   // dominó na beira do lago
    bush(2,0);bush(11,3);bush(6,11);tuft(9,4);tuft(11,11);trash(6,6);}},
- {id:'boate',nome:'Boate',desc:'Palco do DJ, lasers, pista de LED, bar neon e camarote',outdoor:false,dark:true,spawn:[6,10],build(){
+ {id:'boate',stageSpot:{x:9,len:3},nome:'Boate',desc:'Palco do DJ, lasers, pista de LED, bar neon e camarote',outdoor:false,dark:true,spawn:[6,10],build(){
    B.floorAt=()=>'club';
    B.walls=()=>roomWalls('#211d29',180,()=>{R(130,-160,130,28,'#141018');for(let k=0;k<12;k++){R(20+k*30,-100,2,100,'rgba(255,79,163,.15)');}},
      ()=>{for(let i=0;i<5;i++){R(30+i*22,-120,18,2,'#4a4458');[0,1,2].forEach(k=>R(32+i*22+k*5,-132,3,12,['#3f8a4a','#c23b3b','#b9822a'][(i+k)%3]));}R(30,-92,110,2,'#4a4458');});
@@ -68,7 +68,7 @@ const SCENES=[
    boothSofa(9,11,3,'#5a2a6a');sofa(11,9,'nx','#5a2a6a');sofa(11,10,'nx','#5a2a6a');lowTable(10,9,[[10.5,9.5,'copo','#ff4fa3']]);
    neonSign('A',150,140,'ROLÊ CLUB','#ff4fa3');neonSign('B',190,60,'BAR','#43d9e8');
    neon('A',172,'#ff4fa3',0,12);neon('B',172,'#43d9e8',0,12);}},
- {id:'boteco',nome:'Boteco de esquina',desc:'Balcão com estufa, TV no futebol, sinuca, engradado e mesa na calçada',outdoor:false,spawn:[6,11],build(){
+ {id:'boteco',stageSpot:{x:6,len:3},nome:'Boteco de esquina',desc:'Balcão com estufa, TV no futebol, sinuca, engradado e mesa na calçada',outdoor:false,spawn:[6,11],build(){
    B.floorAt=(x,y)=>y>=9?'concrete':'hydraulic';
    B.walls=()=>roomWalls('#f2e6c8',150,()=>{R(0,-64,GW*32,64,'#2f7a6a');ctx.fillStyle='rgba(255,255,255,.18)';for(let x=0;x<GW*32;x+=12)ctx.fillRect(x,-64,1,64);for(let y=-64;y<0;y+=12)ctx.fillRect(0,y,GW*32,1);
        R(140,-128,74,46,'#141414');const g=Math.floor(now/2000)%2;R(144,-124,66,38,'#3f9a4a');R(176,-124,2,38,'#e8f2e8');ctx.strokeStyle='#e8f2e8';ctx.beginPath();ctx.arc(177,-105,7,0,7);ctx.stroke();
@@ -85,7 +85,7 @@ const SCENES=[
    plasticTable(5,10,'#c23b3b');chair(4,10,'x','#c23b3b');chair(6,10,'nx','#c23b3b');chair(5,11,'ny','#c23b3b');
    jukebox(11,6);lampPost(11,11);vaso(11,0,true);
    stringLights([[0,8.6],[12,8.6]],120,4);}},
- {id:'piscina',nome:'Casa com piscina',desc:'Piscina com boias, bar de drinks, palmeiras e espreguiçadeiras',outdoor:true,spawn:[2,7],build(){
+ {id:'piscina',stageSpot:{x:4.4,len:3},nome:'Casa com piscina',desc:'Piscina com boias, bar de drinks, palmeiras e espreguiçadeiras',outdoor:true,spawn:[2,7],build(){
    B.floorAt=(x,y)=>(x>=3&&x<=9&&y>=3&&y<=8)?'deck':'grass';
    B.walls=()=>{houseFacade('#e9dfcf',190);box(-.2,0,.2,GH,44,0,'#e2d8c6','#cfc4b2','#cfc4b2');};
    water(4,4,5,4,'pool');poolFloat(5.3,5.2,'donut');poolFloat(7.4,6.4,'flamingo');
@@ -94,7 +94,7 @@ const SCENES=[
    grill(11,5);table(10,6,1,2,24,'#9a6a44',[[10.4,6.5,'prato'],[10.5,7.4,'copo','#f0c24a']]);chair(11,6,'nx','#efe6d4');chair(11,7,'nx','#efe6d4');chair(9,6,'x','#efe6d4');
    palm(1,11);palm(11,11);palm(0,5);vaso(1,4,true);bush(0,8);tuft(2,10);pouf(2,8,'#ffd84a');
    stringLights([[0,0],[3,6],[0,12]],88,8);stringLights([[3,0],[9,3],[12,0]],100,10);}},
- {id:'vulcao',nome:'Ilha do vulcão',desc:'Rio de lava, ponte, tochas tiki, totens e fogueira',outdoor:true,spawn:[2,10],sky:{day:['#e0855a','#f6c890'],night:['#2a1018','#120a0e']},tint:'#5a3a52',cliff:'rock',build(){
+ {id:'vulcao',stageSpot:{x:5.6,len:3},nome:'Ilha do vulcão',desc:'Rio de lava, ponte, tochas tiki, totens e fogueira',outdoor:true,spawn:[2,10],sky:{day:['#e0855a','#f6c890'],night:['#2a1018','#120a0e']},tint:'#5a3a52',cliff:'rock',build(){
    B.floorAt=()=>'basalt';
    B.walls=()=>volcanoBack();
    const lava=[];for(let i=0;i<12;i++){lava.push([i,Math.max(0,Math.min(11,Math.round(5+Math.sin(i*.7)*1.2)))]);}lavaRiver(lava);
@@ -103,7 +103,7 @@ const SCENES=[
    torch(1,1);torch(5,2);torch(9,1);torch(1,7);torch(10,9);torch(7,11);tikiHead(0,3);tikiHead(11,3);tikiHead(11,7);
    rock(8,8,true);rock(10,11,false,'#5a5250');rock(6,9,false,'#5a5250');rock(4,1,true,'#4a4240');
    palm(0,11);palm(11,1);mixer(8,1);speaker(7,1);gong(1,9);smoke(0,0,240,'#6a5a56');smoke(.4,0,260,'#7a6a66');}},
- {id:'templo',nome:'Templo e lago de carpas',desc:'Portal torii, ponte vermelha, carpas, cerejeiras e chá',outdoor:true,spawn:[2,11],build(){
+ {id:'templo',stageSpot:{x:5.6,len:3},nome:'Templo e lago de carpas',desc:'Portal torii, ponte vermelha, carpas, cerejeiras e chá',outdoor:true,spawn:[2,11],build(){
    B.floorAt=(x,y)=>(x>=6&&y>=4&&x<=10&&y<=9)?'grass':(x===2||y===10)?'stonepath':'gravel';
    B.walls=()=>pagoda();
    water(6,4,5,5,'koi');koi();bridge(6,6,5);
@@ -113,7 +113,7 @@ const SCENES=[
    damasTable(3,6);zabuton(2,6,'#7a2a3a');zabuton(4,6,'#2a4a7a');
    fishSpot(5,5,'x');fishSpot(5,7,'x');fishSpot(8,9,'ny');fishSpot(10,9,'ny');
    mixer(9,1);rock(8,11,false,'#8a8680');rock(4,7,true,'#9a968e');}},
- {id:'praia',nome:'Luau na praia',desc:'Mar, coqueiros, fogueira, rede, cadeiras de praia e barraca de drinks',outdoor:true,cliff:'sand',spawn:[2,10],build(){
+ {id:'praia',stageSpot:{x:5,len:3},nome:'Luau na praia',desc:'Mar, coqueiros, fogueira, rede, cadeiras de praia e barraca de drinks',outdoor:true,cliff:'sand',spawn:[2,10],build(){
    B.floorAt=(x,y)=>x>=3&&x<=10&&y>=2&&y<=4?'sandlight':'sand';   // a quadra de vôlei é a areia clarinha
    B.walls=()=>{};
    for(let y=0;y<GH;y++){B.blocked.add(key(11,y));}sea();voleiCourt();
@@ -122,7 +122,7 @@ const SCENES=[
    beachChair(8,9,'ny','#ff7a5a');beachChair(9,9,'ny','#43d9e8');umbrella(9,10,'#ffd84a','#f2efe9');surfboard(10,6);surfboard(10,7);
    drinkHut(2,9);stool(2,8,'y','#ff8fc7');stool(3,8,'y','#ffd84a');torch(1,7);torch(10,1);torch(8,7);mixer(6,1);speaker(7,1);
    stringLights([[0,1],[5,3],[10,1]],90,10);}},
- {id:'rooftop',nome:'Rooftop na cidade',desc:'Terraço com skyline, jacuzzi, puffs, neon e telescópio',outdoor:true,cliff:'building',spawn:[6,10],build(){
+ {id:'rooftop',stageSpot:{x:4.4,len:3},nome:'Rooftop na cidade',desc:'Terraço com skyline, jacuzzi, puffs, neon e telescópio',outdoor:true,cliff:'building',spawn:[6,10],build(){
    B.floorAt=(x,y)=>(x>=7&&y<=4)?'deck':'rooftop';
    B.walls=()=>{skyline();glassRail();};
    jacuzzi(8,1);pouf(3,6,'#ff4fa3');pouf(4,7,'#43d9e8');pouf(2,7,'#ffd84a');lowTable(3,7,[[3.5,7.5,'copo','#ff4fa3']]);

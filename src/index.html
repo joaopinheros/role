@@ -197,6 +197,28 @@ p{margin:0}
 .log > div{background:#fff;color:#000;border:2px solid var(--ink);border-radius:12px 12px 12px 4px;padding:5px 10px;font-size:15px;line-height:1.35;max-width:100%;box-shadow:2px 2px 0 var(--ink)}
 .log > .sys{background:var(--sun);border-radius:10px;font-weight:600}
 .log b{font-weight:800}
+/* Rolê FM: mensagens do bot (chip sun com a nota em pixel); as que só você vê ficam tracejadas */
+.log > .bot{display:flex;gap:8px;align-items:flex-start;background:var(--sun);border-radius:10px;font-weight:600}
+.log > .bot svg{flex:0 0 auto;width:16px;height:16px;margin-top:2px}
+.log > .bot.mine{border-style:dashed}
+.fmhint{display:flex;flex-wrap:wrap;gap:6px}
+.fmhint button{font:700 13px/1 var(--body);padding:7px 10px;border:2px solid var(--ink);border-radius:9px;background:var(--shell);color:var(--text);box-shadow:2px 2px 0 var(--ink);cursor:pointer}
+.fmhint button:first-child{background:var(--sun);color:#000}
+/* o player do Rolê FM: moldura de Game Boy; o vídeo nunca fica menor que 200x200 nem coberto */
+.fmbox{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:3;width:max-content;background:var(--grape);border:var(--line) solid var(--ink);border-radius:14px 14px 30px 14px;box-shadow:var(--sh);padding:8px 10px 10px}
+.fmbox .fmtag{display:flex;align-items:center;gap:8px;margin:0 0 7px;min-height:22px;max-width:200px}
+.fmbox .fmtag b{flex:0 0 auto;font:900 12px/1 var(--display);font-stretch:125%;letter-spacing:.04em;text-transform:uppercase;background:var(--sun);color:#000;border:2px solid var(--ink);border-radius:7px;padding:4px 7px}
+.fmbox .fmt{flex:1;min-width:0;font:700 12px/1.25 var(--body);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fmbox .fmvid{width:200px;height:200px;border:var(--line) solid var(--ink);border-radius:6px;overflow:hidden;background:#000}
+.fmbox .fmvid iframe,.fmbox .fmvid > div{display:block;width:200px;height:200px}
+.fmbox .fmctl{display:flex;align-items:center;gap:8px;margin-top:8px;max-width:200px}
+.fmbox .fmctl input{flex:1;min-width:0;accent-color:var(--sun)}
+.fmbox .fmctl .px{min-height:34px;padding:0 10px;font-size:12px}
+.fmbox .fmctl .px.icon{width:34px;padding:0}
+.fmbox .fmtime{font:700 11px/1 var(--body);color:#d8ccff;min-width:64px}
+.fmbox .fmtap{margin-top:8px;width:200px;min-height:36px;background:var(--sun);color:#000}
+.fmbox.min .fmt,.fmbox.min .fmctl{display:none}
+@media (max-width:760px){.fmbox{right:12px;padding:6px 8px 8px}.fmon .log{max-width:calc(100% - 236px)}}
 .chat-dock form{display:flex;gap:10px}
 .chat-dock input{flex:1;min-width:0;font:inherit;font-size:16px;color:#000;background:#fff;border:var(--line) solid var(--ink);border-radius:12px;padding:0 14px;height:50px;box-shadow:var(--sh)}
 .chat-dock input:focus{outline:none;box-shadow:0 0 0 4px var(--sun),var(--sh)}
@@ -404,6 +426,7 @@ p{margin:0}
       <button class="px hot" id="wardBtn" aria-expanded="false" aria-controls="wardrobe" data-i="shirt"><span>Visual</span></button>
       <button class="px" id="rInvite" data-i="link"><span>Convidar</span></button>
       <button class="px" id="rSom" aria-pressed="false" data-i="note"><span>Som</span></button>
+      <button class="px" id="rFm" hidden aria-pressed="false" data-i="radio"><span>Ouvir junto</span></button>
       <button class="px hot" id="rAct" hidden data-i="dice"><span>Jogar</span></button>
       <button class="px" id="rVoz" hidden aria-pressed="false" aria-label="Entrar no chat de voz" data-i="mic"><span>Voz</span></button>
       <button class="px" id="rMute" hidden aria-pressed="false" aria-label="Silenciar meu microfone" data-i="mic"><span>Mudo</span></button>
@@ -418,11 +441,18 @@ p{margin:0}
         <button class="px" data-act="sit" data-i="sit" aria-label="Sentar"><span>Sentar</span></button>
         <button class="px" data-act="stop" data-i="stand" aria-label="Levantar"><span>Levantar</span></button>
       </div>
+      <div class="fmhint" id="fmHint" hidden aria-label="Comandos do Rolê FM"></div>
       <form id="chatForm">
         <input id="msg" maxlength="120" autocomplete="off" placeholder="Fala com a galera…" aria-label="Mensagem">
         <button class="px hot icon" type="submit" aria-label="Enviar" data-i="send"></button>
       </form>
     </section>
+    <div class="fmbox" id="fmBox" hidden aria-label="Player do Rolê FM">
+      <div class="fmtag"><b>Rolê FM</b><span class="fmt" id="fmTitle"></span></div>
+      <div class="fmvid"><div id="fmYT"></div></div>
+      <button class="px fmtap" id="fmTap" type="button" hidden>Toque para ouvir</button>
+      <div class="fmctl"><span class="fmtime" id="fmTime"></span><input id="fmVol" type="range" min="0" max="100" aria-label="Volume (só para você)"><button class="px icon" id="fmMin" type="button" aria-label="Minimizar" data-i="minus"></button><button class="px" id="fmStop" type="button">Parar</button></div>
+    </div>
   </div>
 
   <aside class="wardrobe" id="wardrobe" aria-label="Guarda-roupa">

@@ -11,6 +11,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY server ./server
+COPY src/engine/fmcore.js ./src/engine/fmcore.js
 COPY public ./public
 COPY scripts/build.js ./scripts/build.js
 COPY --from=build /app/dist ./dist

@@ -336,6 +336,12 @@ function leaveRoom(c, name) {
   if (!r.size) rooms.delete(name);
   else roomSend(name, r, { ev: 'left', peer });
 }
+/* Rolê FM: o servidor guarda o que toca e a fila; avisa a sala ao vivo a cada mudança (mensagem "fm") */
+const FM = require('./fm')({
+  store,
+  notify(role) { const name = 'role-' + role, r = rooms.get(name); if (r) roomSend(name, r, { ev: 'g', from: 'srv', t: 'fm', d: {} }); },
+});
+
 function cleanPresence(d) {
   if (!d || typeof d !== 'object') return {};
   const s = JSON.stringify(d);
@@ -490,6 +496,11 @@ wss.on('connection', (ws, req) => {
           return roomSend(name, r, { ev: 'g', from: peer, t: m.t, d: m.d }, peer);
         }
         case 'leave': return leaveRoom(c, String(m.room || ''));
+
+        case 'fmNow': return reply(id, FM.now());
+        case 'fmState': return reply(id, FM.state(c, String(m.role || '')));
+        case 'fmAdd': return reply(id, await FM.add(c, String(m.role || ''), String(m.link || '')));
+        case 'fmAct': return reply(id, FM.act(c, String(m.role || ''), String(m.act || ''), m.a && typeof m.a === 'object' ? m.a : {}));
         default: return reply(id, null, 'op');
       }
     } catch (e) {

@@ -128,11 +128,14 @@ export async function connect({ url, key, ice }) {
     }
     return names.get(id);
   }
-  const chatDoc = (row, u) => ({ u: u.usuario, n: u.nome, t: row.texto, at: Date.parse(row.created_at) });
+  const chatDoc = (row, u) => ({ u: u.usuario, n: u.nome, t: row.texto, at: Date.parse(row.created_at), ...(row.tipo === 'bot' ? { k: 'bot', d: row.dados || {} } : {}) });
+  let chatCols = 'id,texto,created_at,user_id,tipo,dados,user:users(usuario,nome)';   // tipo e dados vêm do supabase/fm.sql
 
   async function listChat(roleId, o = {}) {
-    const { data, error } = await sb.from('chat_messages').select('id,texto,created_at,user_id,user:users(usuario,nome)')
+    const q = () => sb.from('chat_messages').select(chatCols)
       .eq('role_id', roleId).is('deleted_at', null).order('id', { ascending: false }).limit(Math.min(500, o.limit | 0 || 200));
+    let { data, error } = await q();
+    if (error && error.code === '42703' && chatCols.includes('tipo')) { chatCols = 'id,texto,created_at,user_id,user:users(usuario,nome)'; ({ data, error } = await q()); }   // fm.sql ainda não rodou
     check(error);
     return data.reverse().map(x => {
       if (x.user) names.set(x.user_id, x.user);
@@ -407,5 +410,34 @@ export async function connect({ url, key, ice }) {
     });
   }
 
-  return { uid: state.uid, conta: hello ? hello.conta : null, net, db, room, voice: id => makeVoice(sb, id, ice) };
+  /* ---------- Rolê FM (supabase/fm.sql + Edge Function music-resolve) ----------
+     O aviso de "mudou" não usa canal próprio: quem muda avisa a sala ao vivo (mensagem "fm"), e as mensagens do bot
+     no chat também fazem os aparelhos relerem o estado. Assim, se o fm.sql ainda não rodou, nada mais quebra. */
+  const FM_ARGS = {
+    advance: a => ({ p_version: a.version | 0, p_skip: !!a.skip }), pause: () => ({}), play: () => ({}), limpar: () => ({}),
+    tirar: a => ({ p_pos: a.pos | 0 }), dj: a => ({ p_usuario: String(a.u || ''), p_on: !!a.on }),
+    duracao: a => ({ p_version: a.version | 0, p_dur: a.dur | 0 }), quem: a => ({ p_quem: String(a.quem || '') }),
+  };
+  const fm = {
+    async now() { return Number(await rpc('fm_now')); },
+    state: role => rpc('fm_estado', { p_role: role }),
+    async add(role, link) {
+      const { data, error } = await sb.functions.invoke('music-resolve', { body: { role, link } });
+      if (error) {
+        const st = error.context && error.context.status;
+        let code = st === 401 ? 'auth' : st === 404 ? 'nofn' : 'server';
+        try { const b = await error.context.json(); if (b && b.error) code = b.error; } catch (_) { /* sem corpo */ }
+        throw coded(code);
+      }
+      if (data && data.error) throw coded(data.error);
+      return data;
+    },
+    act(role, op, a = {}) {
+      const f = FM_ARGS[op];
+      if (!f) return Promise.reject(coded('op'));
+      return rpc('fm_' + op, { p_role: role, ...f(a) });
+    },
+  };
+
+  return { uid: state.uid, conta: hello ? hello.conta : null, net, db, room, fm, voice: id => makeVoice(sb, id, ice) };
 }

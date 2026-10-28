@@ -72,6 +72,8 @@ async function setup(browser, sceneNth, who) {
 /* os dois jogadores chegam perto da atividade; A convida e B aceita */
 async function startMatch(a, b, spotA, spotB, act, nome) {
   ok(await a.evaluate(([x, y]) => window.__role.go(x, y), spotA) && await b.evaluate(([x, y]) => window.__role.go(x, y), spotB), 'os dois andam até a mesa de ' + nome);
+  const parado = p => p.evaluate(() => window.__role.avs()[0].p === 0);
+  await waitFor(async () => (await parado(a)) && (await parado(b)), 25000);   // só olha o botão com os dois parados: no caminho eles passam por outras mesas
   ok(!!await waitFor(async () => (await label(a)) && (await label(b)), 20000), 'o botão da atividade aparece perto da mesa: "' + (await label(a)) + '"');
   if (process.env.GDBG) for (const p of [a, b]) console.log('   dbg', JSON.stringify(await p.evaluate(() => ({ gon: window.__role.gon(), eu: window.__role.games(), avs: window.__role.avs() }))), errs.join(' | '));
   await a.click('#rAct');

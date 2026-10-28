@@ -13,8 +13,8 @@ const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'src');
 const DIST = process.env.ROLE_DIST ? path.resolve(process.env.ROLE_DIST) : path.join(ROOT, 'dist');   // ROLE_DIST: outra pasta de saída (os testes usam)
 
-const ENGINE = ['core.js', 'body.js', 'hair.js', 'items.js', 'render.js', 'poolsim.js', 'truco.js', 'damas.js', 'domino.js'];
-const APP = ['adapter.js', 'icons.js', 'music.js', 'scenes.js', 'props2.js', 'catalog.js', 'pets.js', 'games.js', 'pool.js', 'chess.js', 'cards.js', 'truco.js', 'damas.js', 'domino.js', 'memoria.js', 'pesca.js', 'volei.js', 'lava.js', 'telescopio.js', 'net.js', 'app.js'];
+const ENGINE = ['core.js', 'body.js', 'hair.js', 'items.js', 'render.js', 'poolsim.js', 'truco.js', 'damas.js', 'domino.js', 'fmcore.js'];
+const APP = ['adapter.js', 'icons.js', 'music.js', 'scenes.js', 'props2.js', 'catalog.js', 'pets.js', 'games.js', 'pool.js', 'chess.js', 'cards.js', 'truco.js', 'damas.js', 'domino.js', 'memoria.js', 'pesca.js', 'volei.js', 'lava.js', 'telescopio.js', 'fm.js', 'fmvisual.js', 'net.js', 'app.js'];
 
 const args = process.argv.slice(2);
 const WATCH = args.includes('--watch');

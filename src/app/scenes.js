@@ -4,6 +4,7 @@ const S=(fx,fy)=>[ox+(fx-fy)*TW,oy+(fx+fy)*TH];
 const up=(p,h)=>[p[0],p[1]-h];
 const key=(x,y)=>x+','+y;
 const WB=WW*WS,HB=WHt*WS;const wb=document.createElement('canvas');wb.width=WB;wb.height=HB;const wctx=wb.getContext('2d');
+wctx.imageSmoothingEnabled=false;   // pixel art: e trocar isso no meio do quadro força o navegador a desenhar tudo o que estava pendente
 const mk=document.createElement('canvas');mk.width=WB;mk.height=HB;const mkc=mk.getContext('2d');
 let ctx=wctx,now=0,beatPulse=0;
 function poly(pts,fill,stroke,lw){ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.lineWidth=lw||1;ctx.strokeStyle=stroke;ctx.stroke();}}
@@ -222,6 +223,7 @@ function waterFx(){B.ground.push(()=>{for(const W of SCN.water){const pool=W.kin
 function buildScene(id,isNight){const sc=sceneById(id);
   B={id,sc,night:!!isNight,acts:[],furn:[],blocked:new Set(),seats:new Map(),ground:[],air:[],glowsG:[],glowsA:[],water:[],cfg:{},rugs:[],dance:null,mixer:null,lava:null,bridge:null,floorAt:()=>'grass',walls:()=>{}};
   sc.build();if(B.water.length){waterFx();B.ground.unshift(B.ground.pop());}
+  if(sc.stageSpot)fmStageReg(sc.stageSpot);   // palco do Rolê FM (só aparece no celular)
   const st=document.createElement('canvas');st.width=WB;st.height=HB;const prev=ctx;ctx=st.getContext('2d');ctx.setTransform(WS,0,0,WS,0,0);
   cliff(sc.outdoor,sc.cliff);B.walls();
   const fr=rng(11);for(let gy=0;gy<GH;gy++)for(let gx=0;gx<GW;gx++){const t=B.floorAt(gx,gy);(FLOOR[t]||FLOOR.grass)(gx,gy,fr);}

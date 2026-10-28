@@ -42,9 +42,14 @@ Para testar com duas pessoas: abra uma janela normal e uma anônima, crie a cont
 | `npm run assets` | regera ícones e a imagem de prévia `public/og.png` |
 | `npm test` | teste de ponta a ponta com navegador real (precisa de `npx playwright install chromium` uma vez) |
 | `node test/games.js [nomes]` | testa os jogos com 2 a 5 navegadores (`sinuca,xadrez,truco,damas,domino,memoria,volei,solo` ou `todos`) |
+| `node test/fm.js` | testa o Rolê FM (música sincronizada) com 3 navegadores e o player do YouTube simulado |
 | `node --test test/*.test.js` | regras dos jogos (sinuca, truco, damas, dominó) e o servidor de tempo real |
 
 Se mudar a lista de arquivos do `scripts/build.js`, o `npm run dev` se reinicia sozinho (versões antigas do `dev` precisam ser fechadas e abertas de novo). `ROLE_DIST=pasta` faz o build e o servidor usarem outra pasta no lugar de `dist/` (útil para testar com o `dev` aberto).
+
+## Rolê FM
+
+Música do YouTube sincronizada na sala, por comandos no chat (`/music <link>`, `/skip`, `/pause`…). Dirigível no céu no computador e palco com caixas no celular. Instalação, comandos e limites em [docs/ROLE-FM.md](docs/ROLE-FM.md).
 
 ## Jogos e atividades da sala
 
