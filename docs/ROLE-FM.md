@@ -19,12 +19,12 @@ No computador a música aparece como um **dirigível** no céu; no celular, como
 | Comando | Quem | O que faz |
 |---|---|---|
 | `/music <link ou nome>` (ou `/m`) | todos | põe na fila; se nada toca, toca na hora. Com um nome (`/music ai se eu te pego`), o 1º resultado entra e aparece **"Não era essa?"** com até 4 alternativas |
-| `/skip` | dono e DJs | pula |
-| `/pause` e `/play` | dono e DJs | pausa e volta para todo mundo |
+| `/skip` | todos | pula |
+| `/pause` e `/play` | todos | pausa e volta para todo mundo |
 | `/fila` | todos | as próximas 5 (só para quem pediu) |
 | `/tocando` | todos | o que toca e o tempo (só para quem pediu) |
-| `/tirar` | todos | tira a última música que **você** colocou (dono e DJs: `/tirar <posição>`) |
-| `/limpar` | dono e DJs | esvazia a fila |
+| `/tirar` | todos | tira a última música que **você** colocou (`/tirar <posição>` tira a dessa posição) |
+| `/limpar` | todos | esvazia a fila |
 
 Digitar `/` mostra só os comandos que a pessoa pode usar. As mensagens do bot (chip amarelo com a nota) vão para o chat de todos; as respostas privadas ficam só para quem pediu (borda tracejada).
 
@@ -64,12 +64,12 @@ Se subir a cota, ajuste `fm_cota_dia` em `app_config` (Supabase) ou `FM_CFG.quot
 |---|---|---|
 | duração máxima do vídeo | 15 min | `fm_max_dur_s` em `app_config` (Supabase) · `FM_CFG.maxDurS` (Node) |
 | fila da sala | 30 itens | `fm_max_fila` · `FM_CFG.maxQueue` |
-| esperando por pessoa (dono e DJs sem limite) | 3 | `fm_por_pessoa` · `FM_CFG.perUser` |
+| esperando por pessoa | 3 | `fm_por_pessoa` · `FM_CFG.perUser` |
 | `/music` por minuto por pessoa | 5 | `fm_por_minuto` · `FM_CFG.perMinute` |
 | buscas por nome por pessoa por hora | 10 | `fm_busca_hora` · `FM_CFG.searchPerHour` |
 | cota diária da API / aviso | 10.000 / 90% | `fm_cota_dia`, `fm_cota_aviso` · `FM_CFG.quotaDay`, `quotaWarnPct` |
 | validade do cache de buscas | 30 dias | `fm_cache_dias` · `FM_CFG.cacheDays` |
-| quem pode pôr música | todos | `roles.quem_adiciona` (`'todos'` ou `'djs'`) |
+| quem pode pôr música | todos (a sala tem no máximo 8 pessoas, todas com os mesmos poderes) | — |
 | visual (tamanho do player, BPM do pulso, velocidade do dirigível) | | `FMV` em `src/app/fm.js` |
 
 ## Regras do YouTube que o Rolê FM respeita

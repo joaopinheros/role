@@ -394,10 +394,6 @@ p{margin:0}
       <form id="c1" style="display:flex;flex-direction:column;gap:14px" novalidate>
         <h1>Qual é o rolê?</h1>
         <div class="field"><label class="lbl" for="cNome">Nome do evento</label><input id="cNome" maxlength="40" placeholder="Niver da Bia, churras de sábado…"></div>
-        <div class="row2">
-          <div class="field"><label class="lbl" for="cData">Data</label><input id="cData" type="date"></div>
-          <div class="field"><label class="lbl" for="cHora">Hora</label><input id="cHora" type="time" value="20:00"></div>
-        </div>
         <p class="err" id="c1Err" hidden></p>
         <button class="px hot big" type="submit">Continuar</button>
       </form>
@@ -427,7 +423,7 @@ p{margin:0}
       <div class="event">
         <span class="chip live">Ao vivo</span>
         <span class="chip name" id="rName"></span>
-        <span class="chip" id="rWhen"></span>
+        <span class="chip" id="rWhen" title="As salas duram 8 horas"></span>
         <span class="chip" id="count">1 na sala</span>
       </div>
     </header>

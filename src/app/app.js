@@ -106,7 +106,7 @@ function LocalRoom(name){
     onPeers(h){hs.add(h);return()=>hs.delete(h);},async leave(){send({t:'bye'});bc&&bc.close();hs.clear();},start(){send({t:'hello',presence:mine});}};}
 
 let DB=LocalDB(),UID=null,ROOMCAP=null,REMOTE=false,SRV=false,NET=null;
-const MAX_SALA=50;
+const MAX_SALA=8,SALA_MS=8*3600e3;   // até 8 pessoas e 8 h no ar (mesmos números do banco e do servidor)
 async function initCaps(){
   if(window.ROLE_SERVER){SRV=REMOTE=true;NET=Net();DB=ServerDB(NET);ROOMCAP={join:n=>NET.join(n),fm:NET.fm};
     const a=LS.get('role-auth',null);if(a&&a.token){try{const r=await NET.hello(a.token);UID=r.uid;}catch(e){if(e.code!=='timeout')LS.del('role-auth');}}
@@ -131,8 +131,9 @@ function fmtTel(d){d=onlyDigits(d).slice(0,11);if(d.length<3)return d.length?'('
 const telOk=d=>/^\d{10,11}$/.test(d);
 const mailOk=m=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m);
 const userOk=u=>/^[a-z0-9._]{3,16}$/.test(u);
-function fmtWhen(data,hora){try{const[y,m,d]=data.split('-').map(Number),dt=new Date(y,m-1,d);
-  const s=dt.toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'}).replace(/\./g,'');return s+', '+(hora||'').replace(':','h').replace('h00','h');}catch(e){return data+' '+hora;}}
+/* a sala dura 8 h depois de criada; salas antigas (sem "criado") contam como no ar */
+const roomLeft=r=>r&&r.criado?r.criado+SALA_MS-Date.now():SALA_MS;
+function leftTxt(r){const ms=roomLeft(r);if(ms<=0)return'Encerrado';const m=Math.ceil(ms/60000),h=Math.floor(m/60);return'Restam '+(h?h+'h '+String(m%60).padStart(2,'0')+'min':m+' min');}
 const ownOrigin=()=>/^https?:$/.test(location.protocol)&&!(window.claude&&claude.use);
 const inviteLink=eid=>SRV||ownOrigin()?location.origin+'/r/'+eid:ARTIFACT_URL+'#r-'+eid;
 async function copyText(text,btn){const done=()=>{if(btn){const o=btn.innerHTML;setBtn(btn,'check','Copiado');setTimeout(()=>btn.innerHTML=o,1500);}toast('Link copiado. Agora é só colar no grupo.');};
@@ -141,7 +142,7 @@ const CART={churrasco:'#8fd42a',festa:'#ff3d8b',pijama:'#c9a5ff',parque:'#13b3c4
 const cartColor=id=>CART[id]||'#6c3ce0';
 function setTime(n){document.body.dataset.time=n?'night':'day';}
 function chipsFor(el,r){el.innerHTML='';const sc=sceneById(r.cena);
-  [[r.nome?null:null],[fmtWhen(r.data,r.hora),''],[sc.nome,''],[r.noite?'Noite':'Dia',r.noite?'moon':'sun']].forEach(([t,c])=>{if(!t)return;const s=document.createElement('span');s.className='chip '+(c||'');s.textContent=t;el.append(s);});}
+  [[r.nome?null:null],[leftTxt(r),''],[sc.nome,''],[r.noite?'Noite':'Dia',r.noite?'moon':'sun']].forEach(([t,c])=>{if(!t)return;const s=document.createElement('span');s.className='chip '+(c||'');s.textContent=t;el.append(s);});}
 
 /* ================= cenas, miniaturas e vitrine ================= */
 const sceneCache=new Map();
@@ -245,9 +246,9 @@ async function openHome(){go('#scrHome');$('#homeName').textContent=ME.nome;$('#
     const roles=(await Promise.all(mine.map(async m=>{const r=await DB.get('roles/'+m.data.eid);return r&&{...r,eid:m.data.eid,papel:m.data.papel};}))).filter(Boolean).sort((a,b)=>(b.criado||0)-(a.criado||0));
     box.innerHTML='';if(!roles.length){box.innerHTML='<div class="empty">Nenhum rolê ainda. Cria o primeiro e chama a galera.</div>';return;}
     roles.forEach(r=>{const cart=document.createElement('div');cart.className='cart';cart.style.setProperty('--cc',cartColor(r.cena));const d=document.createElement('div');d.className='label ev';d.style.padding='8px';const c=document.createElement('canvas');c.width=192;c.height=160;sceneThumb(r.cena,r.noite,c);
-      const t=document.createElement('div');t.className='t';const b=document.createElement('b');b.textContent=r.nome;const s=document.createElement('span');s.textContent=fmtWhen(r.data,r.hora);const s2=document.createElement('span');s2.textContent=r.papel==='dono'?'Você criou':'Você foi chamado';t.append(b,s,s2);
+      const t=document.createElement('div');t.className='t';const b=document.createElement('b');b.textContent=r.nome;const s=document.createElement('span');s.textContent=leftTxt(r);const s2=document.createElement('span');s2.textContent=r.papel==='dono'?'Você criou':'Você foi chamado';t.append(b,s,s2);
       const bar=document.createElement('div');bar.className='bar';const lk=document.createElement('button');lk.className='px icon';lk.setAttribute('aria-label','Copiar link do convite');setBtn(lk,'link');lk.addEventListener('click',()=>copyText(inviteLink(r.eid),lk));
-      const en=document.createElement('button');en.className='px hot';en.textContent='Entrar';en.addEventListener('click',()=>enterRoom(r.eid));bar.append(lk,en);t.append(bar);d.append(c,t);cart.append(d);box.append(cart);});
+      const en=document.createElement('button');en.className='px hot';en.textContent='Entrar';en.disabled=roomLeft(r)<=0;en.addEventListener('click',()=>enterRoom(r.eid));bar.append(lk,en);t.append(bar);d.append(c,t);cart.append(d);box.append(cart);});
   }catch(e){box.innerHTML='<div class="empty">Não deu pra carregar seus rolês.</div>';console.warn(e);}}
 function drawHomeAv(){const g=$('#homeAv').getContext('2d');g.clearRect(0,0,112,236);const sp=getSprite(fig,'f',IDLE);g.drawImage(sp,0,-22);}
 $('#homeWard').addEventListener('click',()=>setWard(true));
@@ -255,15 +256,15 @@ $('#newRole').addEventListener('click',()=>openCreate());
 
 /* ---------- criar rolê ---------- */
 let draft=null,cstep=1;
-function openCreate(){const d=new Date();d.setDate(d.getDate()+((6-d.getDay()+7)%7||7));
-  draft={nome:'',data:d.toISOString().slice(0,10),hora:'20:00',cena:'churrasco',noite:true};
-  $('#cNome').value='';$('#cData').value=draft.data;$('#cHora').value=draft.hora;errOn('#c1Err');cStep(1);go('#scrCreate');}
+function openCreate(){
+  draft={nome:'',cena:'churrasco',noite:true};
+  $('#cNome').value='';errOn('#c1Err');cStep(1);go('#scrCreate');}
 function cStep(n){cstep=n;show($('#c1'),n===1);show($('#c2'),n===2);show($('#c3'),n===3);$('#cStepLbl').textContent=n+' de 3';
   document.querySelectorAll('.steps i').forEach((i,k)=>i.classList.toggle('on',k<n));$('#createCard').classList.toggle('wide',n===2);
   show($('#cBack'),n!==3);if(n===2)renderSceneGrid();if(n===1)vitrine(draft.cena,draft.noite);}
 $('#cBack').addEventListener('click',()=>{if(cstep===2)cStep(1);else openHome();});
-$('#c1').addEventListener('submit',e=>{e.preventDefault();draft.nome=$('#cNome').value.trim();draft.data=$('#cData').value;draft.hora=$('#cHora').value;
-  if(draft.nome.length<2)return errOn('#c1Err','Dá um nome pro rolê.');if(!draft.data)return errOn('#c1Err','Escolhe a data.');if(!draft.hora)return errOn('#c1Err','Escolhe a hora.');errOn('#c1Err');cStep(2);});
+$('#c1').addEventListener('submit',e=>{e.preventDefault();draft.nome=$('#cNome').value.trim();
+  if(draft.nome.length<2)return errOn('#c1Err','Dá um nome pro rolê.');errOn('#c1Err');cStep(2);});
 document.querySelectorAll('#c2 [data-n]').forEach(b=>b.addEventListener('click',()=>{draft.noite=b.dataset.n==='1';renderSceneGrid();}));
 function renderSceneGrid(){document.querySelectorAll('#c2 [data-n]').forEach(b=>b.setAttribute('aria-checked',String((b.dataset.n==='1')===draft.noite)));
   const g=$('#sceneGrid');g.innerHTML='';SCENES.forEach(s=>{const b=document.createElement('button');b.type='button';b.className='scn';b.setAttribute('role','radio');b.setAttribute('aria-checked',String(s.id===draft.cena));
@@ -272,7 +273,7 @@ function renderSceneGrid(){document.querySelectorAll('#c2 [data-n]').forEach(b=>
     setTimeout(()=>sceneThumb(s.id,draft.noite,c),0);});
   vitrine(draft.cena,draft.noite);}
 $('#c2Next').addEventListener('click',async()=>{const btn=$('#c2Next');btn.disabled=true;
-  try{const eid=genId(10),r={nome:draft.nome,data:draft.data,hora:draft.hora,cena:draft.cena,noite:draft.noite,dono:ME.usuario,donoNome:ME.nome,criado:Date.now()};
+  try{const eid=genId(10),r={nome:draft.nome,cena:draft.cena,noite:draft.noite,dono:ME.usuario,donoNome:ME.nome,criado:Date.now()};
     await DB.set('roles/'+eid,r);await DB.set(`roles/${eid}/gente/${ME.usuario}`,{nome:ME.nome,at:Date.now(),papel:'dono'});await DB.set(`data/users/${UID}/r_${eid}`,{eid,papel:'dono',at:Date.now()});
     draft.eid=eid;$('#c3Link').value=inviteLink(eid);chipsFor($('#c3Meta'),r);cStep(3);
   }catch(e){toast('Não deu pra criar o rolê. Tenta de novo.');console.warn(e);}btn.disabled=false;});
@@ -285,6 +286,7 @@ async function openInvite(eid){go('#scrInvite');errOn('#invErr');$('#invName').t
   let r=null;try{r=await DB.get('roles/'+eid);}catch(e){}
   if(!r){$('#invName').textContent='Convite não encontrado';errOn('#invErr','Esse link não leva a nenhum rolê. Confere com quem te mandou.');show($('#invAccept'),false);LS.del('role-convite');PENDING_INVITE=null;vitrine('parque',true);return;}
   $('#invName').textContent=r.nome;chipsFor($('#invMeta'),r);PENDING_INVITE={eid,nome:r.nome,cena:r.cena,noite:r.noite};
+  if(roomLeft(r)<=0||r.status==='encerrado'){errOn('#invErr','Esse rolê já encerrou (as salas duram 8 horas). Pede pra quem te chamou criar outro.');show($('#invAccept'),false);}
   let n=0;try{n=(await DB.list(`roles/${eid}/gente`)).length;}catch(e){}
   $('#invBy').textContent=`${r.donoNome||'@'+r.dono} te chamou.`+(n>1?` ${n} pessoas já confirmaram.`:'');$('#invCart').style.setProperty('--cc',cartColor(r.cena));
   sceneThumb(r.cena,r.noite,$('#invThumb'));vitrine(r.cena,r.noite);
@@ -295,7 +297,7 @@ $('#invLater').addEventListener('click',()=>{LS.del('role-convite');PENDING_INVI
 async function acceptInvite(eid){
   try{await DB.set(`roles/${eid}/gente/${ME.usuario}`,{nome:ME.nome,at:Date.now(),papel:'convidado'});
     const mine=await DB.get(`data/users/${UID}/r_${eid}`);if(!mine)await DB.set(`data/users/${UID}/r_${eid}`,{eid,papel:'convidado',at:Date.now()});}
-  catch(e){const err=new Error('write');err.msg=(e&&(e.code==='not_granted'||e.code==='not_permitted'))?'Seu acesso a esse link é só de leitura. Pede pra quem te chamou te dar acesso de colaborador.':'Não deu pra salvar o convite.';throw err;}
+  catch(e){const err=new Error('write');err.msg=e&&e.code==='cheia'?'Esse rolê já tem 8 pessoas, que é o máximo.':e&&e.code==='closed'?'Esse rolê já encerrou (as salas duram 8 horas).':(e&&(e.code==='not_granted'||e.code==='not_permitted'))?'Seu acesso a esse link é só de leitura. Pede pra quem te chamou te dar acesso de colaborador.':'Não deu pra salvar o convite.';throw err;}
   LS.del('role-convite');PENDING_INVITE=null;clearHash();await enterRoom(eid,true);}
 function clearHash(){try{if(location.hash||/^\/r\//.test(location.pathname))history.replaceState(null,'',(/^\/r\//.test(location.pathname)?'/':location.pathname)+location.search);}catch(e){}}
 
@@ -307,10 +309,11 @@ function playInsert(r){if(matchMedia('(prefers-reduced-motion: reduce)').matches
 async function enterRoom(eid,fresh){
   let r=null;try{r=await DB.get('roles/'+eid);}catch(e){}
   if(!r){toast('Rolê não encontrado.');return openHome();}
+  if(roomLeft(r)<=0){toast('Esse rolê já encerrou: as salas duram 8 horas.',4200);return openHome();}
   playInsert(r);CUR={eid,...r};mode='sala';go('room');setTime(r.noite);setWard(false);zoom=frame.clientWidth<700?.5:1;resize();updZoomBtns();
   avatars=[];peerAvs.clear();SCN=getScene(r.cena,r.noite);MUSIC.scene(r.cena);
   const[sx,sy]=spawnTile();me=makeAv(ME.nome,{...fig},sx,sy,{user:ME.usuario});npcSpawn();
-  $('#rName').textContent=r.nome;$('#rWhen').textContent=fmtWhen(r.data,r.hora);updDayBtn();
+  $('#rName').textContent=r.nome;roomClock();updDayBtn();
   $('#log').innerHTML='';chatSeen=new Set();joinedAt=Date.now();centerOn(...S(sx+.5,sy+.5).map((v,i)=>i?v-50:v));
   addLog(null,fresh?`Você entrou em ${r.nome}. Bem-vindo!`:`Você está em ${r.nome}.`);spawnPets(eid);if(SCN.mixer)addLog(null,`Toca na mesa de som (ou no botão Som) pra soltar o ${MUSIC.name()}. Tem ${pets.map(p=>p.name).join(' e ')} passeando por aí.`);updSom();
   unsubRole=DB.watchDoc('roles/'+eid,d=>{if(!d||mode!=='sala')return;const ch=d.cena!==CUR.cena||!!d.noite!==!!CUR.noite;CUR={eid,...d};if(ch){SCN=getScene(d.cena,d.noite);setTime(d.noite);updDayBtn();avatars.forEach(a=>{if(!walkable(a.gx,a.gy,a.gx,a.gy)){const[x,y]=freeNear(a.gx,a.gy,a);a.gx=a.fx=x;a.gy=a.fy=y;a.path=[];}});}});
@@ -327,7 +330,14 @@ async function enterRoom(eid,fresh){
 }
 function salaCheia(){if(live){try{live.leave()}catch(e){}live=null;}toast('Essa sala tá cheia agora. Tenta de novo daqui a pouco.',4200);openHome();}
 function spawnTile(){const[x0,y0]=SCN.sc.spawn;for(let i=0;i<60;i++){const x=x0+ri(5)-2,y=y0+ri(5)-2;if(walkable(x,y,-1,-1)&&!occupied(x,y,null))return[x,y];}return freeNear(x0,y0,null);}
-function leaveRoom(){vozStop();gamesStop();fmStop();mode='vitrine';MUSIC.stop();updSom&&updSom();unsubRole&&unsubRole();unsubChat&&unsubChat();unsubRole=unsubChat=null;if(live){try{live.leave()}catch(e){}live=null;}avatars=[];peerAvs.clear();me=null;CUR=null;vitrine.k=null;seedBots();}
+let roomTimer=0,roomWarn=0;
+/* o relógio da sala: mostra quanto falta e, no fim das 8 h, manda todo mundo para o início */
+function roomClock(){clearInterval(roomTimer);roomWarn=0;const tick=()=>{if(mode!=='sala'||!CUR){clearInterval(roomTimer);return;}
+    const ms=roomLeft(CUR);$('#rWhen').textContent=leftTxt(CUR);
+    if(ms<=0){clearInterval(roomTimer);toast('O rolê acabou: as salas duram 8 horas. Cria outro quando quiser!',5200);leaveRoom();return openHome();}
+    if(ms<=5*60e3&&roomWarn<2){roomWarn=2;addLog(null,'Faltam 5 minutos pro rolê acabar.');}else if(ms<=15*60e3&&roomWarn<1){roomWarn=1;addLog(null,'Faltam 15 minutos pro rolê acabar.');}};
+  tick();roomTimer=setInterval(tick,10000);}
+function leaveRoom(){clearInterval(roomTimer);vozStop();gamesStop();fmStop();mode='vitrine';MUSIC.stop();updSom&&updSom();unsubRole&&unsubRole();unsubChat&&unsubChat();unsubRole=unsubChat=null;if(live){try{live.leave()}catch(e){}live=null;}avatars=[];peerAvs.clear();me=null;CUR=null;vitrine.k=null;seedBots();}
 function presObj(){const t=me.path.length?me.path[me.path.length-1]:[me.gx,me.gy];return{u:ME.usuario,n:ME.nome,j:joinedAt,f:encode(me.fig),x:t[0],y:t[1],a:me.action||'',b:me.back?1:0,m:me.mirror?1:0};}
 function pushPres(force){if(!live||!me)return;const p=presObj(),s=JSON.stringify(p);if(!force&&s===lastPres)return;lastPres=s;live.presence(p).catch(e=>console.warn(e));}
 function syncPeers(peers){if(mode!=='sala')return;const seen=new Set();
@@ -614,6 +624,7 @@ window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loa
   fmPerf:()=>{FMVIS.perf={sky:0,stage:0,n:0};},
   fmHide:h=>{FMV.hide=!!h;},
   bdOff:o=>{BD.off=!!o;},
+  expira:()=>{CUR.criado=Date.now()-SALA_MS+2000;roomClock();},
   nadando:()=>!!(me&&swimAt(me)),
   pets:()=>pets.map(p=>({t:p.type,x:p.gx,y:p.gy,m:p.mirror})),
   dragonTest:()=>{const p=pets.find(x=>x.type==='dragao');if(!p||!me)return false;p.gx=p.fx=7;p.gy=p.fy=9;p.path=[];p.mirror=false;p.fire=null;p.fireAt=1;p.next=now+1e9;me.gx=me.fx=8;me.gy=me.fy=9;me.path=[];me.burnUntil=0;return true;},

@@ -107,9 +107,6 @@ async function principal(browser) {
   await say(b, '/music ' + link(1));
   ok(!!await waitFor(async () => (await fm(a)).video === V(1) && (await fm(b)).status === 'tocando', 8000), 'o convidado põe uma música e ela toca na hora para os dois');
   ok(!!await waitFor(() => logHas(a, /colocou/), 5000) && !!await waitFor(() => logHas(b, /Tocando agora/), 5000), 'os dois veem as mensagens do bot ("colocou" e "Tocando agora")');
-  await say(b, '/skip');
-  ok(!!await waitFor(() => logHas(b, /Só o dono ou os DJs/), 3000), 'o convidado tenta /skip e recebe a recusa');
-  ok((await fm(a)).video === V(1), 'e a música continua');
   for (const n of [2, 3, 4]) { await say(b, '/music ' + link(n)); await sleep(500); }
   ok(!!await waitFor(async () => (await fm(a)).fila.length === 3, 5000), 'três músicas do convidado esperando na fila');
   await say(b, '/music ' + link(5));
@@ -118,10 +115,10 @@ async function principal(browser) {
   await say(a, '/music ' + 'https://youtu.be/bloq0000001');
   ok(!!await waitFor(() => logHas(a, /não deixa tocar fora do YouTube/), 4000), 'vídeo que não deixa incorporar é recusado');
 
-  // a dona pula (só o dono e os DJs pulam)
-  await say(a, '/skip');
-  ok(!!await waitFor(async () => (await fm(a)).video === V(2), 5000), 'o /skip da dona funciona');
-  ok(!!await waitFor(() => logHas(b, /pulou a música/), 4000), 'o bot avisa quem pulou');
+  // qualquer pessoa da sala pula, pausa e limpa: o convidado também
+  await say(b, '/skip');
+  ok(!!await waitFor(async () => (await fm(a)).video === V(2), 5000), 'o /skip do convidado funciona');
+  ok(!!await waitFor(() => logHas(a, /pulou a música/), 4000), 'o bot avisa quem pulou');
 
   // computador: o dirigível no céu, com a capa; "Ouvir junto" toca no player e pausa o house
   ok(!!await waitFor(async () => (await fm(a)).visual.ceu, 45000), 'o dirigível aparece no céu (computador)');
@@ -167,7 +164,7 @@ async function principal(browser) {
   ok(!!await waitFor(() => logHas(c, /Tocando: /), 3000), '/tocando mostra o que toca e o tempo (só para quem pediu)');
   ok(!(await logHas(a, /Tocando: /)), 'e os outros não veem');
   await c.fill('#msg', '/');
-  ok(await c.isVisible('#fmHint') && !(await c.textContent('#fmHint')).includes('/skip'), 'digitar "/" mostra os comandos que a pessoa pode usar (convidado não vê /skip)');
+  ok(await c.isVisible('#fmHint') && (await c.textContent('#fmHint')).includes('/skip') && !(await c.textContent('#fmHint')).includes('/dj'), 'digitar "/" mostra os comandos (todos podem, e não existe mais /dj)');
   await c.fill('#msg', '');
 
   // a música acaba sozinha e a próxima entra

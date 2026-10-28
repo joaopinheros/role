@@ -125,7 +125,7 @@ Dá para publicar o app só com o Pages e o banco no Supabase (Postgres). Serve 
 
 **Ainda falta neste modo:**
 - O SMS é simulado: `app_config.sms_dev = 1` devolve o código na tela. Para SMS de verdade, envie o código por uma Edge Function e ponha `sms_dev = 0`.
-- A lotação de 50 pessoas só vale no cliente.
+- A lotação de 8 pessoas só vale no cliente.
 - A sala ao vivo (canal de presença) não exige ser membro.
 - Painel admin, expulsar e banir pelo app, excluir conta e baixar dados (LGPD).
 
@@ -166,7 +166,7 @@ Configurações em `.env` (copie de `.env.example`).
   - Só quem criou o rolê pode mudar o cenário ou o dia/noite.
   - Mensagens no chat são limitadas a 280 caracteres e uma a cada 0,6 s.
   - Há limite de mensagens por conexão e de tentativas de login por IP.
-- **Salas:** presença ao vivo por WebSocket, com no máximo 50 pessoas (`MAX_SALA`). Quem chega com a sala cheia volta para o início com um aviso. O limite não aparece na interface.
+- **Salas:** presença ao vivo por WebSocket, com no máximo 8 pessoas (`MAX_SALA`) e 8 horas no ar depois de criada (`SALA_HORAS`; no Supabase, `sala_max` e `sala_horas` em `app_config`). Quem chega com a sala cheia volta para o início com um aviso. O limite não aparece na interface.
 - **Reconexão:** se a internet cair, o app reconecta sozinho e volta para a sala e para as assinaturas.
 - **Convites:** cada link `/r/<id>` gera uma prévia com o nome do rolê, quem chamou, a data e o lugar. É isso que aparece no WhatsApp e no Instagram.
 

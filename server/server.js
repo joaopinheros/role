@@ -18,7 +18,8 @@ const PORT = +process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 const PUBLIC_URL = (process.env.PUBLIC_URL || '').replace(/\/$/, '');
 const DATA_FILE = process.env.DATA_FILE || path.join(__dirname, '..', 'data', 'db.json');
-const MAX_SALA = +process.env.MAX_SALA || 50;
+const MAX_SALA = +process.env.MAX_SALA || 8;   // até 8 pessoas por sala (guarda todos os detalhes, inclusive a voz)
+const SALA_HORAS = +process.env.SALA_HORAS || 8;   // a sala fica no ar por até 8 h depois de criada
 const SMS_WEBHOOK_URL = process.env.SMS_WEBHOOK_URL || '';
 const SMS_DEV = SMS_WEBHOOK_URL ? process.env.SMS_DEV === '1' : process.env.SMS_DEV !== '0';
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -469,6 +470,7 @@ wss.on('connection', (ws, req) => {
           const name = String(m.room || '');
           if (!/^role-[a-z0-9]{6,16}$/.test(name)) return reply(id, null, 'invalid');
           if (!c.uid) return reply(id, null, 'auth');
+          { const rd = store.get('roles/' + name.slice(5)); if (rd && rd.criado && Date.now() > rd.criado + SALA_HORAS * 3600e3) return reply(id, null, 'closed'); }
           leaveRoom(c, name);
           let r = rooms.get(name);
           if (!r) rooms.set(name, (r = new Map()));

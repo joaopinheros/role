@@ -122,8 +122,7 @@ begin
   v_papel := public.fm_papel(p_role, p_user);
   if v_papel is null then raise exception 'perm'; end if;
   if r.privacidade not in ('link', 'fechado') then raise exception 'privada'; end if;   -- o Rolê FM é só para salas privadas
-  if r.status <> 'ativo' then raise exception 'closed'; end if;
-  if p_chefe and v_papel not in ('dono', 'dj') then raise exception 'perm'; end if;
+  if not public.role_vivo(p_role) then raise exception 'closed'; end if;
   return v_papel;
 end $$;
 
@@ -205,7 +204,6 @@ begin
     where s.auth_uid = p_auth and s.expires_at > now() and u.status = 'ativo';
   v_papel := public.fm_check(p_role, v_me);
   select quem_adiciona into v_quem from public.roles where id = p_role;
-  if v_quem = 'djs' and v_papel not in ('dono', 'dj') then raise exception 'djs'; end if;
   if p_video !~ '^[A-Za-z0-9_-]{11}$' or char_length(coalesce(p_title, '')) not between 1 and 200 then raise exception 'invalid'; end if;
   if p_dur is not null and p_dur > public.fm_cfg('fm_max_dur_s', 900) then raise exception 'longo'; end if;
   if (select count(*) from public.fm_hits where user_id = v_me and created_at > now() - interval '1 minute') >= public.fm_cfg('fm_por_minuto', 5) then
@@ -241,7 +239,6 @@ begin
     where s.auth_uid = p_auth and s.expires_at > now() and u.status = 'ativo';
   v_papel := public.fm_check(p_role, v_me);
   select quem_adiciona into v_quem from public.roles where id = p_role;
-  if v_quem = 'djs' and v_papel not in ('dono', 'dj') then raise exception 'djs'; end if;
   if char_length(coalesce(p_q, '')) not between 2 and 100 then raise exception 'invalid'; end if;
   select resultados into r from public.music_search_cache
     where query_normalizada = p_q and created_at > now() - make_interval(days => public.fm_cfg('fm_cache_dias', 30));
@@ -319,7 +316,7 @@ begin
   if not p_skip then
     if np.status <> 'tocando' then return jsonb_build_object('ok', false, 'version', np.version); end if;
     if now() < np.started_at + make_interval(secs => coalesce(np.duration_s, public.fm_cfg('fm_max_dur_s', 900)) - 3)
-       and not (np.duration_s is null and v_papel in ('dono', 'dj')) then
+       and np.duration_s is not null then
       raise exception 'cedo';
     end if;
   else
@@ -368,7 +365,7 @@ begin
     select * into q from public.room_queue where role_id = p_role and added_by = v_me order by position desc limit 1;
   else
     select * into q from public.room_queue where role_id = p_role order by position offset p_pos - 1 limit 1;
-    if found and q.added_by <> v_me and v_papel not in ('dono', 'dj') then raise exception 'perm'; end if;
+    
   end if;
   if not found then raise exception 'vazio'; end if;
   delete from public.room_queue where id = q.id;
@@ -417,7 +414,7 @@ declare v_me uuid := public.me(); v_texto text := btrim(coalesce(p_texto, '')); 
 begin
   if v_me is null then raise exception 'auth'; end if;
   if not public.is_member(p_role) then raise exception 'perm'; end if;
-  if (select status from public.roles where id = p_role) <> 'ativo' then raise exception 'closed'; end if;
+  if not public.role_vivo(p_role) then raise exception 'closed'; end if;
   if char_length(v_texto) not between 1 and 280 then raise exception 'invalid'; end if;
   if exists (select 1 from public.chat_messages where user_id = v_me and tipo = 'texto' and created_at > now() - interval '600 milliseconds') then
     raise exception 'slow';

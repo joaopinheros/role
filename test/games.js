@@ -420,6 +420,13 @@ async function solo(browser) {
     await Promise.all([a, b].map(p => p.context().close()));
   }
   {
+    const { a, b } = await setup(browser, 6, 'x');
+    ok(/Restam 7h|Restam 8h/.test(await a.textContent('#rWhen')), 'o chip mostra quanto falta das 8 horas: ' + await a.textContent('#rWhen'));
+    await a.evaluate(() => window.__role.expira());
+    ok(!!await waitFor(() => a.isVisible('#scrHome'), 14000), 'passadas as 8 horas, todo mundo volta para o início');
+    await Promise.all([a, b].map(p => p.context().close()));
+  }
+  {
     const { a, b } = await setup(browser, 7, 'w');
     ok(!(await a.evaluate(() => window.__role.nadando())), 'fora da piscina, ninguém está nadando');
     ok(await a.evaluate(() => window.__role.go(6, 5)), 'dá para andar para dentro da piscina');

@@ -28,7 +28,7 @@ module.exports = function makeFm({ store, notify, env = process.env, fetchImpl =
     if (!store.get(`roles/${role}/gente/${c.usuario}`)) throw 'perm';
     return load(role).djs.includes(c.usuario) ? 'dj' : 'membro';
   }
-  const chefe = p => p === 'dono' || p === 'dj';
+  const chefe = p => !!p;   // todo mundo da sala (até 8) pode tudo
 
   function bot(role, c, t, d) {
     return store.add(`roles/${role}/chat`, { u: c.usuario, n: nome(c.usuario), t: String(t).slice(0, 280), at: Date.now(), k: 'bot', d });

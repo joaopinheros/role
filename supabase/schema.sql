@@ -19,7 +19,9 @@ create table if not exists public.app_config (
 );
 insert into public.app_config (key, value) values
   ('sms_dev', '1'),         -- 1: o código volta na resposta e aparece na tela (teste). 0 quando houver SMS de verdade.
-  ('sms_cap_dia', '500')    -- teto de códigos por dia
+  ('sms_cap_dia', '500'),   -- teto de códigos por dia
+  ('sala_horas', '8'),      -- a sala fica no ar por até 8 h depois de criada
+  ('sala_max', '8')         -- até 8 pessoas por sala (para guardar todos os detalhes, inclusive a voz)
 on conflict (key) do nothing;
 
 create table if not exists public.users (
@@ -78,7 +80,7 @@ create table if not exists public.roles (
   cena        text not null check (cena ~ '^[a-z]{3,20}$'),
   noite       boolean not null default true,
   owner_id    uuid not null references public.users (id),
-  max_pessoas int not null default 50 check (max_pessoas between 2 and 200),
+  max_pessoas int not null default 8 check (max_pessoas between 2 and 200),
   privacidade text not null default 'link' check (privacidade in ('link', 'fechado')),
   status      text not null default 'ativo' check (status in ('ativo', 'encerrado', 'arquivado')),
   created_at  timestamptz not null default now(),
@@ -325,6 +327,13 @@ end $$;
 
 /* ============================================================ rolês */
 
+-- a sala está no ar: ativa e criada há menos de sala_horas (8 h)
+create or replace function public.role_vivo(p_id text) returns boolean language sql stable security definer set search_path = public as $$
+  select coalesce((select r.status = 'ativo'
+      and r.created_at > now() - make_interval(hours => coalesce((select value::int from public.app_config where key = 'sala_horas'), 8))
+    from public.roles r where r.id = p_id), false)
+$$;
+
 -- Prévia do convite: qualquer pessoa com o link vê (mesmo antes de criar conta). Rolê "fechado" só os membros.
 create or replace function public.ver_role(p_id text) returns jsonb language plpgsql stable security definer set search_path = public as $$
 declare r public.roles; o public.users;
@@ -335,7 +344,8 @@ begin
   select * into o from public.users where id = r.owner_id;
   return jsonb_build_object('nome', r.nome, 'data', to_char(r.data, 'YYYY-MM-DD'), 'hora', r.hora, 'cena', r.cena,
     'noite', r.noite, 'dono', o.usuario, 'donoNome', o.nome, 'criado', public.ms(r.created_at),
-    'status', r.status, 'max', r.max_pessoas);
+    'status', case when public.role_vivo(p_id) then r.status else 'encerrado' end, 'max', r.max_pessoas,
+    'expira', public.ms(r.created_at + make_interval(hours => coalesce((select value::int from public.app_config where key = 'sala_horas'), 8))));
 end $$;
 
 -- Quem já confirmou (links abertos mostram a contagem; fechado só para membros)
@@ -380,12 +390,17 @@ begin
   if v_me is null then raise exception 'auth'; end if;
   select * into r from public.roles where id = p_id;
   if not found then raise exception 'notfound'; end if;
+  if not public.role_vivo(p_id) then raise exception 'closed'; end if;
   select * into m from public.role_members where role_id = p_id and user_id = v_me;
   if found then
     if m.banned_at is not null then raise exception 'banned'; end if;
     return m.papel;
   end if;
   if r.status <> 'ativo' or r.privacidade = 'fechado' then raise exception 'closed'; end if;
+  if (select count(*) from public.role_members where role_id = p_id and banned_at is null)
+     >= coalesce((select value::int from public.app_config where key = 'sala_max'), 8) then
+    raise exception 'cheia';
+  end if;
   insert into public.role_members (role_id, user_id, papel) values (p_id, v_me, 'convidado');
   return 'convidado';
 end $$;
@@ -412,7 +427,7 @@ declare v_me uuid := public.me(); v_texto text := btrim(coalesce(p_texto, '')); 
 begin
   if v_me is null then raise exception 'auth'; end if;
   if not public.is_member(p_role) then raise exception 'perm'; end if;
-  if (select status from public.roles where id = p_role) <> 'ativo' then raise exception 'closed'; end if;
+  if not public.role_vivo(p_role) then raise exception 'closed'; end if;
   if char_length(v_texto) not between 1 and 280 then raise exception 'invalid'; end if;
   if exists (select 1 from public.chat_messages where user_id = v_me and created_at > now() - interval '600 milliseconds') then
     raise exception 'slow';

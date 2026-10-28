@@ -195,7 +195,7 @@ export async function connect({ url, key, ice }) {
     async set(p, d) {
       const s = seg(p);
       if (s[0] === 'roles' && s.length === 2) {
-        return void await rpc('criar_role', { p_id: s[1], p_nome: d.nome, p_data: d.data, p_hora: d.hora, p_cena: d.cena, p_noite: !!d.noite });
+        return void await rpc('criar_role', { p_id: s[1], p_nome: d.nome, p_data: d.data || new Date().toISOString().slice(0, 10), p_hora: d.hora || '00:00', p_cena: d.cena, p_noite: !!d.noite });
       }
       if (s[0] === 'roles' && s[2] === 'gente' && s.length === 4) return void await rpc('entrar_role', { p_id: s[1] });
       if (s[0] === 'data' && s[1] === 'users' && s[3] && s[3].startsWith('r_')) return; // vem de role_members

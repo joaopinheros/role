@@ -94,12 +94,10 @@ await no('C (de fora) não lê a fila pela tabela', as(C, `select count(*)::int 
 r = await as(B, `select count(*)::int n from room_queue`); assert.equal(r.v, 4); console.log('ok    membro lê a fila pela RLS');
 
 /* /skip: só dono e DJ; compare-and-swap */
-await no('B (membro) não pula', rpc(B, 'fm_advance', R, 1, true), 'perm');
-await no('B não pausa', rpc(B, 'fm_pause', R), 'perm');
-await no('D não dá DJ (só a dona)', rpc(D, 'fm_dj', R, 'beto', true), 'perm');
-await ok('a dona faz o B DJ', rpc(A, 'fm_dj', R, 'beto', true));
-st = (await rpc(B, 'fm_estado', R)).v; assert.equal(st.papel, 'dj'); assert.deepEqual(st.djs, ['beto']);
-r = await ok('B (agora DJ) pula', rpc(B, 'fm_advance', R, 1, true)); assert.equal(r.v.ok, true); assert.equal(r.v.version, 2);
+await no('quem é de fora não pula', rpc(C, 'fm_advance', R, 1, true), 'perm');
+await no('quem é de fora não pausa', rpc(C, 'fm_pause', R), 'perm');
+st = (await rpc(B, 'fm_estado', R)).v; assert.equal(st.papel, 'membro');
+r = await ok('B (convidado comum) pula', rpc(B, 'fm_advance', R, 1, true)); assert.equal(r.v.ok, true); assert.equal(r.v.version, 2);
 r = await ok('A pula com a versão velha: não avança de novo', rpc(A, 'fm_advance', R, 1, true)); assert.equal(r.v.ok, false);
 st = (await rpc(B, 'fm_estado', R)).v; assert.equal(st.np.video, V(2)); assert.equal(st.queue.length, 3);
 console.log('ok    dois pulos com a mesma versão: só um vale');
@@ -122,10 +120,10 @@ console.log('ok    pausa de 30 s não andou a música (', pos.toFixed(1), 's )')
 
 /* tirar e limpar */
 r = await ok('B tira a última que colocou', rpc(B, 'fm_tirar', R, 0)); assert.equal(r.v, 'Música 4');
-await no('D tira uma que não é dela', rpc(D, 'fm_tirar', R, 1), 'perm');
+await no('quem é de fora não tira', rpc(C, 'fm_tirar', R, 1), 'perm');
 r = await ok('a dona tira a da posição 1', rpc(A, 'fm_tirar', R, 1)); assert.equal(r.v, 'Música 6');
-await no('D não limpa', rpc(D, 'fm_limpar', R), 'perm');
-await ok('B (DJ) limpa', rpc(B, 'fm_limpar', R));
+await ok('D (convidada) limpa a fila', rpc(D, 'fm_limpar', R));
+await ok('B limpa de novo (já vazia)', rpc(B, 'fm_limpar', R));
 st = (await rpc(B, 'fm_estado', R)).v; assert.equal(st.queue.length, 0);
 
 /* fila acaba: para e avisa */
@@ -137,10 +135,9 @@ console.log('ok    fila vazia: "o som da sala voltou"');
 
 /* só DJs põem música */
 await ok('a dona fecha para DJs', rpc(A, 'fm_quem', R, 'djs'));
-await no('D (membro) não põe mais', add(D, 7), 'djs');
-await ok('B (DJ) põe', add(B, 8));
-await ok('a dona tira o DJ do B', rpc(A, 'fm_dj', R, 'beto', false));
-await no('B (de novo membro) não pula', rpc(B, 'fm_advance', R, (await rpc(B, 'fm_estado', R)).v.np.version, true), 'perm');
+await ok('D põe música mesmo assim (todo mundo da sala pode)', add(D, 7));
+await ok('B também', add(B, 8));
+await ok('B pula', rpc(B, 'fm_advance', R, (await rpc(B, 'fm_estado', R)).v.np.version, true));
 
 /* limite por minuto */
 await ok('a dona abre de novo', rpc(A, 'fm_quem', R, 'todos'));
@@ -183,7 +180,7 @@ await c.query("update fm_quota set dia = dia - 1");   // virou o dia (Pacífico)
 await ok('no dia seguinte a busca volta', sbegin(B, 'musica b')); await ssave(null, 0, 'musica b');
 await c.query("update music_search_cache set created_at = now() - interval '31 days'");
 r = await ok('cache velho (31 dias) não vale', sbegin(B, 'ai se eu te pego')); assert.equal(r.v.cache, null); await ssave(RES, 101);
-await no('"só DJs": convidado não busca', (async () => { await rpc(A, 'fm_quem', R, 'djs'); return sbegin(D, 'ai se eu te pego'); })(), 'djs'); await ok('reabre', rpc(A, 'fm_quem', R, 'todos'));
+await ok('reabre', rpc(A, 'fm_quem', R, 'todos'));
 
 // pôr o primeiro resultado com as alternativas, e trocar
 await c.query('delete from room_queue'); await c.query("update room_now_playing set status='parado', video_id=null, queue_id=null, version = version + 1");

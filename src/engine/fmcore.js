@@ -76,12 +76,11 @@ function fmPos(np, serverNow) {
 const fmPrivate = sala => !sala || sala.priv === 'link' || sala.priv === 'fechado';
 function fmCan(papel, acao, sala) {
   if (!papel || !fmPrivate(sala)) return false;
-  const chefe = papel === 'dono' || papel === 'dj';
+  const chefe = true;   // sala de até 8 amigos: todo mundo põe, pula, pausa, limpa e tira
   switch (acao) {
-    case 'add': return chefe || !sala || sala.quem !== 'djs';
+    case 'add': return true;
     case 'ver': case 'tirarMinha': return true;
     case 'skip': case 'pause': case 'play': case 'limpar': case 'tirarQualquer': case 'duracao': return chefe;
-    case 'dj': case 'undj': return papel === 'dono';
     default: return false;
   }
 }

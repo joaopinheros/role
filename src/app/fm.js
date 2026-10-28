@@ -99,7 +99,7 @@ function fmTick(){
   if(np.status==='tocando'&&np.dur&&pos>=np.dur+1&&FM.advancing!==np.version)fmAdvanceLater(np.version);
   if(FM.listen&&FM.ytReady&&np.status==='tocando'){
     if(now-FM.lastDrift>FM_CFG.driftEveryMs){FM.lastDrift=now;const cur=FM.yt.getCurrentTime();if(Math.abs(cur-pos)>FM_CFG.driftMaxS)FM.yt.seekTo(pos,true);}
-    const chefe=FM.st.papel==='dono'||FM.st.papel==='dj',d=FM.yt.getDuration&&FM.yt.getDuration();
+    const chefe=!!FM.st,d=FM.yt.getDuration&&FM.yt.getDuration();
     if(chefe&&np.dur==null&&d>0&&FM.durSent!==np.version){FM.durSent=np.version;FM.api.act(FM.role,'duracao',{version:np.version,dur:Math.round(d)}).then(fmChanged).catch(()=>{});}
   }
   fmUiTime();
@@ -122,7 +122,7 @@ async function fmCommand(text){
   const st=FM.st,sala={quem:st.quem,priv:st.priv},papel=st.papel,np=fmNp();
   if(!fmPrivate(sala)){fmSay(FM_ERR.privada);return true;}
   const run=async(p,ok)=>{try{const r=await p;if(ok)ok(r);fmChanged();return r;}catch(e){fmSay(fmErr(e));return null;}};
-  const need=a=>{if(fmCan(papel,a,sala))return true;fmSay(a==='dj'||a==='undj'?'Só o dono da sala dá ou tira DJ.':'Só o dono ou os DJs podem pular ou pausar.');return false;};
+  const need=a=>{if(fmCan(papel,a,sala))return true;fmSay(a==='dj'||a==='undj'?'Só o dono da sala dá ou tira DJ.':'Não deu pra fazer isso agora.');return false;};
   switch(c.cmd){
     case 'ajuda':fmSay('Comandos: '+FM_HELP.filter(h=>fmHelpOk(h[2])).map(h=>h[1]).join(' · '));break;
     case 'music':
@@ -144,7 +144,7 @@ async function fmCommand(text){
   }
   return true;
 }
-const fmHelpOk=who=>{const st=FM.st;if(!st)return who!=='dj'&&who!=='dono';const p=st.papel;return who==='dono'?p==='dono':who==='dj'?p==='dono'||p==='dj':who==='add'?fmCan(p,'add',{quem:st.quem,priv:st.priv}):true;};
+const fmHelpOk=()=>true;
 
 /* autocompletar: digitou "/" e aparece a lista do que a pessoa pode usar */
 function fmHint(v){
@@ -263,7 +263,7 @@ function fmSyncPlayer(force){
       playerVars:{autoplay:np.status==='tocando'?1:0,playsinline:1,controls:0,disablekb:1,fs:0,rel:0,iv_load_policy:3,modestbranding:1,start:Math.floor(pos),origin:location.origin},
       events:{onReady:()=>{FM.ytReady=true;try{FM.yt.setVolume(LS.get('role-fm-vol',80));}catch(_){}fmSyncPlayer(true);fmAutoplayCheck();},
         onStateChange:e=>{if(e.data===0&&fmPlaying())fmAdvanceLater(fmNp().version);},
-        onError:()=>{const chefe=FM.st&&(FM.st.papel==='dono'||FM.st.papel==='dj');fmSay(chefe?'Esse vídeo não tocou aqui. Pulando…':'Esse vídeo não tocou aqui. Pede pro DJ pular (/skip).');
+        onError:()=>{const chefe=!!FM.st;fmSay('Esse vídeo não tocou aqui. Pulando…');
           if(chefe&&fmPlaying())FM.api.act(FM.role,'advance',{version:fmNp().version,skip:true}).then(fmChanged).catch(()=>{});}}});
     return;
   }

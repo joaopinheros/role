@@ -42,9 +42,7 @@ test('posição da música: andando, pausada e parada; com a diferença de reló
 test('quem pode o quê', () => {
   const sala = { quem: 'todos', priv: 'link' };
   for (const a of ['add', 'ver', 'tirarMinha']) assert.ok(F.fmCan('membro', a, sala), 'membro ' + a);
-  for (const a of ['skip', 'pause', 'play', 'limpar', 'tirarQualquer']) assert.ok(!F.fmCan('membro', a, sala), 'membro não ' + a);
-  for (const a of ['skip', 'pause', 'limpar', 'tirarQualquer']) assert.ok(F.fmCan('dj', a, sala), 'dj ' + a);
-  assert.ok(!F.fmCan('membro', 'add', { ...sala, quem: 'djs' }) && F.fmCan('dj', 'add', { ...sala, quem: 'djs' }), 'sala fechada para DJs');
+  for (const a of ['skip', 'pause', 'play', 'limpar', 'tirarQualquer']) assert.ok(F.fmCan('membro', a, sala), 'todo mundo da sala pode ' + a);
   assert.ok(!F.fmCan('dono', 'add', { quem: 'todos', priv: 'publica' }), 'sala pública não tem Rolê FM');
   assert.ok(F.fmCan('dono', 'skip', { quem: 'todos', priv: 'fechado' }));
   assert.ok(!F.fmCan(null, 'ver', sala), 'quem não é da sala não pode nada');
