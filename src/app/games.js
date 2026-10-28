@@ -296,7 +296,7 @@ function gBtns(list){
 function gStageOpen(a,st,idx){
   if(G.stage||!G.defs[a.type].stageOpen)return;
   const el=$('#stage');G.stage={a,st,idx};
-  el.hidden=false;frame.classList.add('instage','diving');
+  el.hidden=false;frame.classList.add('instage','diving');frame.classList.remove('chaton');if(typeof chatUi==='function')chatUi();
   requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('on')));
   G.quitAt=0;$('#stageExit').textContent='Sair do jogo';
   gHudBuild(st,idx);
@@ -310,7 +310,7 @@ function gStageClose(instant){
   if(G.defs[s.a.type].stageClose)G.defs[s.a.type].stageClose();
   $('#shud').innerHTML='';$('#sbtns').innerHTML='';$('#sbtns').dataset.k='';
   el.classList.remove('on');frame.classList.remove('diving');
-  const done=()=>{if(!G.stage){el.hidden=true;frame.classList.remove('instage');}};
+  const done=()=>{if(!G.stage){el.hidden=true;frame.classList.remove('instage','chaton');if(typeof chatUi==='function')chatUi();}};
   if(instant)done();else setTimeout(done,520);
   gUpdateBtn();
 }

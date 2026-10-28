@@ -303,15 +303,33 @@ function fmUi(){
   box.classList.toggle('min',FM.min);
   $('#fmTitle').textContent=np.title||'';
   show($('#fmTap'),FM.muted);
-  fmUiTime();
+  fmUiTime();fmLayout();
 }
 function fmUiTime(){const t=$('#fmTime');if(!t||!FM.listen)return;const np=fmNp();t.textContent=np.status==='parado'?'':fmClock(fmCurPos())+(np.dur?' / '+fmClock(np.dur):'');}
+/* celular com música ou jogo: opções e chat viram botões (veja o CSS "celular"); o player fica sempre inteiro e visível */
+const fmCompact=()=>matchMedia('(max-width:760px),(pointer:coarse) and (max-height:520px)').matches&&(frame.classList.contains('fmon')||frame.classList.contains('instage'));
 function fmLayout(){
-  const box=$('#fmBox');if(!box||box.hidden)return;
+  const box=$('#fmBox'),dock=document.querySelector('.chat-dock');
+  if(dock)dock.style.bottom='';
+  if(!box||box.hidden)return;
   if(!fmMobile()){box.style.bottom='';return;}
-  const acts=document.querySelector('.chat-dock .acts'),fr=frame.getBoundingClientRect();
+  const fr=frame.getBoundingClientRect();
+  if(fmCompact()){
+    if(innerWidth>innerHeight){box.style.bottom='';return;}   // deitado: o player fica à direita e o chat à esquerda
+    if(frame.classList.contains('chaton')){const f=$('#chatForm').getBoundingClientRect();box.style.bottom=Math.round(fr.bottom-f.top+8)+'px';}   // chat aberto: o player sobe acima da barra de digitar
+    else{box.style.bottom='';if(dock)dock.style.bottom=Math.round(box.offsetHeight+28)+'px';}   // chat fechado: as mensagens claras ficam acima do player
+    return;
+  }
+  const acts=document.querySelector('.chat-dock .acts');
   if(acts){const r=acts.getBoundingClientRect();box.style.bottom=Math.max(12,Math.round(fr.bottom-r.top+8))+'px';}
 }
+function chatUi(){
+  $('#rChat').setAttribute('aria-pressed',String(frame.classList.contains('chaton')));
+  $('#rMore').setAttribute('aria-pressed',String(frame.classList.contains('more')));
+  fmLayout();
+}
+$('#rChat').addEventListener('click',()=>{const on=frame.classList.toggle('chaton');chatUi();if(on)setTimeout(()=>$('#msg').focus(),0);});
+$('#rMore').addEventListener('click',()=>{frame.classList.toggle('more');chatUi();});
 addEventListener('resize',fmLayout);
 $('#rFm').addEventListener('click',()=>fmListen(!FM.listen));
 $('#fmStop').addEventListener('click',()=>fmListen(false));

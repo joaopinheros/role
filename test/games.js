@@ -27,6 +27,7 @@ const errs = [];
 const VIEW = (process.env.VIEW || '1100x760').split('x').map(Number).reduce((w, h) => ({ width: w, height: h }));   // ex.: VIEW=1920x945
 
 async function signup(page, nome, user) {
+  await sleep(250);   // a tela de entrada tira o foco para o 1º campo 30 ms depois de abrir: espera isso passar antes de preencher
   await page.fill('#suNome', nome); await page.fill('#suUser', user);
   await page.fill('#suEmail', user + '@exemplo.com'); await page.fill('#suTel', '11' + (user.charCodeAt(0) % 2 ? '9' : '9') + rnd(8));
   await sleep(120);   // dá tempo de os campos formatarem o que foi preenchido antes de enviar
@@ -420,7 +421,7 @@ async function solo(browser) {
     await Promise.all([a, b].map(p => p.context().close()));
   }
   {
-    const { a, b } = await setup(browser, 6, 'x');
+    const { a, b } = await setup(browser, 6, 'q');
     ok(/Restam 7h|Restam 8h/.test(await a.textContent('#rWhen')), 'o chip mostra quanto falta das 8 horas: ' + await a.textContent('#rWhen'));
     await a.evaluate(() => window.__role.expira());
     ok(!!await waitFor(() => a.isVisible('#scrHome'), 14000), 'passadas as 8 horas, todo mundo volta para o início');

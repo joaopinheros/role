@@ -231,6 +231,25 @@ async function visual(browser, sceneNth, nome) {
   await say(a, '/music ' + link(7));
   ok(!!await waitFor(async () => (await fm(b)).status === 'tocando', 8000), 'música tocando');
   ok((await fm(b)).mobile, 'o celular usa o visual de celular');
+  if (nome === 'festa') {   // tela do celular com música: só o essencial, chat em botão, player inteiro
+    await b.click('#rFm');
+    ok(!!await waitFor(() => b.evaluate(() => document.querySelector('#frame').classList.contains('fmon')), 5000), 'ouvindo junto, a tela entra no modo música');
+    const vis = sel => b.isVisible(sel);
+    ok(await vis('#rMore') && await vis('#rChat') && !(await vis('#rHome')) && !(await vis('#rInvite')), 'só ficam os botões Opções e Chat');
+    ok(!(await vis('.chat-dock .acts')) && !(await vis('#chatForm')), 'sem os botões de ação e sem a barra de digitar');
+    const pl = await b.locator('#fmYT').boundingBox(), rc = await b.locator('#rChat').boundingBox();
+    ok(pl.width >= 200 && pl.height >= 200 && pl.x >= 0 && pl.x + pl.width <= 390 && pl.y + pl.height <= 844, 'o player continua inteiro na tela e com 200x200');
+    ok(pl.y >= rc.y + rc.height || pl.x >= rc.x + rc.width || pl.x + pl.width <= rc.x, 'e os botões não ficam em cima do player');
+    await b.click('#rChat');
+    ok(await vis('#chatForm'), 'o botão Chat mostra a barra de digitar e enviar');
+    const fb = await b.locator('#chatForm').boundingBox(), pl2 = await b.locator('#fmYT').boundingBox();
+    ok(pl2.y + pl2.height <= fb.y, 'com o chat aberto o player sobe e não é coberto');
+    await say(b, 'oi'); ok(!!await waitFor(() => logHas(b, /oi/), 3000), 'e dá para mandar mensagem');
+    await b.click('#rChat'); ok(!(await vis('#chatForm')), 'fechar o chat esconde a barra de novo');
+    await b.click('#rMore'); ok(await vis('#rHome') && await vis('#rInvite'), 'Opções traz os outros botões de volta');
+    await b.click('#rMore');
+    await b.click('#fmStop');   // volta ao estado de antes para o resto do teste (e para a medida de custo)
+  }
   ok(!!await waitFor(async () => { await b.evaluate(() => window.__role.lookStage && window.__role.lookStage()); return (await fm(b)).visual.palco; }, 8000), 'o palco aparece no cenário');
   ok(!!await waitFor(async () => (await fm(b)).capa, 5000), 'com a capa no telão');
   await sleep(600); await shot(b, `fm_palco_${nome}_noite`);

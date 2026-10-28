@@ -337,7 +337,7 @@ function roomClock(){clearInterval(roomTimer);roomWarn=0;const tick=()=>{if(mode
     if(ms<=0){clearInterval(roomTimer);toast('O rolê acabou: as salas duram 8 horas. Cria outro quando quiser!',5200);leaveRoom();return openHome();}
     if(ms<=5*60e3&&roomWarn<2){roomWarn=2;addLog(null,'Faltam 5 minutos pro rolê acabar.');}else if(ms<=15*60e3&&roomWarn<1){roomWarn=1;addLog(null,'Faltam 15 minutos pro rolê acabar.');}};
   tick();roomTimer=setInterval(tick,10000);}
-function leaveRoom(){clearInterval(roomTimer);vozStop();gamesStop();fmStop();mode='vitrine';MUSIC.stop();updSom&&updSom();unsubRole&&unsubRole();unsubChat&&unsubChat();unsubRole=unsubChat=null;if(live){try{live.leave()}catch(e){}live=null;}avatars=[];peerAvs.clear();me=null;CUR=null;vitrine.k=null;seedBots();}
+function leaveRoom(){clearInterval(roomTimer);frame.classList.remove('chaton','more');vozStop();gamesStop();fmStop();mode='vitrine';MUSIC.stop();updSom&&updSom();unsubRole&&unsubRole();unsubChat&&unsubChat();unsubRole=unsubChat=null;if(live){try{live.leave()}catch(e){}live=null;}avatars=[];peerAvs.clear();me=null;CUR=null;vitrine.k=null;seedBots();}
 function presObj(){const t=me.path.length?me.path[me.path.length-1]:[me.gx,me.gy];return{u:ME.usuario,n:ME.nome,j:joinedAt,f:encode(me.fig),x:t[0],y:t[1],a:me.action||'',b:me.back?1:0,m:me.mirror?1:0};}
 function pushPres(force){if(!live||!me)return;const p=presObj(),s=JSON.stringify(p);if(!force&&s===lastPres)return;lastPres=s;live.presence(p).catch(e=>console.warn(e));}
 function syncPeers(peers){if(mode!=='sala')return;const seen=new Set();
