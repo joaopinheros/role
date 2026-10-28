@@ -15,6 +15,13 @@ const FM_CFG = {
   driftEveryMs: 30000,  // de quanto em quanto tempo confere se o player desviou
   driftMaxS: 2,         // desvio que faz pular para a posição certa
   endSlackS: 3,         // folga para aceitar "acabou" (relógios e carregamento)
+  searchPerHour: 10,    // buscas por nome no YouTube por pessoa por hora (as que já estão no cache não contam)
+  quotaDay: 10000,      // cota diária gratuita da YouTube Data API (unidades; zera à meia-noite do Pacífico)
+  quotaWarnPct: 90,     // a partir daqui a busca por nome é pausada e só links valem
+  searchCost: 101,      // search.list (100) + videos.list (1)
+  cacheDays: 30,        // quanto tempo uma busca fica no cache
+  altCount: 4,          // alternativas mostradas em "Não era essa?"
+  swapS: 60,            // tempo para trocar a música recém-pedida por uma alternativa
 };
 
 const FM_ID = /^[A-Za-z0-9_-]{11}$/;
@@ -93,6 +100,21 @@ function fmOffset(ms) {
   return ok.reduce((s, x) => s + (x.server - (x.t0 + x.t1) / 2), 0) / ok.length;
 }
 
+/* consulta normalizada (chave do cache): minúsculas, sem acento, sem pontuação, espaços únicos */
+const fmNorm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 100);
+
+/* resultados da busca: tira o que passa de maxDurS e as transmissões ao vivo; em ranking apertado, "official", "clipe"
+ * ou "áudio" no título sobe uma posição. Cada item: { video, title, canal, dur, live } na ordem do YouTube. */
+const FM_OFFICIAL = /official|oficial|clipe|[aá]udio|lyric/i;
+function fmRank(items) {
+  return (items || []).filter(x => x && x.video && !x.live && !(x.dur > FM_CFG.maxDurS) && x.dur !== 0)
+    .map((x, i) => ({ x, k: i - (FM_OFFICIAL.test(x.title || '') ? 1.5 : 0) }))
+    .sort((a, b) => a.k - b.k).map(o => o.x);
+}
+/* o "dia" da cota do Google: o calendário do fuso do Pacífico */
+const fmQuotaDay = (d = new Date()) => d.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+const fmThumb = id => 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+
 const fmClock = s => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 
 /* "PT1H2M3S" → 3723 */
@@ -102,4 +124,4 @@ function fmIsoDur(s) {
   return ((+m[1] || 0) * 86400) + ((+m[2] || 0) * 3600) + ((+m[3] || 0) * 60) + (+m[4] || 0);
 }
 
-if (typeof module !== 'undefined') module.exports = { FM_CFG, FM_HELP, fmVideoId, fmIsLink, fmParse, fmPos, fmPrivate, fmCan, fmRoomFor, fmOffset, fmClock, fmIsoDur };
+if (typeof module !== 'undefined') module.exports = { FM_CFG, FM_HELP, fmVideoId, fmIsLink, fmParse, fmPos, fmPrivate, fmCan, fmRoomFor, fmOffset, fmClock, fmIsoDur, fmNorm, fmRank, fmThumb, fmQuotaDay };

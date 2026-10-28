@@ -16,7 +16,11 @@ insert into public.app_config (key, value) values
   ('fm_max_dur_s', '900'),   -- vídeo de até 15 min
   ('fm_max_fila', '30'),     -- itens na fila
   ('fm_por_pessoa', '3'),    -- músicas esperando por pessoa (dono e DJs sem limite)
-  ('fm_por_minuto', '5')     -- /music por minuto por pessoa
+  ('fm_por_minuto', '5'),    -- /music por minuto por pessoa
+  ('fm_busca_hora', '10'),   -- buscas por nome no YouTube por pessoa por hora (as do cache não contam)
+  ('fm_cota_dia', '10000'),  -- cota diária da YouTube Data API (unidades)
+  ('fm_cota_aviso', '90'),   -- % da cota em que a busca por nome pausa (só links valem)
+  ('fm_cache_dias', '30')    -- validade do cache de buscas
 on conflict (key) do nothing;
 
 create or replace function public.fm_cfg(k text, d int) returns int language sql stable security definer set search_path = public as $$
@@ -82,6 +86,18 @@ create table if not exists public.fm_hits (
   created_at timestamptz not null default now()
 );
 create index if not exists fm_hits_idx on public.fm_hits (user_id, created_at);
+
+-- busca por nome: cache (30 dias), contador da cota do dia (dia do fuso do Pacífico, que é quando o Google zera),
+-- buscas por pessoa e trava de uma busca por vez na sala
+create table if not exists public.music_search_cache (
+  query_normalizada text primary key,
+  resultados        jsonb not null,
+  created_at        timestamptz not null default now()
+);
+create table if not exists public.fm_quota (dia date primary key, usado int not null default 0);
+create table if not exists public.fm_search_hits (user_id uuid not null, created_at timestamptz not null default now());
+create index if not exists fm_search_hits_idx on public.fm_search_hits (user_id, created_at);
+create table if not exists public.fm_search_lock (role_id text primary key, ate timestamptz not null);
 
 /* ============================================================ auxiliares (fora da API) */
 
@@ -177,11 +193,13 @@ begin
       where d.role_id = p_role), '[]'::jsonb));
 end $$;
 
+drop function if exists public.fm_add(uuid, text, text, text, text, int);   -- a versão antiga, sem p_extra
 -- pôr na fila (só a Edge Function chama, com o vídeo já conferido no YouTube; p_auth = quem pediu)
 -- Erros: auth, perm, privada, closed, djs (só DJs põem música), fila_cheia, limite (3 por pessoa), rapido, longo, invalid
-create or replace function public.fm_add(p_auth uuid, p_role text, p_video text, p_title text, p_thumb text, p_dur int)
+-- p_extra: vai junto na mensagem do bot (busca por nome: q e alts, as alternativas de "Não era essa?")
+create or replace function public.fm_add(p_auth uuid, p_role text, p_video text, p_title text, p_thumb text, p_dur int, p_extra jsonb default null)
 returns jsonb language plpgsql security definer set search_path = public as $$
-declare v_me uuid; v_papel text; v_quem text; v_pos int; np public.room_now_playing; v_tocou boolean := false;
+declare v_me uuid; v_papel text; v_quem text; v_pos int; np public.room_now_playing; v_tocou boolean := false; v_qid bigint;
 begin
   select s.user_id into v_me from public.sessions s join public.users u on u.id = s.user_id
     where s.auth_uid = p_auth and s.expires_at > now() and u.status = 'ativo';
@@ -202,13 +220,89 @@ begin
   end if;
   select coalesce(max(position), 0) + 1 into v_pos from public.room_queue where role_id = p_role;
   insert into public.room_queue (role_id, video_id, title, thumb_url, duration_s, added_by, position)
-    values (p_role, p_video, left(p_title, 200), coalesce(p_thumb, 'https://i.ytimg.com/vi/' || p_video || '/hqdefault.jpg'), p_dur, v_me, v_pos);
+    values (p_role, p_video, left(p_title, 200), coalesce(p_thumb, 'https://i.ytimg.com/vi/' || p_video || '/hqdefault.jpg'), p_dur, v_me, v_pos)
+    returning id into v_qid;
   perform public.fm_bot(p_role, v_me, '@' || public.fm_nome(v_me) || ' colocou: ' || p_title,
-    jsonb_build_object('k', 'colocou', 'video', p_video, 'title', p_title, 'u', public.fm_nome(v_me)));
+    jsonb_build_object('k', 'colocou', 'video', p_video, 'title', p_title, 'u', public.fm_nome(v_me), 'qid', v_qid) || coalesce(p_extra, '{}'::jsonb));
   if np.status = 'parado' then v_tocou := public.fm_next(p_role, v_me);
   else perform public.fm_touch(p_role); end if;
   return jsonb_build_object('ok', true, 'tocando', v_tocou,
     'pos', (select count(*) from public.room_queue where role_id = p_role), 'title', p_title);
+end $$;
+
+-- busca por nome, passo 1 (só a Edge Function chama): confere a sala e devolve { cache } se a busca já está no cache.
+-- Sem cache: trava a sala (uma busca por vez), confere as buscas da pessoa na hora e a cota do dia; senão levanta
+-- ocupado, buscas ou cota. Também: auth, perm, privada, closed, djs, invalid
+create or replace function public.fm_search_begin(p_auth uuid, p_role text, p_q text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare v_me uuid; v_papel text; v_quem text; r jsonb;
+begin
+  select s.user_id into v_me from public.sessions s join public.users u on u.id = s.user_id
+    where s.auth_uid = p_auth and s.expires_at > now() and u.status = 'ativo';
+  v_papel := public.fm_check(p_role, v_me);
+  select quem_adiciona into v_quem from public.roles where id = p_role;
+  if v_quem = 'djs' and v_papel not in ('dono', 'dj') then raise exception 'djs'; end if;
+  if char_length(coalesce(p_q, '')) not between 2 and 100 then raise exception 'invalid'; end if;
+  select resultados into r from public.music_search_cache
+    where query_normalizada = p_q and created_at > now() - make_interval(days => public.fm_cfg('fm_cache_dias', 30));
+  if found then return jsonb_build_object('cache', r); end if;
+  insert into public.fm_search_lock (role_id, ate) values (p_role, now() + interval '20 seconds')
+    on conflict (role_id) do update set ate = excluded.ate where public.fm_search_lock.ate < now();
+  if not found then raise exception 'ocupado'; end if;
+  if (select count(*) from public.fm_search_hits where user_id = v_me and created_at > now() - interval '1 hour') >= public.fm_cfg('fm_busca_hora', 10) then
+    raise exception 'buscas';
+  end if;
+  if coalesce((select usado from public.fm_quota where dia = (now() at time zone 'America/Los_Angeles')::date), 0) * 100
+     >= public.fm_cfg('fm_cota_dia', 10000) * public.fm_cfg('fm_cota_aviso', 90) then
+    raise exception 'cota';
+  end if;
+  insert into public.fm_search_hits (user_id) values (v_me);
+  return jsonb_build_object('cache', null);
+end $$;
+
+-- passo 2: guarda o resultado no cache (se veio), soma as unidades gastas na cota e solta a sala
+create or replace function public.fm_search_save(p_role text, p_q text, p_res jsonb, p_units int)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if p_res is not null then
+    insert into public.music_search_cache (query_normalizada, resultados, created_at) values (p_q, p_res, now())
+      on conflict (query_normalizada) do update set resultados = excluded.resultados, created_at = now();
+  end if;
+  if coalesce(p_units, 0) > 0 then
+    insert into public.fm_quota (dia, usado) values ((now() at time zone 'America/Los_Angeles')::date, p_units)
+      on conflict (dia) do update set usado = public.fm_quota.usado + excluded.usado;
+  end if;
+  delete from public.fm_search_lock where role_id = p_role;
+end $$;
+
+-- "Não era essa?": troca a música recém-pedida (na fila ou já tocando) pela alternativa p_idx. Só quem pediu, em até 60 s.
+create or replace function public.fm_trocar(p_role text, p_msg bigint, p_idx int) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare v_me uuid := public.me(); m public.chat_messages; alt jsonb; np public.room_now_playing; v_qid bigint; v_thumb text;
+begin
+  perform public.fm_check(p_role, v_me);
+  select * into m from public.chat_messages where id = p_msg and role_id = p_role and tipo = 'bot' and dados->>'k' = 'colocou';
+  if not found then raise exception 'invalid'; end if;
+  if m.dados->>'u' <> public.fm_nome(v_me) then raise exception 'perm'; end if;
+  if m.created_at < now() - interval '60 seconds' or m.dados ? 'trocou' then raise exception 'tarde'; end if;
+  alt := (m.dados->'alts') -> coalesce(p_idx, -1);
+  if alt is null then raise exception 'invalid'; end if;
+  v_qid := (m.dados->>'qid')::bigint;
+  v_thumb := 'https://i.ytimg.com/vi/' || (alt->>'video') || '/hqdefault.jpg';
+  select * into np from public.room_now_playing where role_id = p_role for update;
+  if exists (select 1 from public.room_queue where id = v_qid and role_id = p_role) then
+    update public.room_queue set video_id = alt->>'video', title = left(alt->>'title', 200), thumb_url = v_thumb, duration_s = (alt->>'dur')::int
+      where id = v_qid;
+    perform public.fm_touch(p_role);
+  elsif np.queue_id = v_qid and np.status <> 'parado' then
+    update public.room_now_playing set video_id = alt->>'video', title = left(alt->>'title', 200), thumb_url = v_thumb, duration_s = (alt->>'dur')::int,
+      started_at = now(), paused_at = null, status = 'tocando', version = version + 1, queue_version = queue_version + 1, updated_at = now()
+      where role_id = p_role;
+  else raise exception 'tarde'; end if;
+  update public.chat_messages set dados = dados || jsonb_build_object('trocou', p_idx) where id = p_msg;
+  perform public.fm_bot(p_role, v_me, '@' || public.fm_nome(v_me) || ' trocou por: ' || (alt->>'title'),
+    jsonb_build_object('k', 'trocou', 'video', alt->>'video', 'title', alt->>'title', 'u', public.fm_nome(v_me)));
+  return jsonb_build_object('ok', true, 'title', alt->>'title');
 end $$;
 
 -- próxima música. p_skip = pulo (só dono e DJ); sem p_skip, só vale se a música já acabou mesmo.
@@ -344,6 +438,10 @@ alter table public.room_djs enable row level security;
 alter table public.room_queue enable row level security;
 alter table public.room_now_playing enable row level security;
 alter table public.fm_hits enable row level security;
+alter table public.music_search_cache enable row level security;
+alter table public.fm_quota enable row level security;
+alter table public.fm_search_hits enable row level security;
+alter table public.fm_search_lock enable row level security;
 
 drop policy if exists fm_djs_select on public.room_djs;
 create policy fm_djs_select on public.room_djs for select to authenticated using (public.is_member(role_id));
@@ -353,7 +451,8 @@ drop policy if exists fm_np_select on public.room_now_playing;
 create policy fm_np_select on public.room_now_playing for select to authenticated using (public.is_member(role_id));
 -- fm_hits: sem política e sem permissão
 
-revoke all on public.room_djs, public.room_queue, public.room_now_playing, public.fm_hits from anon, authenticated;
+revoke all on public.room_djs, public.room_queue, public.room_now_playing, public.fm_hits, public.music_search_cache, public.fm_quota,
+  public.fm_search_hits, public.fm_search_lock from anon, authenticated;
 grant select on public.room_djs, public.room_queue, public.room_now_playing to authenticated;
 grant select (tipo, dados) on public.chat_messages to authenticated;
 
@@ -369,11 +468,11 @@ end $$;
 grant execute on function
   public.fm_now(), public.fm_estado(text), public.fm_advance(text, int, boolean), public.fm_pause(text), public.fm_play(text),
   public.fm_limpar(text), public.fm_tirar(text, int), public.fm_dj(text, text, boolean), public.fm_duracao(text, int, int),
-  public.fm_quem(text, text), public.enviar_mensagem(text, text)
+  public.fm_quem(text, text), public.fm_trocar(text, bigint, int), public.enviar_mensagem(text, text)
   to authenticated;
 do $$ begin
   if exists (select 1 from pg_roles where rolname = 'service_role') then
-    execute 'grant execute on function public.fm_add(uuid, text, text, text, text, int) to service_role';
+    execute 'grant execute on function public.fm_add(uuid, text, text, text, text, int, jsonb), public.fm_search_begin(uuid, text, text), public.fm_search_save(text, text, jsonb, int) to service_role';
   end if;
 end $$;
 

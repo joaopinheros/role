@@ -187,6 +187,57 @@ async function principal(browser) {
   await Promise.all([a, b, c].map(p => p.context().close()));
 }
 
+/* busca por nome: /music nome, "Não era essa?", cache, /buscar, cota */
+async function busca(browser) {
+  console.log('\nRolê FM: busca por nome');
+  const { a, b, ub } = await room(browser, 2, 'b');
+  const cards = p => p.evaluate(() => [...document.querySelectorAll('#log .fmcard')].map(c => c.textContent));
+  const stats = p => p.evaluate(() => window.__role.fmStats());
+
+  await say(b, '/music Ai, Se Eu Te Pego!');
+  ok(!!await waitFor(async () => { const f = await fm(b); return f.status === 'tocando' && /resultado 1/.test(f.title || ''); }, 8000), '"/music ai se eu te pego" toca o primeiro resultado');
+  const cs = await waitFor(async () => { const l = await cards(b); return l.length ? l : null; }, 5000);
+  ok(cs && cs.length === 3 && cs.some(t => /Clipe Oficial/.test(t)), 'aparecem 3 alternativas em "Não era essa?" (sem a live e sem o vídeo de 1 hora): ' + (cs && cs.length));
+  ok(!(await cards(a)).length, 'e só quem pediu vê as alternativas');
+  ok((await b.textContent('#log')).includes('Não era essa?'), 'com o título "Não era essa?"');
+  await shot(b, 'fm_busca_alternativas');
+  const antes = (await stats(b)).api;
+  ok(antes === 2, 'a busca gastou 2 chamadas ao YouTube (search.list + videos.list): ' + antes);
+
+  // trocar pela alternativa: o clipe oficial
+  const v1 = (await fm(a)).version;
+  await b.locator('#log .fmcard', { hasText: 'Clipe Oficial' }).click();
+  ok(!!await waitFor(async () => { const f = await fm(a); return /Clipe Oficial/.test(f.title || '') && f.version === v1 + 1; }, 6000), 'tocar numa alternativa troca a música para todo mundo');
+  ok((await cards(b)).length === 0, 'e os cartões somem');
+  ok(!!await waitFor(() => logHas(a, /trocou por/), 4000), 'o bot avisa a troca');
+
+  // a mesma busca de novo (por outra pessoa, escrita diferente): cache, sem chamar o YouTube
+  await say(a, '/music  ai se eu te PEGO');
+  ok(!!await waitFor(async () => (await fm(a)).fila.length === 1, 6000), 'a mesma busca, escrita de outro jeito, entra na fila');
+  ok((await stats(a)).api === antes, 'e não chamou o YouTube de novo (cache)');
+
+  // /buscar: só para quem pediu, sem tocar
+  const fila0 = (await fm(a)).fila.length;
+  await say(b, '/buscar pagode da sexta');
+  const rs = await waitFor(async () => { const l = await cards(b); return l.length ? l : null; }, 6000);
+  ok(rs && rs.length === 4 && rs.every(t => /Pôr na fila/.test(t)), '/buscar mostra os resultados com "Pôr na fila": ' + (rs && rs.length));
+  ok(!(await a.textContent('#log')).includes('Resultados (só você vê)') && (await fm(a)).fila.length === fila0, 'só para quem pediu, e nada entrou na fila');
+  await shot(b, 'fm_buscar');
+  await b.locator('#log .fmcard').first().click();
+  ok(!!await waitFor(async () => (await fm(a)).fila.length === fila0 + 1, 5000), '"Pôr na fila" põe o resultado na fila');
+
+  // cota: com 90% usados, a busca por nome pausa e o link continua valendo
+  await b.evaluate(() => window.__role.fmFake(0.95));
+  await say(a, '/music uma musica totalmente nova');
+  ok(!!await waitFor(() => logHas(a, /limite de hoje\. Cola o link/), 5000), 'com a cota em 90%: "A busca por nome está no limite de hoje. Cola o link que funciona."');
+  await say(a, '/music ' + link(33));
+  ok(!!await waitFor(async () => (await fm(a)).fila.some(v => v === V(33)), 5000), 'mas o link continua funcionando');
+  await say(a, '/music ai se eu te pego');
+  ok(!!await waitFor(async () => (await fm(a)).fila.length >= fila0 + 3, 5000), 'e o que já está no cache também (sem gastar cota)');
+  await b.evaluate(() => window.__role.fmFake(0));
+  await Promise.all([a, b].map(p => p.context().close()));
+}
+
 /* celular: o palco com telão e paredão de caixas; capturas de dia e de noite em dois cenários */
 async function visual(browser, sceneNth, nome) {
   console.log(`\nvisual (${nome})`);
@@ -232,6 +283,7 @@ async function visual(browser, sceneNth, nome) {
   try {
     const which = process.argv[2] || 'todos';
     if (which === 'todos' || which === 'principal') await principal(browser);
+    if (which === 'todos' || which === 'busca') await busca(browser);
     if (which === 'todos' || which === 'visual') { await visual(browser, 2, 'festa'); await visual(browser, 10, 'praia'); }
     ok(!errs.length, 'sem erros de JS' + (errs.length ? ': ' + errs.slice(0, 4).join(' | ') : ''));
   } catch (e) { console.error('\n' + e.stack); failed++; }

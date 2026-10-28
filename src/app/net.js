@@ -34,7 +34,7 @@ function Net(){
         onMsg(h){ms.add(h);return()=>ms.delete(h);},get me(){return meId;},
         async leave(){rooms.delete(name);hs.clear();ms.clear();raw({op:'leave',room:name});}};});}
   /* Rolê FM: o servidor guarda o que toca e a fila; os erros chegam como códigos curtos (perm, limite…) */
-  const fm={now:()=>call('fmNow'),state:role=>call('fmState',{role}),add:(role,link)=>call('fmAdd',{role,link}),act:(role,op,a={})=>call('fmAct',{role,act:op,a})};
+  const fm={now:()=>call('fmNow'),state:role=>call('fmState',{role}),add:(role,link)=>call('fmAdd',{role,link}),search:(role,q)=>call('fmSearch',{role,q}),stats:()=>call('fmStats'),fake:quota=>call('fmFake',{quota}),act:(role,op,a={})=>call('fmAct',{role,act:op,a})};
   return{call,watch,join,fm,async hello(t){token=t;return call('hello',{token:t});},forget(){token=null;return call('logout');}};}
 function ServerDB(n){return{local:false,server:true,
   get:p=>n.call('get',{p}),set:(p,d)=>n.call('set',{p,d}),update:(p,d)=>n.call('update',{p,d}),del:p=>n.call('del',{p}),

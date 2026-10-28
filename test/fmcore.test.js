@@ -69,3 +69,29 @@ test('duração ISO do YouTube e relógio na tela', () => {
   assert.equal(F.fmClock(213), '3:33');
   assert.equal(F.fmClock(5), '0:05');
 });
+
+test('consulta normalizada (chave do cache)', () => {
+  assert.equal(F.fmNorm('  Ai, Se Eu Te Pego!!  '), 'ai se eu te pego');
+  assert.equal(F.fmNorm('Ai se eu te PEGO'), F.fmNorm('ai   se eu te pego'));
+  assert.equal(F.fmNorm('Açaí — Música (Ao Vivo)'), 'acai musica ao vivo');
+  assert.equal(F.fmNorm('???'), '');
+  assert.ok(F.fmNorm('x'.repeat(300)).length <= 100);
+  assert.ok(!F.fmIsLink('ai se eu te pego') && !F.fmIsLink('youtube clipe') && F.fmIsLink('youtu.be/abc'));
+});
+
+test('ordem dos resultados: tira lives e vídeos longos; título "official" sobe uma posição', () => {
+  const it = (video, title, dur, live) => ({ video, title, dur, live });
+  const r = F.fmRank([it('a', 'Ai Se Eu Te Pego (cover)', 200), it('b', 'Ai Se Eu Te Pego - Clipe Oficial', 210), it('c', 'Ai Se Eu Te Pego ao vivo', 230, true),
+    it('d', 'Ai Se Eu Te Pego - 1 hora', 3600), it('e', 'Ai Se Eu Te Pego karaokê', 190), it('f', 'sem duração', 0)]);
+  assert.deepEqual(r.map(x => x.video), ['b', 'a', 'e'], 'sem a live, sem o de 1 hora e sem duração zero; o oficial passa o cover');
+  assert.deepEqual(F.fmRank([it('a', 'a', 100), it('b', 'b', 100)]).map(x => x.video), ['a', 'b'], 'sem palavra-chave, a ordem do YouTube fica');
+  assert.deepEqual(F.fmRank(null), []);
+  assert.equal(F.fmThumb('dQw4w9WgXcQ'), 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg');
+});
+
+test('contador de cota: 90% pausa a busca; o dia vira à meia-noite do Pacífico', () => {
+  const pct = u => u * 100 / F.FM_CFG.quotaDay;
+  assert.ok(pct(F.FM_CFG.searchCost * 89) < F.FM_CFG.quotaWarnPct && pct(F.FM_CFG.searchCost * 90) >= F.FM_CFG.quotaWarnPct, 'cerca de 90 buscas novas por dia');
+  assert.equal(F.fmQuotaDay(new Date('2026-11-01T06:59:00Z')), '2026-10-31', '23:59 do Pacífico (PDT) ainda é o dia anterior');
+  assert.equal(F.fmQuotaDay(new Date('2026-11-01T07:01:00Z')), '2026-11-01');
+});

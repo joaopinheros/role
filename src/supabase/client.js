@@ -417,12 +417,14 @@ export async function connect({ url, key, ice }) {
     advance: a => ({ p_version: a.version | 0, p_skip: !!a.skip }), pause: () => ({}), play: () => ({}), limpar: () => ({}),
     tirar: a => ({ p_pos: a.pos | 0 }), dj: a => ({ p_usuario: String(a.u || ''), p_on: !!a.on }),
     duracao: a => ({ p_version: a.version | 0, p_dur: a.dur | 0 }), quem: a => ({ p_quem: String(a.quem || '') }),
+    trocar: a => ({ p_msg: Number(a.msg) || 0, p_idx: a.idx | 0 }),
   };
   const fm = {
     async now() { return Number(await rpc('fm_now')); },
     state: role => rpc('fm_estado', { p_role: role }),
-    async add(role, link) {
-      const { data, error } = await sb.functions.invoke('music-resolve', { body: { role, link } });
+    /* link ou nome: a Edge Function decide (nome vira busca no YouTube, com cache e cota) */
+    async call(body) {
+      const { data, error } = await sb.functions.invoke('music-resolve', { body });
       if (error) {
         const st = error.context && error.context.status;
         let code = st === 401 ? 'auth' : st === 404 ? 'nofn' : 'server';
@@ -432,6 +434,8 @@ export async function connect({ url, key, ice }) {
       if (data && data.error) throw coded(data.error);
       return data;
     },
+    add(role, input) { return fm.call({ role, link: input }); },
+    search(role, q) { return fm.call({ role, q, mode: 'search' }); },
     act(role, op, a = {}) {
       const f = FM_ARGS[op];
       if (!f) return Promise.reject(coded('op'));

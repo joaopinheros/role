@@ -27,6 +27,9 @@ const FM_ERR={
   link:'Não entendi esse link. Cola um link do YouTube.',embed:'Esse vídeo não deixa tocar fora do YouTube. Tenta outro.',
   notfound:'Não achei esse vídeo no YouTube.',live:'Transmissão ao vivo não dá. Escolhe um vídeo.',vazio:'Não tem música sua na fila.',
   ninguem:'Não achei essa pessoa no rolê.',dono:'O dono já é DJ.',cedo:'A música ainda não acabou.',
+  ocupado:'Já tem uma busca rodando nesta sala. Espera um instante.',buscas:'Você já fez 10 buscas nesta hora. Cola o link, que funciona sempre.',
+  cota:'A busca por nome está no limite de hoje. Cola o link que funciona.',semchave:'A busca por nome ainda não está ligada. Cola o link que funciona.',
+  nada:'Não achei nada com esse nome. Tenta outras palavras ou cola o link.',tarde:'Já passou o tempo de trocar (60 segundos).',
   nofn:'O Rolê FM ainda não está ligado aqui (falta publicar a função music-resolve).',
   off:'O Rolê FM ainda não está ligado neste servidor.',server:'Não deu pra falar com o servidor agora. Tenta de novo.',
 };
@@ -125,8 +128,12 @@ async function fmCommand(text){
       if(!c.arg){fmSay('Cola um link do YouTube: /music https://youtu.be/…');break;}
       if(!fmCan(papel,'add',sala)){fmSay(FM_ERR.djs);break;}
       if(fmRoomFor(st.queue,st.eu,papel)<=0){fmSay(FM_ERR.limite);break;}
-      if(c.cmd==='buscar'||!fmIsLink(c.arg)){fmSay('Por enquanto o /music aceita só link do YouTube: /music https://youtu.be/…');break;}
-      fmSay('Procurando no YouTube…');
+      if(c.cmd==='buscar'){   // mostra 5 resultados só para quem pediu, sem tocar
+        if(fmIsLink(c.arg)){fmSay('Pra link, use /music <link>. O /buscar é pra procurar por nome.');break;}
+        fmSay('Procurando no YouTube…');
+        try{const r=await FM.api.search(FM.role,c.arg);fmShowResults(r.results||[]);}catch(e){fmSay(fmErr(e));}
+        break;}
+      fmSay(fmIsLink(c.arg)?'Conferindo o link…':'Procurando no YouTube…');
       await run(FM.api.add(FM.role,c.arg),r=>{if(r&&!r.tocando)fmSay(`Na fila (posição ${r.pos}): ${r.title}`);});
       break;
     case 'skip':if(need('skip')){if(np.status==='parado'){fmSay('Não tem nada tocando.');break;}await run(FM.api.act(FM.role,'advance',{version:np.version,skip:true}),r=>{if(r&&!r.ok)fmSay('Alguém já pulou essa.');});}break;
@@ -169,7 +176,49 @@ function addBotLine(text,mine){
   d.innerHTML=pix('note');const s=document.createElement('span');s.textContent=text;d.append(s);
   log.append(d);while(log.children.length>(innerWidth<760?3:4))log.firstChild.remove();log.scrollTop=log.scrollHeight;
 }
-function fmBotFromChat(m,fresh){addBotLine(m.t,false);if(fresh)fmPoke();}
+function fmBotFromChat(id,m,fresh){
+  addBotLine(m.t,false);
+  if(fresh)fmPoke();
+  const d=m.d||{};
+  // "Não era essa?": só para quem pediu, enquanto dá tempo de trocar (60 s)
+  if(fresh&&d.k==='colocou'&&d.alts&&d.alts.length&&ME&&d.u===ME.usuario&&Date.now()-m.at<FM_CFG.swapS*1000)fmAlts(id,d.alts,m.at);
+}
+function fmDur(s){return s?fmClock(s):'';}
+function fmCard(it,label){
+  const b=document.createElement('button');b.type='button';b.className='fmcard';
+  const im=document.createElement('img');im.alt='';im.loading='lazy';im.src='https://i.ytimg.com/vi/'+it.video+'/default.jpg';
+  const t=document.createElement('span');t.className='ct';t.textContent=it.title;
+  const s=document.createElement('span');s.className='cs';s.textContent=[it.canal,fmDur(it.dur)].filter(Boolean).join(' · ');
+  const tx=document.createElement('span');tx.className='cx';tx.append(t,s);
+  b.append(im,tx);if(label){const l=document.createElement('i');l.textContent=label;b.append(l);}
+  return b;
+}
+function fmAlts(id,alts,at){
+  const box=document.createElement('div');box.className='bot alts';
+  const h=document.createElement('b');h.textContent='Não era essa?';box.append(h);
+  const row=document.createElement('div');row.className='fmcards';box.append(row);
+  alts.slice(0,FM_CFG.altCount).forEach((it,i)=>{
+    const c=fmCard(it);c.addEventListener('click',async()=>{
+      box.remove();
+      try{await FM.api.act(FM.role,'trocar',{msg:id,idx:i});fmChanged();}catch(e){fmSay(fmErr(e));}});
+    row.append(c);});
+  log.append(box);log.scrollTop=log.scrollHeight;
+  setTimeout(()=>box.remove(),Math.max(1000,FM_CFG.swapS*1000-(Date.now()-at)));
+}
+/* /buscar: os resultados só para quem pediu, cada um com "Pôr na fila" */
+function fmShowResults(list){
+  if(!list.length){fmSay(FM_ERR.nada);return;}
+  const box=document.createElement('div');box.className='bot mine alts';
+  const h=document.createElement('b');h.textContent='Resultados (só você vê)';box.append(h);
+  const row=document.createElement('div');row.className='fmcards';box.append(row);
+  list.slice(0,5).forEach(it=>{
+    const c=fmCard(it,'Pôr na fila');c.addEventListener('click',async()=>{
+      c.disabled=true;
+      try{const r=await FM.api.add(FM.role,'https://youtu.be/'+it.video);fmChanged();if(r&&!r.tocando)fmSay(`Na fila (posição ${r.pos}): ${r.title}`);}
+      catch(e){fmSay(fmErr(e));c.disabled=false;}});
+    row.append(c);});
+  log.append(box);log.scrollTop=log.scrollHeight;
+}
 
 /* ---------- capa (miniatura pública do YouTube, reduzida uma vez por música) ---------- */
 function fmCover(np){

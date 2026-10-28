@@ -337,6 +337,7 @@ function leaveRoom(c, name) {
   else roomSend(name, r, { ev: 'left', peer });
 }
 /* Rolê FM: o servidor guarda o que toca e a fila; avisa a sala ao vivo a cada mudança (mensagem "fm") */
+const env_FM_FAKE = !!process.env.FM_FAKE;
 const FM = require('./fm')({
   store,
   notify(role) { const name = 'role-' + role, r = rooms.get(name); if (r) roomSend(name, r, { ev: 'g', from: 'srv', t: 'fm', d: {} }); },
@@ -499,6 +500,9 @@ wss.on('connection', (ws, req) => {
 
         case 'fmNow': return reply(id, FM.now());
         case 'fmState': return reply(id, FM.state(c, String(m.role || '')));
+        case 'fmSearch': return reply(id, await FM.search(c, String(m.role || ''), String(m.q || '')));
+        case 'fmStats': return env_FM_FAKE ? reply(id, FM.stats()) : reply(id, null, 'op');
+        case 'fmFake': if (!env_FM_FAKE) return reply(id, null, 'op'); process.env.FM_FAKE_QUOTA = String(+m.quota || 0); return reply(id, true);   // testes: simula a cota do dia
         case 'fmAdd': return reply(id, await FM.add(c, String(m.role || ''), String(m.link || '')));
         case 'fmAct': return reply(id, FM.act(c, String(m.role || ''), String(m.act || ''), m.a && typeof m.a === 'object' ? m.a : {}));
         default: return reply(id, null, 'op');

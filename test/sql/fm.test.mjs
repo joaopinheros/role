@@ -153,5 +153,64 @@ await ok('B escreve logo depois de uma ação do bot', rpc(B, 'enviar_mensagem',
 r = await as(B, `select tipo, dados from chat_messages where tipo='bot' order by id desc limit 1`); assert.equal(r.rows[0].tipo, 'bot');
 console.log('ok    membro lê tipo e dados das mensagens');
 
+
+/* ---------- busca por nome: cache, trava, limite por hora, cota e troca ("Não era essa?") */
+const sbegin = (who, q) => svc('fm_search_begin', who, R, q);
+const ssave = (res, units, q = 'ai se eu te pego') => svc('fm_search_save', R, q, res === null ? null : JSON.stringify(res), units);
+const RES = [1, 2, 3, 4, 5].map(i => ({ video: V(20 + i), title: 'Ai Se Eu Te Pego ' + i, canal: 'Canal ' + i, dur: 150 + i }));
+await c.query('delete from fm_hits'); await c.query('delete from fm_search_hits');
+await no('quem é de fora não busca', sbegin(C, 'ai se eu te pego'), 'perm');
+await no('busca curta demais', sbegin(B, 'a'), 'invalid');
+r = await ok('1ª busca: sem cache', sbegin(B, 'ai se eu te pego')); assert.equal(r.v.cache, null);
+await no('outra busca na mesma sala enquanto uma roda', sbegin(D, 'outra musica'), 'ocupado');
+await ok('salva e solta a sala', ssave(RES, 101));
+r = await ok('mesma busca: vem do cache', sbegin(D, 'ai se eu te pego')); assert.equal(r.v.cache.length, 5);
+assert.equal((await sqlv('select usado from fm_quota'))[0].usado, 101); console.log('ok    a cota subiu 101 e o cache não gastou nada');
+const hoje = (await sqlv("select (now() at time zone 'America/Los_Angeles')::date d"))[0].d;
+assert((await sqlv('select count(*)::int n from fm_search_hits'))[0].n === 1, 'só a busca que foi ao YouTube conta no limite por hora'); console.log('ok    o cache não conta no limite por hora');
+// 10 buscas por hora
+await c.query('delete from fm_search_lock');
+await c.query("insert into fm_search_hits (user_id) select id from users where usuario = 'duda' from generate_series(1, 10)".replace(" from generate_series(1, 10)", "") );
+for (let i = 0; i < 9; i++) await c.query("insert into fm_search_hits (user_id) select id from users where usuario = 'duda'");
+await no('11ª busca na mesma hora', sbegin(D, 'musica nova'), 'buscas');
+await c.query('delete from fm_search_hits'); await c.query('delete from fm_search_lock');
+// cota: a partir de 90% só links valem
+await c.query("update fm_quota set usado = 8999"); await ok('com 89,99% da cota ainda busca', sbegin(B, 'musica a')); await ssave(null, 0, 'musica a');
+await c.query("update fm_quota set usado = 9000");
+await no('com 90% da cota a busca por nome pausa', sbegin(B, 'musica b'), 'cota');
+r = await ok('mas o que está no cache continua valendo', sbegin(B, 'ai se eu te pego')); assert.equal(r.v.cache.length, 5);
+await c.query("update fm_quota set dia = dia - 1");   // virou o dia (Pacífico): a cota zera
+await ok('no dia seguinte a busca volta', sbegin(B, 'musica b')); await ssave(null, 0, 'musica b');
+await c.query("update music_search_cache set created_at = now() - interval '31 days'");
+r = await ok('cache velho (31 dias) não vale', sbegin(B, 'ai se eu te pego')); assert.equal(r.v.cache, null); await ssave(RES, 101);
+await no('"só DJs": convidado não busca', (async () => { await rpc(A, 'fm_quem', R, 'djs'); return sbegin(D, 'ai se eu te pego'); })(), 'djs'); await ok('reabre', rpc(A, 'fm_quem', R, 'todos'));
+
+// pôr o primeiro resultado com as alternativas, e trocar
+await c.query('delete from room_queue'); await c.query("update room_now_playing set status='parado', video_id=null, queue_id=null, version = version + 1");
+const alts = RES.slice(1, 5).map(x => ({ video: x.video, title: x.title, canal: x.canal, dur: x.dur }));
+r = await ok('põe o 1º resultado com as alternativas', svc('fm_add', B, R, RES[0].video, RES[0].title, null, RES[0].dur, JSON.stringify({ q: 'ai se eu te pego', alts })));
+assert.equal(r.v.tocando, true);
+const msg = (await sqlv(`select id, dados from chat_messages where tipo='bot' and dados->>'k'='colocou' order by id desc limit 1`))[0];
+assert.equal(msg.dados.alts.length, 4); assert(msg.dados.qid, 'a mensagem guarda o id do item');
+await no('outra pessoa não troca a música do B', rpc(D, 'fm_trocar', R, msg.id, 0), 'perm');
+await no('alternativa que não existe', rpc(B, 'fm_trocar', R, msg.id, 9), 'invalid');
+const vTroca = (await rpc(B, 'fm_estado', R)).v.np.version;
+r = await ok('B troca pela 1ª alternativa (a música já estava tocando)', rpc(B, 'fm_trocar', R, msg.id, 0));
+st = (await rpc(B, 'fm_estado', R)).v;
+assert.equal(st.np.video, alts[0].video); assert.equal(st.np.version, vTroca + 1); assert.equal(st.np.status, 'tocando');
+assert((Date.now() - st.np.started) < 5000, 'a nova música começa do zero'); console.log('ok    a troca recomeça a música nova do zero');
+await no('só uma troca por pedido', rpc(B, 'fm_trocar', R, msg.id, 1), 'tarde');
+// troca com a música ainda na fila e fora do prazo
+await ok('A põe uma música (vai para a fila)', svc('fm_add', A, R, RES[0].video, RES[0].title, null, 200, JSON.stringify({ q: 'x', alts })));
+const m2 = (await sqlv(`select id from chat_messages where tipo='bot' and dados->>'k'='colocou' order by id desc limit 1`))[0];
+await ok('A troca a que está na fila', rpc(A, 'fm_trocar', R, m2.id, 2));
+st = (await rpc(A, 'fm_estado', R)).v; assert.equal(st.queue[0].video, alts[2].video); console.log('ok    trocou o item que ainda esperava na fila');
+await ok('A põe outra', svc('fm_add', A, R, RES[0].video, RES[0].title, null, 200, JSON.stringify({ q: 'y', alts })));
+const m3 = (await sqlv(`select id from chat_messages where tipo='bot' and dados->>'k'='colocou' order by id desc limit 1`))[0];
+await c.query('update chat_messages set created_at = now() - interval \'61 seconds\' where id = $1', [m3.id]);
+await no('passou de 60 s: não troca mais', rpc(A, 'fm_trocar', R, m3.id, 0), 'tarde');
+await no('membro não lê o cache direto', as(B, 'select * from music_search_cache'), 'permission denied');
+await no('membro não chama fm_search_begin', rpc(B, 'fm_search_begin', B, R, 'x'), 'permission denied');
+
 console.log('\ntudo certo');
 await done(0);

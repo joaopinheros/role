@@ -306,7 +306,7 @@ async function enterRoom(eid,fresh){
   addLog(null,fresh?`Você entrou em ${r.nome}. Bem-vindo!`:`Você está em ${r.nome}.`);spawnPets(eid);if(SCN.mixer)addLog(null,`Toca na mesa de som (ou no botão Som) pra soltar o ${MUSIC.name()}. Tem ${pets.map(p=>p.name).join(' e ')} passeando por aí.`);updSom();
   unsubRole=DB.watchDoc('roles/'+eid,d=>{if(!d||mode!=='sala')return;const ch=d.cena!==CUR.cena||!!d.noite!==!!CUR.noite;CUR={eid,...d};if(ch){SCN=getScene(d.cena,d.noite);setTime(d.noite);updDayBtn();avatars.forEach(a=>{if(!walkable(a.gx,a.gy,a.gx,a.gy)){const[x,y]=freeNear(a.gx,a.gy,a);a.gx=a.fx=x;a.gy=a.fy=y;a.path=[];}});}});
   unsubChat=DB.watchColl(`roles/${eid}/chat`,list=>{list.forEach(({id,data:m})=>{if(chatSeen.has(id))return;chatSeen.add(id);
-      if(m.k==='bot'){fmBotFromChat(m,m.at>=joinedAt-2000);return;}   // Rolê FM
+      if(m.k==='bot'){fmBotFromChat(id,m,m.at>=joinedAt-2000);return;}   // Rolê FM
       const a=avatars.find(v=>v.user===m.u);addLog(m.n||m.u,m.t,a?logColor(a):'#ffb347');if(a&&m.at>=joinedAt-2000)a.bubble={text:m.t,t:now};});},{order:'at',limit:60});
   // presença ao vivo
   try{live=ROOMCAP?await ROOMCAP.join('role-'+eid):LocalRoom('role-'+eid);}catch(e){if(e&&e.code==='full')return salaCheia();console.warn('room',e);live=LocalRoom('role-'+eid);}
@@ -603,6 +603,8 @@ window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loa
   fm:()=>fmDbg(),
   fmPerf:()=>{FMVIS.perf={sky:0,stage:0,n:0};},
   fmHide:h=>{FMV.hide=!!h;},
+  fmStats:()=>ROOMCAP&&ROOMCAP.fm&&ROOMCAP.fm.stats&&ROOMCAP.fm.stats(),
+  fmFake:q=>ROOMCAP.fm.fake(q),
   lookStage:()=>{const sp=SCN&&SCN.sc.stageSpot;if(sp){const[wx,wy]=S(sp.x+1.5,-.6);centerOn(wx,wy-30);}},
   /* para os testes: escolhe direto (vôlei: posição do meu jogador; pesca: fisga já) */
   act:(type,cmd,arg)=>{const d=G.defs[type];return d&&d.test?d.test(cmd,arg):null;}};
