@@ -169,13 +169,23 @@ function fridge(gx,gy){addF(gx,gy,()=>{box(gx+.12,gy+.15,.76,.7,72,0,'#e9e7e2','
 function jukebox(gx,gy){addF(gx,gy,()=>{box(gx+.15,gy+.2,.7,.6,50,0,'#6a2a3a','#4e1f2c','#421a25');const c=up(S(gx+.5,gy+.5),50);ell(c[0],c[1],18,9,'#8a3a4e');
   const D=S(gx+.15,gy+.8);ctx.save();ctx.transform(1,.5,0,1,D[0],D[1]);const cs=['#ffb347','#ff4fa3','#43d9e8'];for(let i=0;i<3;i++){R(3+i*6,-44,4,30,cs[(i+Math.floor(now/400))%3]);}ctx.restore();});
   glowG(gx+.5,gy+1,60,'#ff8fc7',.25,1);}
-function poolTable(gx,gy){[[gx,gy],[gx+1,gy]].forEach(([x,y],i)=>addF(x,y,()=>{
+function poolTable(gx,gy){actReg('sinuca',gx,gy,2,1);[[gx,gy],[gx+1,gy]].forEach(([x,y],i)=>addF(x,y,()=>{
   const fx=i?x:x+.1,fw=i?.9:.9;[[x+.15,gy+.2],[x+.8,gy+.7]].forEach(([lx,ly])=>bx(lx,ly,.08,.08,22,0,'#4a3020'));
   box(fx,gy+.12,fw,.76,4,22,'#7a4a2a','#5a3420','#4a2a18');box(fx+(i?0:.08),gy+.2,fw-.08,.6,1,26,'#2f8a5a','#256f48','#1f5f3e');
-  if(i){const c=up(S(x+.4,gy+.5),27);[['#f2efe9',-6,0],['#c23b3b',4,2],['#f0c24a',8,-1],['#2f4f7a',10,3],['#26242b',0,4]].forEach(([col,dx,dy])=>circ(c[0]+dx,c[1]+dy,1.6,col));}
-  else{const c=up(S(x+.5,gy+.5),27);ctx.strokeStyle='#d8b57e';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(c[0]-14,c[1]+6);ctx.lineTo(c[0]+12,c[1]-6);ctx.stroke();}}));}
-function plasticTable(gx,gy,col){addF(gx,gy,()=>{bx(gx+.46,gy+.46,.08,.08,22,0,mul(col,.8));const c=up(S(gx+.5,gy+.5),22);ell(c[0],c[1]+1,17,9,mul(col,.75));ell(c[0],c[1],17,9,col);
-  drawItem([gx+.4,gy+.45,'garrafa','#b9822a'],22);drawItem([gx+.6,gy+.55,'copo','#f0c24a'],22);});}
+  if(i){if(!gamePoolDraw(gx,gy)){const c=up(S(x+.4,gy+.5),27);[['#f2efe9',-6,0],['#c23b3b',4,2],['#f0c24a',8,-1],['#2f4f7a',10,3],['#26242b',0,4]].forEach(([col,dx,dy])=>circ(c[0]+dx,c[1]+dy,1.6,col));}}
+  else if(!gamePoolPlaying(gx,gy)){const c=up(S(x+.5,gy+.5),27);ctx.strokeStyle='#d8b57e';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(c[0]-14,c[1]+6);ctx.lineTo(c[0]+12,c[1]-6);ctx.stroke();}}));}
+/* mesa de xadrez: tampo com o tabuleiro; as peças aparecem na posição inicial e acompanham a partida */
+let CP_IDLE=null;
+function chessTable(gx,gy){actReg('xadrez',gx,gy,1,1);addF(gx,gy,()=>{
+  [[.16,.16],[.78,.16],[.16,.78],[.78,.78]].forEach(([dx,dy])=>bx(gx+dx,gy+dy,.07,.07,20,0,'#5a3a24'));
+  bx(gx+.06,gy+.06,.88,.88,3,20,'#8a5a3a');
+  const P=(u,v)=>up(S(gx+.12+u*.76,gy+.12+v*.76),23);
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++)poly([P(c/8,r/8),P((c+1)/8,r/8),P((c+1)/8,(r+1)/8),P(c/8,(r+1)/8)],(r+c)%2?'#a8743c':'#ecd9ae');
+  gameChessDraw(gx,gy);
+});}
+function plasticTable(gx,gy,col,truco){if(truco)actReg('truco',gx,gy,1,1);addF(gx,gy,()=>{bx(gx+.46,gy+.46,.08,.08,22,0,mul(col,.8));const c=up(S(gx+.5,gy+.5),22);ell(c[0],c[1]+1,17,9,mul(col,.75));ell(c[0],c[1],17,9,col);
+  if(truco){drawItem([gx+.16,gy+.2,'garrafa','#b9822a'],22);drawItem([gx+.84,gy+.82,'copo','#f0c24a'],22);gameTrucoDraw(gx,gy);}   // na do truco, a garrafa vai pro canto e as cartas ficam no meio
+  else{drawItem([gx+.4,gy+.45,'garrafa','#b9822a'],22);drawItem([gx+.6,gy+.55,'copo','#f0c24a'],22);}});}
 function barCounter(fx,y0,n,face){for(let j=0;j<n;j++){const gy=y0+j;addF(fx,gy,()=>{bx(fx+.05,gy,.75,1,32,0,'#7a4a2e');box(fx,gy,.85,1,4,32,'#c98a5a','#9a6440','#b07048');
   if(j%2===0)drawItem([fx+.4,gy+.4,'garrafa',['#3f8a4a','#c23b3b','#b9822a'][j%3]],36);else drawItem([fx+.4,gy+.5,'copo'],36);});}}
 function djBooth(x0,gy,n){for(let i=0;i<n;i++){const gx=x0+i;addF(gx,gy,()=>{box(gx,gy+.15,1,.85,32,0,'#2e2838','#221d2c','#1b1724');
@@ -210,7 +220,7 @@ function waterFx(){B.ground.push(()=>{for(const W of SCN.water){const pool=W.kin
 
 /* ---------- montar cena ---------- */
 function buildScene(id,isNight){const sc=sceneById(id);
-  B={id,sc,night:!!isNight,furn:[],blocked:new Set(),seats:new Map(),ground:[],air:[],glowsG:[],glowsA:[],water:[],cfg:{},rugs:[],dance:null,mixer:null,lava:null,bridge:null,floorAt:()=>'grass',walls:()=>{}};
+  B={id,sc,night:!!isNight,acts:[],furn:[],blocked:new Set(),seats:new Map(),ground:[],air:[],glowsG:[],glowsA:[],water:[],cfg:{},rugs:[],dance:null,mixer:null,lava:null,bridge:null,floorAt:()=>'grass',walls:()=>{}};
   sc.build();if(B.water.length){waterFx();B.ground.unshift(B.ground.pop());}
   const st=document.createElement('canvas');st.width=WB;st.height=HB;const prev=ctx;ctx=st.getContext('2d');ctx.setTransform(WS,0,0,WS,0,0);
   cliff(sc.outdoor,sc.cliff);B.walls();
@@ -233,7 +243,7 @@ function drawWorld(scn,avs,extra){
   ctx.clearRect(vx,vy,vw_,vh_);ctx.drawImage(scn.st,vx,vy,vw_,vh_,vx,vy,vw_,vh_);ctx.setTransform(WS,0,0,WS,0,0);
   scn.ground.forEach(f=>f());
   extra&&extra.ground&&extra.ground();
-  const ents=[...scn.furn,...avs.map(a=>({a,depth:Math.max(a.gx+a.gy,a.path.length?a.path[0][0]+a.path[0][1]:0)}))];
+  const ents=[...scn.furn,...avs.map(a=>({a,depth:a.ovr?a.ovr.fx+a.ovr.fy:Math.max(a.gx+a.gy,a.path.length?a.path[0][0]+a.path[0][1]:0)}))];
   ents.sort((p,q)=>p.depth-q.depth||(p.furn?1:0)-(q.furn?1:0));
   ents.forEach(e=>e.furn?e.draw():e.a.pet?drawPet(e.a):drawAv(e.a));
   if(scn.night||scn.sc.dark){

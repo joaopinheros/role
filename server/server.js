@@ -25,7 +25,7 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => 
 const PROD = process.env.NODE_ENV === 'production';
 
 const ROOT = path.join(__dirname, '..');
-const DIST = path.join(ROOT, 'dist');
+const DIST = process.env.ROLE_DIST ? path.resolve(process.env.ROLE_DIST) : path.join(ROOT, 'dist');   // mesma pasta do build (ROLE_DIST nos testes)
 const PUB = path.join(ROOT, 'public');
 
 const store = new Store(DATA_FILE);
@@ -249,7 +249,7 @@ function slow(ip) {
   const l = (authHits.get(ip) || []).filter(t => now - t < 10 * 60e3);
   l.push(now);
   authHits.set(ip, l);
-  return l.length > 8;
+  return l.length > (+process.env.AUTH_LIMIT || 8);   // pedidos de código por IP a cada 10 min
 }
 setInterval(() => { const now = Date.now(); for (const [ip, l] of authHits) if (!l.some(t => now - t < 10 * 60e3)) authHits.delete(ip); }, 60e3).unref();
 
@@ -481,6 +481,13 @@ wss.on('connection', (ws, req) => {
           x.presence = cleanPresence(m.d);
           x.updatedAt = Date.now();
           return roomSend(name, r, { ev: 'up', p: { peer, presence: x.presence, updatedAt: x.updatedAt } }, peer);
+        }
+        case 'g': {   // mensagens dos jogos: o servidor só repassa para a sala (ou para um peer)
+          const name = String(m.room || '');
+          const peer = c.rooms.get(name), r = rooms.get(name);
+          if (!peer || !r || typeof m.t !== 'string' || m.t.length > 24 || JSON.stringify(m.d === undefined ? null : m.d).length > 8192) return;
+          if (typeof m.to === 'string') { const x = r.get(m.to); if (x && x.c.ws.readyState === 1) x.c.ws.send(JSON.stringify({ room: name, ev: 'g', from: peer, t: m.t, d: m.d })); return; }
+          return roomSend(name, r, { ev: 'g', from: peer, t: m.t, d: m.d }, peer);
         }
         case 'leave': return leaveRoom(c, String(m.room || ''));
         default: return reply(id, null, 'op');

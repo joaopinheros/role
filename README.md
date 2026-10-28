@@ -41,6 +41,26 @@ Para testar com duas pessoas: abra uma janela normal e uma anônima, crie a cont
 | `npm start` | sobe o servidor de produção (monta o `dist/` se não existir) |
 | `npm run assets` | regera ícones e a imagem de prévia `public/og.png` |
 | `npm test` | teste de ponta a ponta com navegador real (precisa de `npx playwright install chromium` uma vez) |
+| `node test/games.js [nomes]` | testa os jogos com 2 a 5 navegadores (`sinuca,xadrez,truco,damas,domino,memoria,volei,solo` ou `todos`) |
+| `node --test test/*.test.js` | regras dos jogos (sinuca, truco, damas, dominó) e o servidor de tempo real |
+
+Se mudar a lista de arquivos do `scripts/build.js`, o `npm run dev` se reinicia sozinho (versões antigas do `dev` precisam ser fechadas e abertas de novo). `ROLE_DIST=pasta` faz o build e o servidor usarem outra pasta no lugar de `dist/` (útil para testar com o `dev` aberto).
+
+## Jogos e atividades da sala
+
+Funcionam no modo servidor e no Pages + Supabase (precisam das mensagens da sala). Cada jogador vê a sua tela; quem está na sala vê a partida no mundo.
+
+| Cenário | O quê |
+|---|---|
+| Boteco | sinuca (2), truco mineiro (4, em duplas) |
+| Parque com lago | xadrez (2), dominó (2) |
+| Templo e lago de carpas | damas (2), pesca de carpas (1 por banquinho, 4 banquinhos) |
+| Noite do pijama | jogo da memória com 10 pares (2) |
+| Luau na praia | vôlei de praia (2, um toque) |
+| Ilha do vulcão | o chão é lava (de tempos em tempos ou batendo o gongo) |
+| Rooftop | telescópio para espiar a cidade |
+
+As regras ficam em `src/engine/` (sem tela, com testes) e as telas em `src/app/` (um arquivo por jogo; a base comum é `games.js`). Não há servidor no meio das partidas: é jogo entre amigos, quem fuçar no navegador consegue trapacear.
 
 ## Estrutura
 
@@ -64,7 +84,7 @@ server/
   store.js          banco de documentos em JSON com escrita atômica
 scripts/            build, dev e geração de assets
 public/             ícones, manifest, og.png
-test/smoke.js       teste ponta a ponta
+test/              smoke.js (ponta a ponta), games.js (jogos), *.test.js (regras)
 ```
 
 O mesmo código roda em três modos, escolhidos automaticamente:

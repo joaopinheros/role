@@ -21,14 +21,18 @@ function Net(){
     ws.onclose=()=>{open=false;setTimeout(connect,backoff);backoff=Math.min(8000,backoff*2);};}
   connect();
   function watch(op,p,o,cb){const id='w'+(++seq);watches.set(id,{op,p,o,cb});raw({op,id,p,o});return()=>{watches.delete(id);raw({op:'unwatch',id});};}
-  function join(name,mine={}){const hs=new Set(),peers=new Map();let meId=null;
+  function join(name,mine={}){const hs=new Set(),ms=new Set(),peers=new Map();let meId=null;
     const list=()=>[...peers.values()].map(p=>({...p,isMe:p.peer===meId}));
     const fire=()=>{const l=list();hs.forEach(h=>h({peers:l,joined:[],left:[],updated:[]}));};
     const r={mine,reset(x){meId=x.peer;peers.clear();x.peers.forEach(p=>peers.set(p.peer,p));fire();},
-      ev(m){if(m.ev==='up')peers.set(m.p.peer,m.p);else if(m.ev==='left')peers.delete(m.peer);fire();}};
+      ev(m){if(m.ev==='g'){ms.forEach(h=>{try{h(m.t,m.d,m.from)}catch(e){console.warn('jogo',e)}});return;}if(m.ev==='up')peers.set(m.p.peer,m.p);else if(m.ev==='left')peers.delete(m.peer);fire();}};
     return call('join',{room:name,d:mine}).then(x=>{rooms.set(name,r);r.reset(x);
       return{presence:async d=>{r.mine={...r.mine,...d};raw({op:'presence',room:name,d:r.mine});},peers:list,
-        onPeers(h){hs.add(h);return()=>hs.delete(h);},async leave(){rooms.delete(name);hs.clear();raw({op:'leave',room:name});}};});}
+        onPeers(h){hs.add(h);return()=>hs.delete(h);},
+        /* mensagens de jogo para a sala (to = peer de destino, opcional) */
+        send(kind,data,to){if(!open||!ws||ws.readyState!==1)return false;raw({op:'g',room:name,t:kind,d:data,to});return true;},
+        onMsg(h){ms.add(h);return()=>ms.delete(h);},get me(){return meId;},
+        async leave(){rooms.delete(name);hs.clear();ms.clear();raw({op:'leave',room:name});}};});}
   return{call,watch,join,async hello(t){token=t;return call('hello',{token:t});},forget(){token=null;return call('logout');}};}
 function ServerDB(n){return{local:false,server:true,
   get:p=>n.call('get',{p}),set:(p,d)=>n.call('set',{p,d}),update:(p,d)=>n.call('update',{p,d}),del:p=>n.call('del',{p}),

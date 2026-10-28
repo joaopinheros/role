@@ -9,6 +9,8 @@ export const VOICE_MAX = 8;
 export const DEFAULT_ICE = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
 
 const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+/* eventos de diagnóstico (painel ?debug=1): window.__rt, criado em client.js */
+const dbg = (ev, info) => { const r = typeof window !== 'undefined' && window.__rt; if (r) { r.n[ev] = (r.n[ev] || 0) + 1; r.log.push({ t: Date.now() - r.t0, ev, info: String(info === undefined ? '' : info).slice(0, 80) }); if (r.log.length > 300) r.log.shift(); } };
 const coded = code => Object.assign(new Error(code), { code });
 
 /* erros do microfone viram códigos que o app sabe explicar */
@@ -85,7 +87,9 @@ export function makeVoice(sb, roomId, ice) {
       a.play().catch(() => {});
       p.audio = a; p.an = analyser(e.streams[0]);
     };
+    pc.oniceconnectionstatechange = () => dbg('voz ice', k.slice(-4) + ' ' + pc.iceConnectionState);
     pc.onconnectionstatechange = () => {
+      dbg('voz conn', k.slice(-4) + ' ' + pc.connectionState);
       if (pc.connectionState === 'failed' && peersMap.get(k) === p) { closePeer(k); setTimeout(sync, 1500); }   // o lado que liga tenta de novo
     };
     peersMap.set(k, p);
@@ -138,7 +142,7 @@ export function makeVoice(sb, roomId, ice) {
     emit();
   }
 
-  const track = () => ch && ch.track(meta).catch(() => {});
+  const track = () => { dbg('voz track'); return ch && ch.track(meta).catch(() => {}); };
 
   async function join(user) {
     if (active || joining) return;
@@ -162,6 +166,7 @@ export function makeVoice(sb, roomId, ice) {
 
       meta = { u: String(user || ''), t: Date.now(), m: false };
       active = true;
+      if (window.__rt) window.__rt.pcs = () => [...peersMap].map(([k, p]) => [k, p.pc]);
       localAn = analyser(stream);
       timer = setInterval(measure, 125);
       await track();

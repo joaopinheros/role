@@ -33,7 +33,7 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.cpSync(path.join(ROOT, 'public'), OUT, { recursive: true });
 fs.writeFileSync(path.join(OUT, '_redirects'), '/r/* / 200\n');
 
-let html = fs.readFileSync(path.join(ROOT, 'dist', 'local.html'), 'utf8');
+let html = fs.readFileSync(path.join(env.ROLE_DIST ? path.resolve(env.ROLE_DIST) : path.join(ROOT, 'dist'), 'local.html'), 'utf8');
 if (url && key) {
   esbuild.buildSync({
     entryPoints: [path.join(ROOT, 'src', 'supabase', 'client.js')], outfile: path.join(OUT, 'role-supabase.js'),

@@ -11,10 +11,10 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const SRC = path.join(ROOT, 'src');
-const DIST = path.join(ROOT, 'dist');
+const DIST = process.env.ROLE_DIST ? path.resolve(process.env.ROLE_DIST) : path.join(ROOT, 'dist');   // ROLE_DIST: outra pasta de saída (os testes usam)
 
-const ENGINE = ['core.js', 'body.js', 'hair.js', 'items.js', 'render.js'];
-const APP = ['adapter.js', 'icons.js', 'music.js', 'scenes.js', 'props2.js', 'catalog.js', 'pets.js', 'net.js', 'app.js'];
+const ENGINE = ['core.js', 'body.js', 'hair.js', 'items.js', 'render.js', 'poolsim.js', 'truco.js', 'damas.js', 'domino.js'];
+const APP = ['adapter.js', 'icons.js', 'music.js', 'scenes.js', 'props2.js', 'catalog.js', 'pets.js', 'games.js', 'pool.js', 'chess.js', 'cards.js', 'truco.js', 'damas.js', 'domino.js', 'memoria.js', 'pesca.js', 'volei.js', 'lava.js', 'telescopio.js', 'net.js', 'app.js'];
 
 const args = process.argv.slice(2);
 const WATCH = args.includes('--watch');
@@ -25,10 +25,39 @@ try { esbuild = require('esbuild'); } catch (_) { /* sem esbuild: sai sem minifi
 
 const read = (...p) => fs.readFileSync(path.join(...p), 'utf8');
 
+/* chess.js (regras do xadrez) embutido: vira globalThis.__Chess. Sem esbuild, o xadrez só não aparece. */
+function chessBundle() {
+  if (!esbuild) return '';
+  return esbuild.buildSync({
+    stdin: { contents: "import { Chess } from 'chess.js'; globalThis.__Chess = Chess;", resolveDir: ROOT, loader: 'js' },
+    bundle: true, write: false, minify: true, format: 'iife', target: 'es2020', legalComments: 'none',
+  }).outputFiles[0].text;
+}
+
+/* Todos os arquivos dividem um escopo só: uma função com o mesmo nome em dois arquivos sobrescreve a outra sem erro
+ * (foi assim que as bolas da sinuca ficaram brancas). Aqui só avisa; a contagem de chaves é simples e pode errar. */
+function warnDuplicates(files) {
+  const seen = new Map();
+  for (const [name, src] of files) {
+    let depth = 0;
+    for (const ln of src.split('\n')) {
+      if (depth === 0) {
+        for (const m of ln.matchAll(/(?:^|[;}\s])function\s+([A-Za-z_$][\w$]*)\s*\(/g)) seen.set(m[1], [...(seen.get(m[1]) || []), name]);
+        const d = /^(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=/.exec(ln);
+        if (d) seen.set(d[1], [...(seen.get(d[1]) || []), name]);
+      }
+      for (const ch of ln) { if (ch === '{') depth++; else if (ch === '}') depth--; }
+    }
+  }
+  for (const [n, l] of seen) if (l.length > 1) console.warn(`[build] atenção: "${n}" aparece em ${l.join(' e ')} (o último vence)`);
+}
+
 function bundleScript() {
-  const engine = ENGINE.map(f => read(SRC, 'engine', f).replace(/if\(typeof module[^\n]*\n?/g, '')).join('\n');
-  const app = APP.map(f => read(SRC, 'app', f)).join('\n');
-  return "\n(function(){\nconst $=s=>document.querySelector(s);\nconst RM=matchMedia('(prefers-reduced-motion: reduce)').matches;\n" +
+  const files = [...ENGINE.map(f => ['engine/' + f, read(SRC, 'engine', f).replace(/if\(typeof module[^\n]*\n?/g, '')]), ...APP.map(f => ['app/' + f, read(SRC, 'app', f)])];
+  warnDuplicates(files);
+  const engine = files.filter(([n]) => n.startsWith('engine/')).map(([, s]) => s).join('\n');
+  const app = files.filter(([n]) => n.startsWith('app/')).map(([, s]) => s).join('\n');
+  return '\n' + chessBundle() + "\n(function(){\nconst $=s=>document.querySelector(s);\nconst RM=matchMedia('(prefers-reduced-motion: reduce)').matches;\n" +
     engine + '\n' + app + '\n})();\n';
 }
 
@@ -45,7 +74,7 @@ function splitPage(html) {
 
 function minify(js) {
   if (!MINIFY || !esbuild) return js;
-  return esbuild.transformSync(js, { minify: true, target: 'es2019', legalComments: 'none' }).code;
+  return esbuild.transformSync(js, { minify: true, target: 'es2020', legalComments: 'none' }).code;
 }
 
 const NOSCRIPT = '<noscript><div style="padding:24px;font:16px system-ui;color:#fff"><h1>Rolê</h1>' +

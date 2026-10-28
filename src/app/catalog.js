@@ -8,6 +8,7 @@ Object.assign(FLOOR,{
   hydraulic:(gx,gy,r)=>{tile(gx,gy,'#ede2cc','#cbbfa6');const c=S(gx+.5,gy+.5);poly([[c[0],c[1]-12],[c[0]+24,c[1]],[c[0],c[1]+12],[c[0]-24,c[1]]],(gx+gy)%2?'#3f7a8a':'#c25a3a');poly([[c[0],c[1]-6],[c[0]+12,c[1]],[c[0],c[1]+6],[c[0]-12,c[1]]],'#ede2cc');circ(c[0],c[1],2,'#d8a63a');},
   tatami:(gx,gy,r)=>{tile(gx,gy,'#cfc28a','#a89a5a');ctx.strokeStyle='rgba(120,100,50,.25)';for(let k=1;k<6;k++){const a=S(gx+k/6,gy),b=S(gx+k/6,gy+1);ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.stroke();}},
   stonepath:(gx,gy,r)=>{FLOOR.grass(gx,gy,r);for(let k=0;k<3;k++){const[x,y]=S(gx+.2+r()*.6,gy+.2+r()*.6);ell(x,y,9+r()*4,5,'#b8b2a6');ell(x,y-1,8,4,'#cfc9bd');}},
+  sandlight:(gx,gy,r)=>{tile(gx,gy,['#f8e8bc','#f5e3b4','#fbedc8'][r()*3|0]);specks(gx,gy,r,10,['#e8d29c','#fffbe8']);},
   rooftop:(gx,gy,r)=>{tile(gx,gy,(gx+gy)%2?'#5a5e6a':'#545866','#484c58');}
 });
 function fenceB(c,H){box(-.2,0,.2,GH,H,0,lt(c),mul(c,.86),mul(c,.86));onB(GH,()=>{ctx.fillStyle='rgba(60,30,20,.22)';for(let y=-H+6,i=0;y<0;y+=7,i++){ctx.fillRect(0,y,GH*32,1);for(let x=(i%2)*8;x<GH*32;x+=16)ctx.fillRect(x,y,1,7);}});}
@@ -45,16 +46,18 @@ const SCENES=[
      ()=>{poster(0,80,-104,36,46,'#2f4f7a','#e8708a');poster(0,130,-100,26,34,'#f2efe9','#8e5ac8');R(180,-96,52,30,'#f2efe9');R(186,-90,40,4,'#c23b3b');R(186,-82,30,4,'#2f6fd6');R(250,-110,60,110,'#efe6d4');R(254,-106,26,104,'#d8c8e0');R(282,-106,26,104,'#d8c8e0');});
    bed(1,2,'y','#8e5ac8');bed(2,2,'y','#8e5ac8');tent(9,2);rug(4,5,4,3,'#ffd0e2','#ffffff',true);
    bed(4,9,'x','#43a8b8');bed(7,9,'x','#ff8fc7');beanbag(9,6,'#f0a23a');beanbag(10,8,'#4a68b2');beanbag(3,7,'#3f8a4a');
-   tv(6,0);pizza(6,6);pizza(5,5);lampTable(0,1);lampTable(11,1);mixer(11,5,'radio');vaso(11,11);
+   tv(6,0);pizza(6,6);pizza(5,5);
+   memoryTable(9,4);zabuton(8,4,'#ff8fc7');zabuton(10,4,'#43d9e8');   // jogo da memória na frente da cabanalampTable(0,1);lampTable(11,1);mixer(11,5,'radio');vaso(11,11);
    stringLights([[0,0],[12,0]],128,6);stringLights([[0,0],[0,12]],128,6);stringLights([[9,1],[12,4]],80,6);}},
  {id:'parque',nome:'Parque com lago',desc:'Lago com patos, food truck, sorvete, balanço e piquenique',outdoor:true,spawn:[5,11],build(){
    B.floorAt=(x,y)=>(x===5||y===5)?'dirt':'grass';
    B.walls=()=>{};
    water(7,7,4,4,'pond');
    [[0,0],[3,0],[10,0],[0,3],[0,8],[11,5],[3,11]].forEach(([x,y])=>tree(x,y));
-   bench(4,4,'y');bench(6,4,'y');bench(4,6,'ny');lampPost(4,7);lampPost(6,3);foodTruck(1,6);iceCart(9,2);swing(1,2);
+   chessTable(3,3);stool(2,3,'x','#8a5a3a');stool(4,3,'nx','#8a5a3a');bench(4,4,'y');bench(6,4,'y');bench(4,6,'ny');lampPost(4,7);lampPost(6,3);foodTruck(1,6);iceCart(9,2);swing(1,2);
    picnicTable(2,9);rug(8,0,2,2,'#e8708a','#f2efe9',true);mixer(10,1);
-   bush(2,0);bush(11,3);bush(6,11);tuft(9,4);tuft(4,9);tuft(11,11);trash(6,6);}},
+   dominoTable(5,9);stool(4,9,'x','#8a5a3a');stool(6,9,'nx','#8a5a3a');   // dominó na beira do lago
+   bush(2,0);bush(11,3);bush(6,11);tuft(9,4);tuft(11,11);trash(6,6);}},
  {id:'boate',nome:'Boate',desc:'Palco do DJ, lasers, pista de LED, bar neon e camarote',outdoor:false,dark:true,spawn:[6,10],build(){
    B.floorAt=()=>'club';
    B.walls=()=>roomWalls('#211d29',180,()=>{R(130,-160,130,28,'#141018');for(let k=0;k<12;k++){R(20+k*30,-100,2,100,'rgba(255,79,163,.15)');}},
@@ -77,7 +80,7 @@ const SCENES=[
        R(230,-120,90,60,'#3a2a20');R(234,-116,82,52,'#c9a26a');ctx.font='700 7px Anybody, sans-serif';ctx.fillStyle='#3a2a20';ctx.fillText('SINUCA R$2',240,-92);});
    barCounter(1,1,5);foodCase(1,6);[2,3,4].forEach(y=>stool(2,y,'nx','#c23b3b'));fridge(0,8);crates(3,8);crates(0,10);mixer(1,7,'radio');B.blocked.add(key(1,7));
    poolTable(6,4);ceilingFan(6,6,148);ceilingFan(3,3,148);
-   plasticTable(9,2,'#f0c24a');chair(10,2,'nx','#f0c24a');chair(9,3,'ny','#f0c24a');chair(8,2,'x','#f0c24a');
+   plasticTable(9,2,'#f0c24a',true);chair(9,1,'y','#f0c24a');chair(10,2,'nx','#f0c24a');chair(9,3,'ny','#f0c24a');chair(8,2,'x','#f0c24a');
    plasticTable(9,10,'#f0c24a');chair(10,10,'nx','#f0c24a');chair(8,10,'x','#f0c24a');chair(9,11,'ny','#f0c24a');
    plasticTable(5,10,'#c23b3b');chair(4,10,'x','#c23b3b');chair(6,10,'nx','#c23b3b');chair(5,11,'ny','#c23b3b');
    jukebox(11,6);lampPost(11,11);vaso(11,0,true);
@@ -99,7 +102,7 @@ const SCENES=[
    campfire(3,9,[[2,9,'x'],[4,9,'nx'],[3,8,'y'],[3,10,'ny']]);
    torch(1,1);torch(5,2);torch(9,1);torch(1,7);torch(10,9);torch(7,11);tikiHead(0,3);tikiHead(11,3);tikiHead(11,7);
    rock(8,8,true);rock(10,11,false,'#5a5250');rock(6,9,false,'#5a5250');rock(4,1,true,'#4a4240');
-   palm(0,11);palm(11,1);mixer(8,1);speaker(7,1);smoke(0,0,240,'#6a5a56');smoke(.4,0,260,'#7a6a66');}},
+   palm(0,11);palm(11,1);mixer(8,1);speaker(7,1);gong(1,9);smoke(0,0,240,'#6a5a56');smoke(.4,0,260,'#7a6a66');}},
  {id:'templo',nome:'Templo e lago de carpas',desc:'Portal torii, ponte vermelha, carpas, cerejeiras e chá',outdoor:true,spawn:[2,11],build(){
    B.floorAt=(x,y)=>(x>=6&&y>=4&&x<=10&&y<=9)?'grass':(x===2||y===10)?'stonepath':'gravel';
    B.walls=()=>pagoda();
@@ -107,22 +110,24 @@ const SCENES=[
    torii(1,8,2);sakura(10,1);sakura(0,10);sakura(11,10);bamboo(0,1);bamboo(0,2);bamboo(11,4);
    stoneLantern(5,4);stoneLantern(5,9);stoneLantern(11,9);
    zabuton(2,3,'#7a2a3a');zabuton(4,3,'#7a2a3a');zabuton(3,2,'#2a4a7a');zabuton(3,4,'#2a4a7a');lowTable(3,3,[[3.4,3.4,'copo','#7fb85a'],[3.6,3.6,'copo','#7fb85a']]);
+   damasTable(3,6);zabuton(2,6,'#7a2a3a');zabuton(4,6,'#2a4a7a');
+   fishSpot(5,5,'x');fishSpot(5,7,'x');fishSpot(8,9,'ny');fishSpot(10,9,'ny');
    mixer(9,1);rock(8,11,false,'#8a8680');rock(4,7,true,'#9a968e');}},
  {id:'praia',nome:'Luau na praia',desc:'Mar, coqueiros, fogueira, rede, cadeiras de praia e barraca de drinks',outdoor:true,cliff:'sand',spawn:[2,10],build(){
-   B.floorAt=()=>'sand';
+   B.floorAt=(x,y)=>x>=3&&x<=10&&y>=2&&y<=4?'sandlight':'sand';   // a quadra de vôlei é a areia clarinha
    B.walls=()=>{};
-   for(let y=0;y<GH;y++){B.blocked.add(key(11,y));}sea();
+   for(let y=0;y<GH;y++){B.blocked.add(key(11,y));}sea();voleiCourt();
    palm(0,0);palm(4,0);palm(0,5);palm(9,0);hammock(1,2,2);
    campfire(5,6,[[4,6,'x'],[6,6,'nx'],[5,5,'y'],[5,7,'ny']]);
-   beachChair(8,9,'ny','#ff7a5a');beachChair(9,9,'ny','#43d9e8');umbrella(9,10,'#ffd84a','#f2efe9');surfboard(10,3);surfboard(10,4);
-   drinkHut(2,9);stool(2,8,'y','#ff8fc7');stool(3,8,'y','#ffd84a');torch(1,7);torch(8,2);torch(8,7);mixer(6,1);speaker(7,1);
+   beachChair(8,9,'ny','#ff7a5a');beachChair(9,9,'ny','#43d9e8');umbrella(9,10,'#ffd84a','#f2efe9');surfboard(10,6);surfboard(10,7);
+   drinkHut(2,9);stool(2,8,'y','#ff8fc7');stool(3,8,'y','#ffd84a');torch(1,7);torch(10,1);torch(8,7);mixer(6,1);speaker(7,1);
    stringLights([[0,1],[5,3],[10,1]],90,10);}},
  {id:'rooftop',nome:'Rooftop na cidade',desc:'Terraço com skyline, jacuzzi, puffs, neon e telescópio',outdoor:true,cliff:'building',spawn:[6,10],build(){
    B.floorAt=(x,y)=>(x>=7&&y<=4)?'deck':'rooftop';
    B.walls=()=>{skyline();glassRail();};
    jacuzzi(8,1);pouf(3,6,'#ff4fa3');pouf(4,7,'#43d9e8');pouf(2,7,'#ffd84a');lowTable(3,7,[[3.5,7.5,'copo','#ff4fa3']]);
    sofa(1,2,'x','#2a2a3a');sofa(1,3,'x','#2a2a3a');sofa(2,1,'y','#2a2a3a');barCounter(11,6,3);stool(10,6,'x','#ff4fa3');stool(10,8,'x','#43d9e8');
-   mixer(5,1);speaker(4,1);speaker(6,1);telescope(11,11);vaso(0,11,true);vaso(11,10,true);vaso(0,6);rug(2,9,3,2,'#2a2a3a','#43d9e8',true);
+   mixer(5,1);speaker(4,1);speaker(6,1);telescope(11,11);actReg('telescopio',11,11,1,1);vaso(0,11,true);vaso(11,10,true);vaso(0,6);rug(2,9,3,2,'#2a2a3a','#43d9e8',true);
    stringLights([[0,0],[6,6],[12,0]],110,14);stringLights([[0,12],[6,6]],100,10);}}
 ];
 const sceneById=id=>SCENES.find(s=>s.id===id)||SCENES[0];

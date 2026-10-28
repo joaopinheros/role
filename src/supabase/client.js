@@ -18,6 +18,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { makeVoice } from './voice.js';
 
+/* ---------- diagnóstico: window.__rt guarda eventos e contadores; com ?debug=1 aparece um painel na tela ---------- */
+const rt = (typeof window !== 'undefined' && (window.__rt = window.__rt || { log: [], n: {}, sent: 0, recv: 0, sentB: 0, recvB: 0, t0: Date.now(), socket: 'abrindo', reconexoes: 0, canais: {}, pcs: () => [] })) || { log: [], n: {}, canais: {} };
+const note = (ev, info) => { rt.n[ev] = (rt.n[ev] || 0) + 1; rt.log.push({ t: Date.now() - rt.t0, ev, info: info === undefined ? '' : String(info).slice(0, 80) }); if (rt.log.length > 300) rt.log.shift(); };
 const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const coded = code => Object.assign(new Error(code), { code });
 
@@ -35,8 +38,41 @@ function arrange(rows, o = {}) {
   return l;
 }
 
+/* painel de diagnóstico: abra o app com ?debug=1 */
+function overlay() {
+  if (typeof document === 'undefined' || !/[?&]debug=1/.test(location.search)) return;
+  const el = document.createElement('pre');
+  el.style.cssText = 'position:fixed;left:6px;bottom:6px;z-index:99999;max-width:94vw;max-height:55vh;overflow:auto;margin:0;padding:8px;background:rgba(0,0,0,.84);color:#9f9;font:11px/1.35 ui-monospace,Consolas,monospace;border-radius:6px;pointer-events:none;white-space:pre-wrap';
+  document.body.append(el);
+  let prev = { s: 0, r: 0, t: Date.now() };
+  const ctype = (stats, id) => { const c = id && stats.get(id); return c ? c.candidateType : '?'; };
+  setInterval(async () => {
+    const now = Date.now(), dt = (now - prev.t) / 1000;
+    const up = ((rt.sent - prev.s) / dt).toFixed(1), down = ((rt.recv - prev.r) / dt).toFixed(1);
+    prev = { s: rt.sent, r: rt.recv, t: now };
+    const NL = String.fromCharCode(10);
+    let out = 'RT  socket: ' + rt.socket + '  hb: ' + (rt.hb || '-') + '  reconexoes: ' + rt.reconexoes + '  envia ' + up + '/s  recebe ' + down + '/s' + NL;
+    out += 'canais: ' + (Object.entries(rt.canais).map(([k, v]) => k + '=' + v).join(' ') || '-') + NL;
+    out += 'eventos: ' + (Object.entries(rt.n).map(([k, v]) => k + ':' + v).join('  ') || '-') + NL;
+    for (const [k, pc] of (rt.pcs ? rt.pcs() : [])) {
+      let tipo = '?', rx = 0;
+      try {
+        const st = await pc.getStats();
+        st.forEach(r => {
+          if (r.type === 'inbound-rtp' && r.kind === 'audio') rx += r.bytesReceived;
+          if (r.type === 'candidate-pair' && r.nominated && r.state === 'succeeded') tipo = ctype(st, r.localCandidateId) + '/' + ctype(st, r.remoteCandidateId);
+        });
+      } catch (_) {}
+      out += 'voz ' + k.slice(-4) + '  conn=' + pc.connectionState + '  ice=' + pc.iceConnectionState + '  candidato(local/remoto)=' + tipo + '  rx=' + (rx / 1024).toFixed(0) + 'KB' + NL;
+    }
+    out += rt.log.slice(-8).map(x => (x.t / 1000).toFixed(0).padStart(4) + 's ' + x.ev + ' ' + x.info).join(NL);
+    el.textContent = out;
+  }, 1000);
+}
+
 export async function connect({ url, key, ice }) {
-  const sb = createClient(url, key, { realtime: { params: { eventsPerSecond: 20 } } });
+  overlay();
+  const sb = createClient(url, key, { realtime: { params: { eventsPerSecond: 20 }, heartbeatCallback: (st, lat) => { rt.hb = st + (lat ? ' ' + lat + 'ms' : ''); if (st !== 'sent' && st !== 'ok') note('heartbeat ' + st); } } });
 
   /* o navegador entra como anônimo; o usuário de verdade é ligado a essa sessão pelo código (auth_verify) */
   let { data: { session } } = await sb.auth.getSession();
@@ -45,6 +81,21 @@ export async function connect({ url, key, ice }) {
     const r = await sb.auth.signInAnonymously();
     if (r.error) throw r.error;
   }
+
+  /* conta mensagens do socket e as reconexões (o socket é recriado a cada reconexão, por isso o gancho se repete) */
+  const hook = () => {
+    let c = null;
+    try { c = sb.realtime.socketAdapter.socket.conn; } catch (_) { /* detalhe interno do realtime-js: só o painel de debug usa */ }
+    if (!c || c.__rt) return;
+    c.__rt = 1;
+    rt.socket = 'aberto';
+    const send = c.send.bind(c);
+    c.send = d => { rt.sent++; rt.sentB += String(d).length; return send(d); };
+    c.addEventListener('message', e => { rt.recv++; rt.recvB += String(e.data).length; });
+    c.addEventListener('close', e => { rt.socket = 'fechado'; rt.reconexoes++; note('socket fechado', e.code + ' ' + (e.reason || '')); });
+    c.addEventListener('error', () => note('socket erro'));
+  };
+  setInterval(hook, 500);
 
   const rpc = async (fn, args) => { const { data, error } = await sb.rpc(fn, args); check(error); return data; };
   const state = { uid: null };
@@ -195,52 +246,155 @@ export async function connect({ url, key, ice }) {
     },
   };
 
-  /* ---------- sala ao vivo: quem está no canal aparece em "peers"; o Realtime remove quem cai.
-     A sala se mantém sozinha: reconecta se o canal cair, refaz o canal que não conectou, reenvia a presença
-     a cada poucos segundos e ao voltar para a aba. Nunca desiste: se a conexão falhar, avisa e segue tentando. */
+  /* ---------- sala ao vivo ----------
+     O Supabase limita cada cliente a 5 atualizações de presença a cada 30 s (em todos os planos) e derruba o canal
+     quando passa disso. Por isso a presença leva só o que muda pouco (quem é, nome, visual) e o movimento, as ações
+     e as mensagens de jogo vão por broadcast, que não tem esse limite. Cada aba reenvia o próprio estado a cada 6 s,
+     então quem perdeu uma mensagem se acerta sozinho. O canal não é recriado à mão: o supabase-js religa sozinho. */
+  const STATIC_KEYS = ['u', 'n', 'f', 'j'];
+  const GHOST_MS = 10000, TRACK_GAP = 7000, MV_GAP = 100, BEAT_MS = 6000, DOWN_AFTER = 3000;
+
   function room(name) {
     const key = rid();
-    const hs = new Set(), ss = new Set();
-    let ch = null, mine = {}, dead = false, up = false, watchdog = 0;
+    const hs = new Set(), ss = new Set(), ms = new Set();
+    const dyn = new Map();      // peer -> { d }   estado que muda toda hora (posição, ação…)
+    const ghost = new Map();    // peer -> { entry, timer }   quem saiu há pouco: some só depois de GHOST_MS
+    let ch = null, mine = {}, dead = false, connected = false, reported = false;
+    let lastSentStatic = '', downTimer = 0, watchdog = 0, trackAt = 0, trackTimer = 0, mvTimer = 0, mvAt = 0, lastStatic = '', opening = false;
 
-    const peers = () => (ch ? Object.entries(ch.presenceState()) : []).map(([peer, metas]) => {
-      const m = metas[metas.length - 1] || {};
-      return { peer, isMe: peer === key, presence: m.d || {}, updatedAt: m.at || 0 };
-    });
+    const split = d => { const st = {}, dy = {}; for (const k in d) (STATIC_KEYS.includes(k) ? st : dy)[k] = d[k]; return { st, dy }; };
+
+    function peers() {
+      const out = [], seen = new Set();
+      const add = (peer, st) => {
+        seen.add(peer);
+        const dy = peer === key ? mine : (dyn.get(peer) || {}).d;
+        if (!dy) return;                        // ainda não mandou posição: não aparece (evita boneco no canto 0,0)
+        out.push({ peer, isMe: peer === key, presence: { ...st, ...dy }, updatedAt: Date.now() });
+      };
+      for (const [peer, metas] of Object.entries(ch ? ch.presenceState() : {})) add(peer, (metas[metas.length - 1] || {}).d || {});
+      for (const [peer, g] of ghost) if (!seen.has(peer)) add(peer, g.entry);
+      return out;
+    }
     const fire = () => { const l = peers(); hs.forEach(h => h({ peers: l, joined: [], left: [], updated: [] })); };
-    const setUp = v => { if (up !== v) { up = v; ss.forEach(f => f(v ? 'up' : 'down')); } };
 
-    const track = () => {
-      if (!ch || !up) return;
-      ch.track({ d: mine, at: Date.now() }).then(r => { if (r === 'timed out' && !dead) { setUp(false); open(); } }, () => {});
-    };
+    /* avisa "caiu" só depois de DOWN_AFTER sem conexão; "voltou" é imediato */
+    function setUp(v, why) {
+      connected = v;
+      rt.canais[name] = v ? 'ok' : 'caido';
+      note('sala ' + (v ? 'conectada' : 'caiu'), why);
+      clearTimeout(downTimer);
+      if (v) { if (reported) { reported = false; ss.forEach(f => f('up')); } }
+      else downTimer = setTimeout(() => { if (!connected && !dead) { reported = true; ss.forEach(f => f('down')); } }, DOWN_AFTER);
+    }
 
-    function open() {
-      if (dead) return;
-      if (ch) sb.removeChannel(ch);
-      const c = ch = sb.channel(name, { config: { presence: { key } } });
-      c.on('presence', { event: 'sync' }, fire);
-      clearTimeout(watchdog);
-      watchdog = setTimeout(() => { if (!dead && c === ch && !up) open(); }, 12000);
-      c.subscribe(status => {
-        if (dead || c !== ch) return;
-        if (status === 'SUBSCRIBED') { clearTimeout(watchdog); setUp(true); track(); }
-        else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') setUp(false);
+    /* presença (quem é): no máximo uma atualização a cada TRACK_GAP, para ficar longe do limite de 5 por 30 s */
+    function track() {
+      if (!ch || !connected || !Object.keys(split(mine).st).length) return;   // sem identidade ainda: não gasta o orçamento de presença
+      const st = JSON.stringify(split(mine).st);
+      if (st === lastStatic && trackAt) return;
+      const wait = trackAt + TRACK_GAP - Date.now();
+      if (wait > 0) { if (!trackTimer) trackTimer = setTimeout(() => { trackTimer = 0; track(); }, wait); return; }
+      lastStatic = st; trackAt = Date.now();
+      ch.track({ d: JSON.parse(st) }).then(r => { if (r !== 'ok') note('track ' + r); }, () => {});
+    }
+
+    /* movimento e ações: broadcast, juntando rajadas (no máximo 10 por segundo) */
+    function sendMv(force) {
+      if (!ch || !connected || !Object.keys(mine).length) return;
+      const wait = mvAt + MV_GAP - Date.now();
+      if (!force && wait > 0) { if (!mvTimer) mvTimer = setTimeout(() => { mvTimer = 0; sendMv(); }, wait); return; }
+      mvAt = Date.now();
+      const st = JSON.stringify(split(mine).st), full = force || st !== lastSentStatic;   // identidade vai junto quando é novidade ou reenvio completo
+      lastSentStatic = st;
+      ch.send({ type: 'broadcast', event: 'mv', payload: { k: key, d: full ? mine : split(mine).dy } }).catch(() => {});
+    }
+
+    const lastSeen = new Map();   // peer -> última presença conhecida (para segurar o boneco durante a tolerância)
+    function onGone(peerKey) {
+      if (peerKey === key || ghost.has(peerKey)) return;
+      ghost.set(peerKey, {
+        entry: lastSeen.get(peerKey) || {},
+        timer: setTimeout(() => { ghost.delete(peerKey); lastSeen.delete(peerKey); dyn.delete(peerKey); fire(); }, GHOST_MS),
       });
     }
 
-    const beat = setInterval(() => { if (up) track(); }, 12000);
-    const wake = () => { if (dead || (typeof document !== 'undefined' && document.hidden)) return; if (up) track(); else open(); };
+    function open() {
+      if (dead || opening) return;
+      opening = true;
+      note('sala: abre canal', 'inicio');
+      const c = ch = sb.channel(name, { config: { presence: { key }, broadcast: { self: false } } });
+      c.on('presence', { event: 'sync' }, () => {
+        for (const [peer, metas] of Object.entries(c.presenceState())) {
+          lastSeen.set(peer, (metas[metas.length - 1] || {}).d || {});
+          const g = ghost.get(peer); if (g) { clearTimeout(g.timer); ghost.delete(peer); }
+        }
+        fire();
+      });
+      c.on('presence', { event: 'leave' }, ({ key: k }) => { onGone(k); fire(); });
+      c.on('broadcast', { event: 'mv' }, ({ payload }) => {
+        if (!payload || payload.k === key || typeof payload.k !== 'string') return;
+        dyn.set(payload.k, { d: { ...((dyn.get(payload.k) || {}).d || {}), ...(payload.d || {}) } });   // junta: o movimento não repete a identidade
+        fire();
+      });
+      c.on('broadcast', { event: 'hi' }, ({ payload }) => {   // alguém entrou: manda para ele onde estou (com pequeno atraso, para 50 pessoas não responderem juntas)
+        if (payload && payload.k !== key) setTimeout(() => sendMv(true), Math.random() * 400);
+      });
+      c.on('broadcast', { event: 'g' }, ({ payload }) => {    // mensagens dos jogos
+        if (!payload || payload.k === key || (payload.to && payload.to !== key)) return;
+        note('jogo recebido', payload.t + ' ' + ((payload.d || {}).t || ''));
+        ms.forEach(h => { try { h(payload.t, payload.d, payload.k); } catch (e) { console.warn('jogo', e); } });
+      });
+      clearTimeout(watchdog);
+      watchdog = setTimeout(async () => {   // nunca conectou: refaz do zero (esperando o canal antigo sair, senão o supabase-js devolve o mesmo)
+        if (dead || connected) return;
+        note('sala: refaz canal', 'não conectou em 15s');
+        opening = false;
+        try { await sb.removeChannel(c); } catch (_) {}
+        if (ch === c) ch = null;
+        open();
+      }, 15000);
+      c.subscribe(status => {
+        if (dead || c !== ch) return;
+        note('sala status', status);
+        if (status === 'SUBSCRIBED') {
+          opening = false; clearTimeout(watchdog);
+          setUp(true);
+          trackAt = 0; lastStatic = ''; track();
+          c.send({ type: 'broadcast', event: 'hi', payload: { k: key } }).catch(() => {});
+          sendMv(true);
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') setUp(false, status);
+      });
+    }
+
+    const beat = setInterval(() => { if (connected) sendMv(true); }, BEAT_MS);
+    const wake = () => {
+      if (dead || (typeof document !== 'undefined' && document.hidden)) return;
+      note('sala wake', connected ? 'ok' : 'caida');
+      if (connected) { sendMv(true); if (ch) ch.send({ type: 'broadcast', event: 'hi', payload: { k: key } }).catch(() => {}); }
+    };
     if (typeof document !== 'undefined') document.addEventListener('visibilitychange', wake);
     if (typeof window !== 'undefined') window.addEventListener('online', wake);
 
     const api = {
-      async presence(d) { mine = { ...mine, ...d }; track(); },
+      async presence(d) { mine = { ...mine, ...d }; track(); sendMv(); fire(); },
       peers,
       onPeers(h) { hs.add(h); return () => hs.delete(h); },
-      onStatus(h) { ss.add(h); h(up ? 'up' : 'down'); return () => ss.delete(h); },
+      onStatus(h) { ss.add(h); h(reported ? 'down' : 'up'); return () => ss.delete(h); },
+      /* mensagens de jogo para a sala (to = peer de destino, opcional); devolve false se não deu para enviar */
+      send(kind, data, to) {
+        if (!ch || !connected) return false;
+        note('jogo enviado', kind + ' ' + ((data || {}).t || '') + (to ? ' -> ' + to.slice(-4) : ''));
+        ch.send({ type: 'broadcast', event: 'g', payload: { k: key, t: kind, d: data, to } }).catch(() => {});
+        return true;
+      },
+      onMsg(h) { ms.add(h); return () => ms.delete(h); },
+      get me() { return key; },
       async leave() {
-        dead = true; clearInterval(beat); clearTimeout(watchdog); hs.clear(); ss.clear();
+        dead = true;
+        clearInterval(beat); clearTimeout(downTimer); clearTimeout(watchdog); clearTimeout(trackTimer); clearTimeout(mvTimer);
+        ghost.forEach(g => clearTimeout(g.timer)); ghost.clear();
+        hs.clear(); ss.clear(); ms.clear();
         if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', wake);
         if (typeof window !== 'undefined') window.removeEventListener('online', wake);
         if (ch) await sb.removeChannel(ch);
@@ -248,8 +402,8 @@ export async function connect({ url, key, ice }) {
     };
     open();
     return new Promise(res => {   // entra na sala mesmo se o Realtime demorar; segue conectando por trás
-      const off = api.onStatus(st => { if (st === 'up') { off && off(); res(api); } });
-      setTimeout(() => res(api), 6000);
+      const t = setInterval(() => { if (connected) { clearInterval(t); res(api); } }, 50);
+      setTimeout(() => { clearInterval(t); res(api); }, 6000);
     });
   }
 
