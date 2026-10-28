@@ -93,7 +93,11 @@ Deno.serve(async req => {
   // aceita o segredo mesmo com espaço sobrando no nome ou no valor; se não achar, o log mostra os nomes que a função enxerga
   const envAll = Deno.env.toObject();
   const ykName = Object.keys(envAll).find(k => k.trim().toUpperCase() === 'YOUTUBE_API_KEY');
-  const yk = ykName ? envAll[ykName].trim() || undefined : undefined;
+  let yk = ykName ? envAll[ykName].trim() || undefined : undefined;
+  if (!yk) {   // plano B: a chave também pode ficar em app_config (key 'youtube_api_key'), que só a chave de serviço lê
+    const { data: cfg } = await admin.from('app_config').select('value').eq('key', 'youtube_api_key').maybeSingle();
+    yk = String(cfg?.value ?? '').trim() || undefined;
+  }
   if (!yk && (body.q != null || body.link != null)) console.warn('YOUTUBE_API_KEY vazia. Variáveis visíveis:', Object.keys(envAll).join(', '));
   const dbError = (error: { message: string }) => {
     const code = KNOWN.find(k => error.message === k || error.message.endsWith(': ' + k));
