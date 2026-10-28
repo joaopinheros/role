@@ -28,7 +28,7 @@ const FM_ERR={
   notfound:'Não achei esse vídeo no YouTube.',live:'Transmissão ao vivo não dá. Escolhe um vídeo.',vazio:'Não tem música sua na fila.',
   ninguem:'Não achei essa pessoa no rolê.',dono:'O dono já é DJ.',cedo:'A música ainda não acabou.',
   ocupado:'Já tem uma busca rodando nesta sala. Espera um instante.',buscas:'Você já fez 10 buscas nesta hora. Cola o link, que funciona sempre.',
-  cota:'A busca por nome está no limite de hoje. Cola o link que funciona.',semchave:'Falta a YOUTUBE_API_KEY nos segredos do Supabase (supabase secrets set YOUTUBE_API_KEY=...). Por enquanto cola o link.',
+  cota:'A busca por nome está no limite de hoje. Cola o link que funciona.',semchave:'Falta a YOUTUBE_API_KEY. Rodando local: ponha no arquivo .env e reinicie o servidor. No Supabase: Edge Functions > Secrets. Por enquanto cola o link.',
   nada:'Não achei nada com esse nome. Tenta outras palavras ou cola o link.',tarde:'Já passou o tempo de trocar (60 segundos).',
   fnvelha:'A busca por nome precisa da função music-resolve nova: publica de novo (supabase functions deploy music-resolve --no-verify-jwt) e guarda a YOUTUBE_API_KEY.',
   nofn:'O Rolê FM ainda não está ligado aqui (falta publicar a função music-resolve).',
