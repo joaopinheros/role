@@ -434,7 +434,10 @@ export async function connect({ url, key, ice }) {
       if (data && data.error) throw coded(data.error);
       return data;
     },
-    add(role, input) { return fm.call({ role, link: input }); },
+    add(role, input) {
+      /* uma função music-resolve antiga (sem busca por nome) responde "link" a um nome: avisa em vez de parecer defeito do texto */
+      return fm.call({ role, link: input }).catch(e => { throw (e && e.code === 'link' && !fmIsLink(input)) ? coded('fnvelha') : e; });
+    },
     search(role, q) { return fm.call({ role, q, mode: 'search' }); },
     act(role, op, a = {}) {
       const f = FM_ARGS[op];

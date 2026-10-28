@@ -118,13 +118,10 @@ async function principal(browser) {
   await say(a, '/music ' + 'https://youtu.be/bloq0000001');
   ok(!!await waitFor(() => logHas(a, /não deixa tocar fora do YouTube/), 4000), 'vídeo que não deixa incorporar é recusado');
 
-  // a dona dá DJ e agora o /skip funciona
-  await say(a, '/dj @' + ub);
-  ok(!!await waitFor(async () => (await fm(b)).papel === 'dj', 5000), 'a dona faz o convidado DJ');
-  const v0 = (await fm(a)).version;
-  await say(b, '/skip');
-  ok(!!await waitFor(async () => (await fm(a)).video === V(2), 5000), 'agora o /skip do convidado funciona');
-  ok(!!await waitFor(() => logHas(a, /pulou a música/), 4000), 'o bot avisa quem pulou');
+  // a dona pula (só o dono e os DJs pulam)
+  await say(a, '/skip');
+  ok(!!await waitFor(async () => (await fm(a)).video === V(2), 5000), 'o /skip da dona funciona');
+  ok(!!await waitFor(() => logHas(b, /pulou a música/), 4000), 'o bot avisa quem pulou');
 
   // computador: o dirigível no céu, com a capa; "Ouvir junto" toca no player e pausa o house
   ok(!!await waitFor(async () => (await fm(a)).visual.ceu, 45000), 'o dirigível aparece no céu (computador)');
@@ -158,11 +155,11 @@ async function principal(browser) {
   ok(fc && Math.abs(fc.yt.t - fa.pos) <= 2, `quem entra no meio começa no mesmo ponto (C ${fc && fc.yt.t}s, sala ${fa.pos}s)`);
 
   // pausa e volta para todo mundo
-  await say(b, '/pause');
+  await say(a, '/pause');
   ok(!!await waitFor(async () => (await fm(a)).status === 'pausado' && (await fm(c)).yt.state === 2, 5000), '/pause pausa para todo mundo (inclusive o player de quem ouve)');
   const p1 = (await fm(a)).pos; await sleep(1500);
   ok(Math.abs((await fm(a)).pos - p1) < .2, 'pausada, a posição não anda');
-  await say(b, '/play');
+  await say(a, '/play');
   ok(!!await waitFor(async () => (await fm(c)).yt.state === 1, 5000), '/play solta de novo');
 
   // /fila, /tocando, /tirar e autocompletar
@@ -217,15 +214,6 @@ async function busca(browser) {
   ok(!!await waitFor(async () => (await fm(a)).fila.length === 1, 6000), 'a mesma busca, escrita de outro jeito, entra na fila');
   ok((await stats(a)).api === antes, 'e não chamou o YouTube de novo (cache)');
 
-  // /buscar: só para quem pediu, sem tocar
-  const fila0 = (await fm(a)).fila.length;
-  await say(b, '/buscar pagode da sexta');
-  const rs = await waitFor(async () => { const l = await cards(b); return l.length ? l : null; }, 6000);
-  ok(rs && rs.length === 4 && rs.every(t => /Pôr na fila/.test(t)), '/buscar mostra os resultados com "Pôr na fila": ' + (rs && rs.length));
-  ok(!(await a.textContent('#log')).includes('Resultados (só você vê)') && (await fm(a)).fila.length === fila0, 'só para quem pediu, e nada entrou na fila');
-  await shot(b, 'fm_buscar');
-  await b.locator('#log .fmcard').first().click();
-  ok(!!await waitFor(async () => (await fm(a)).fila.length === fila0 + 1, 5000), '"Pôr na fila" põe o resultado na fila');
 
   // cota: com 90% usados, a busca por nome pausa e o link continua valendo
   await b.evaluate(() => window.__role.fmFake(0.95));
@@ -234,7 +222,7 @@ async function busca(browser) {
   await say(a, '/music ' + link(33));
   ok(!!await waitFor(async () => (await fm(a)).fila.some(v => v === V(33)), 5000), 'mas o link continua funcionando');
   await say(a, '/music ai se eu te pego');
-  ok(!!await waitFor(async () => (await fm(a)).fila.length >= fila0 + 3, 5000), 'e o que já está no cache também (sem gastar cota)');
+  ok(!!await waitFor(async () => (await fm(a)).fila.length >= 3, 5000), 'e o que já está no cache também (sem gastar cota)');
   await b.evaluate(() => window.__role.fmFake(0));
   await Promise.all([a, b].map(p => p.context().close()));
 }

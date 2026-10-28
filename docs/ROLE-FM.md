@@ -19,14 +19,12 @@ No computador a música aparece como um **dirigível** no céu; no celular, como
 | Comando | Quem | O que faz |
 |---|---|---|
 | `/music <link ou nome>` (ou `/m`) | todos | põe na fila; se nada toca, toca na hora. Com um nome (`/music ai se eu te pego`), o 1º resultado entra e aparece **"Não era essa?"** com até 4 alternativas |
-| `/buscar <nome>` | todos | mostra os 5 resultados só para você, sem tocar, cada um com "Pôr na fila" |
 | `/skip` | dono e DJs | pula |
 | `/pause` e `/play` | dono e DJs | pausa e volta para todo mundo |
 | `/fila` | todos | as próximas 5 (só para quem pediu) |
 | `/tocando` | todos | o que toca e o tempo (só para quem pediu) |
 | `/tirar` | todos | tira a última música que **você** colocou (dono e DJs: `/tirar <posição>`) |
 | `/limpar` | dono e DJs | esvazia a fila |
-| `/dj @usuario`, `/undj @usuario` | dono | dá ou tira DJ |
 
 Digitar `/` mostra só os comandos que a pessoa pode usar. As mensagens do bot (chip amarelo com a nota) vão para o chat de todos; as respostas privadas ficam só para quem pediu (borda tracejada).
 

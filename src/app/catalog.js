@@ -75,10 +75,10 @@ const SCENES=[
    barCounter(0,3,6);[3,5,7].forEach(y=>stool(1,y,'nx','#ff4fa3'));[4,6,8].forEach(y=>stool(1,y,'nx','#43d9e8'));
    boothSofa(9,11,3,'#5a2a6a');sofa(11,9,'nx','#5a2a6a');sofa(11,10,'nx','#5a2a6a');lowTable(10,9,[[10.5,9.5,'copo','#ff4fa3']]);
    pouf(1,10,'#ff4fa3');pouf(2,11,'#43d9e8');pouf(5,10,'#ffd84a');pouf(6,11,'#8e5ac8');speakerSeat(3,10);speakerSeat(4,11);speakerSeat(7,10);speakerSeat(8,11);
-   npc(0,2,{name:'Lola',fig:npcFig({g:1,b:0,pele:'pele5',hair:['chanel','vermelho'],face:'piscando',top_under:['espartilho','preto'],bottom:['couro-flare','preto'],shoes:['bota-plataforma','preto'],neck:['choker','rosa']}),face:'y',prop:'shaker',lines:NPC_BARMAN,every:[5000,9000],shake:a=>(now+a.seed*500)%9000<2800,pose:a=>(now+a.seed*500)%9000<2800?{p:'wave',f:Math.floor(now/170)%2}:null});
+   npc(0,2,{name:'Lola',fig:npcFig({g:1,b:0,pele:'pele5',hair:['chanel','vermelho'],face:'piscando',top_under:['espartilho','preto'],bottom:['couro-flare','preto'],shoes:['bota-plataforma','preto'],neck:['choker','rosa']}),face:'y',prop:'shaker',lines:NPC_BARMAN,every:[30000,60000],shake:a=>(now+a.seed*500)%9000<2800,pose:a=>(now+a.seed*500)%9000<2800?{p:'wave',f:Math.floor(now/170)%2}:null});
    neonSign('A',150,172,'ROLÊ CLUB','#ff4fa3');neonSign('B',190,60,'BAR','#43d9e8');
    neon('A',172,'#ff4fa3',0,12);neon('B',172,'#43d9e8',0,12);}},
- {id:'boteco',stageSpot:{x:9,len:3},backdrop:'havana',nome:'Boteco de esquina',desc:'Balcão com barman, viola, sinuca, truco, placar ao vivo, TV e a cidade boêmia lá fora',outdoor:false,spawn:[6,11],build(){
+ {id:'boteco',stageSpot:{x:9,len:3},nome:'Boteco de esquina',desc:'Balcão com barman, sinuca, truco, damas, dominó, placar ao vivo e TV',outdoor:false,spawn:[6,11],build(){
    B.floorAt=(x,y)=>y>=9?'concrete':'hydraulic';
    B.walls=()=>roomWalls('#f2e6c8',150,()=>{R(0,-64,GW*32,64,'#2f7a6a');ctx.fillStyle='rgba(255,255,255,.18)';for(let x=0;x<GW*32;x+=12)ctx.fillRect(x,-64,1,64);for(let y=-64;y<0;y+=12)ctx.fillRect(0,y,GW*32,1);
        R(40,-130,70,44,'#2a3a2a');ctx.font='700 7px Anybody, sans-serif';ctx.fillStyle='#f2efe9';ctx.textBaseline='middle';ctx.fillText('CERVEJA 8',46,-120);ctx.fillText('PASTEL 6',46,-110);ctx.fillText('PF 25',46,-100);
@@ -90,7 +90,9 @@ const SCENES=[
        for(let i=0;i<3;i++){R(20,-130+i*20,180,2,'#6a4a32');for(let k=0;k<16;k++)R(24+k*11,-142+i*20,4,12,['#3f8a4a','#c23b3b','#b9822a','#f0c24a','#efe6d4'][(k+i)%5]);}
        R(230,-120,90,60,'#3a2a20');R(234,-116,82,52,'#c9a26a');ctx.font='700 7px Anybody, sans-serif';ctx.fillStyle='#3a2a20';ctx.fillText('SINUCA R$2',240,-92);});
    barCounter(1,1,5);foodCase(1,6);[2,3,4].forEach(y=>stool(2,y,'nx','#c23b3b'));fridge(0,8);mixer(1,7,'radio');B.blocked.add(key(1,7));
-   [1,2,3,4,5,6,7].forEach(y=>B.blocked.add(key(0,y)));   // o balcão é fechado: ninguém entra atrás dele
+   [1,2,3,4,5,6,7].forEach(y=>B.blocked.add(key(0,y)));   // o balcão é fechado: ninguém entra atrás dele (só o barman, que passeia lá)
+   [1,2,3,4,5,6,7].forEach(y=>B.keep.add(key(0,y)));
+   [1,2,3,4,5,6,7].forEach(y=>B.keep.add(key(0,y)));
    baleiro(1,2);baleiro(1,5);
    beerCrates(0,10,4);beerCrates(0,11,3);beerCrates(1,11,2);crates(3,8);
    poolTable(6,4);cueRack(11);ceilingFan(6,6,148);ceilingFan(3,3,148);
@@ -103,9 +105,7 @@ const SCENES=[
    jukebox(11,6);lampPost(11,11);vaso(11,0,true);
    damasTable(10,4);cushion(9,4,'#c23b3b');cushion(11,4,'#2a4a7a');   // damas e dominó também no boteco
    dominoTable(3,5);stool(2,5,'x','#c23b3b');stool(4,5,'nx','#c23b3b');
-   cushion(6,1,'#c23b3b');
-   npc(0,3,{name:'Zé do Balcão',fig:npcFig({b:2,pele:'pele3',hair:['raspado','preto'],face:'na-boa',top_under:['camiseta','branco'],bottom:['bermuda','jeans'],shoes:['skate','preto']}),face:'x',prop:'pano',lines:NPC_BALCAO,every:[6000,12000]});
-   npc(6,1,{name:'Seu Tonho',sit:2,fig:npcFig({pele:'pele4',hair:['wolf','preto'],face:'sonolento',headwear:['chapeu-cowboy','bege'],top_under:['regata','branco'],top_over:['camisa-aberta','vinho'],bottom:['cargo','militar'],shoes:['cowboy','marrom']}),face:'x',prop:'viola',lines:NPC_VIOLA,every:[5000,10000]});
+   npc(0,3,{name:'Zé do Balcão',fig:npcFig({b:2,pele:'pele3',hair:['raspado','preto'],face:'na-boa',top_under:['camiseta','branco'],bottom:['bermuda','jeans'],shoes:['skate','preto']}),face:'x',prop:'pano',lines:NPC_BALCAO,every:[30000,60000],wander:{x0:0,y0:1,x1:0,y1:7}});
    stringLights([[0,8.6],[12,8.6]],120,4);}},
  {id:'piscina',stageSpot:{x:4.4,len:3},nome:'Casa com piscina',desc:'Piscina de entrar (dá pra nadar!) com boias, bar de drinks, palmeiras e espreguiçadeiras',outdoor:true,spawn:[2,7],build(){
    B.floorAt=(x,y)=>(x>=3&&x<=9&&y>=3&&y<=8)?'deck':'grass';
@@ -136,7 +136,6 @@ const SCENES=[
    damasTable(2,6);zabuton(1,6,'#7a2a3a');zabuton(3,6,'#2a4a7a');   // um passo à esquerda: (4,6) e (5,6) levam à ponte
    fishSpot(5,5,'x');fishSpot(5,7,'x');fishSpot(8,9,'ny');fishSpot(10,9,'ny');
    rug(7,1,2,2,'#cfc28a','#a89a5a',true);rug(1,0,2,2,'#9a7a5a','#cfc28a',true);rug(9,10,2,1,'#7a2a3a','#e8c0a0',true);   // tatames para sentar
-   npc(4,10,{name:'Gueixa Haru',fig:npcFig({g:1,b:0,pele:'pele1',hair:['coque-duplo','preto'],face:'serio',headwear:['presilhas','vermelho'],neck:['choker','vermelho'],top_under:['arrastao','vinho'],bottom:['saia-xadrez','preto'],shoes:['plataforma','branco']}),face:'x',prop:'leque',lines:NPC_GEISHA,every:[9000,16000],slow:1.1,wander:{x0:3,y0:10,x1:7,y1:11}});
    mixer(9,1);rock(8,11,false,'#8a8680');rock(4,7,true,'#9a968e');}},
  {id:'praia',stageSpot:{x:5,len:3},nome:'Luau na praia',desc:'Mar, coqueiros, fogueira, vôlei, rede, cadeiras, cangas e troncos pra sentar e barraca de drinks',outdoor:true,cliff:'sand',spawn:[2,10],build(){
    B.floorAt=(x,y)=>x>=3&&x<=10&&y>=2&&y<=4?'sandlight':'sand';   // a quadra de vôlei é a areia clarinha
@@ -149,12 +148,12 @@ const SCENES=[
    beachChair(8,9,'ny','#ff7a5a');beachChair(9,9,'ny','#43d9e8');umbrella(9,10,'#ffd84a','#f2efe9');surfboard(10,6);surfboard(10,7);
    drinkHut(2,9);stool(2,8,'y','#ff8fc7');stool(3,8,'y','#ffd84a');torch(1,7);torch(10,1);torch(8,7);mixer(6,1);speaker(7,1);
    stringLights([[0,1],[5,3],[10,1]],90,10);}},
- {id:'rooftop',stageSpot:{x:4.4,len:3},backdrop:'gotham',nome:'Rooftop na cidade',desc:'Terraço sobre uma metrópole que não dorme, jacuzzi, puffs, neon e telescópio panorâmico',outdoor:true,cliff:'building',spawn:[6,10],build(){
+ {id:'rooftop',stageSpot:{x:4.4,len:3},nome:'Rooftop na cidade',desc:'Terraço sobre uma metrópole que não dorme, jacuzzi, puffs, neon e telescópio panorâmico',outdoor:true,cliff:'building',spawn:[6,10],build(){
    B.floorAt=(x,y)=>(x>=7&&y<=4)?'deck':'rooftop';
    B.walls=()=>{glassRail();};
    jacuzzi(8,1);pouf(3,6,'#ff4fa3');pouf(4,7,'#43d9e8');pouf(2,7,'#ffd84a');lowTable(3,7,[[3.5,7.5,'copo','#ff4fa3']]);
    sofa(1,2,'x','#2a2a3a');sofa(1,3,'x','#2a2a3a');sofa(2,1,'y','#2a2a3a');barCounter(11,6,3);stool(10,6,'x','#ff4fa3');stool(10,8,'x','#43d9e8');
-   mixer(5,1);speaker(4,1);speaker(6,1);telescope(3,0);actReg('telescopio',3,0,1,1);vaso(0,11,true);vaso(11,10,true);vaso(0,6);rug(2,9,3,2,'#2a2a3a','#43d9e8',true);
+   mixer(5,1);speaker(4,1);speaker(6,1);telescope(7,6);actReg('telescopio',7,6,1,1);vaso(0,11,true);vaso(11,10,true);vaso(0,6);rug(2,9,3,2,'#2a2a3a','#43d9e8',true);
    stringLights([[0,0],[6,6],[12,0]],110,14);stringLights([[0,12],[6,6]],100,10);}}
 ];
 const sceneById=id=>SCENES.find(s=>s.id===id)||SCENES[0];

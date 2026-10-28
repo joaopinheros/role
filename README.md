@@ -58,9 +58,9 @@ Funcionam no modo servidor e no Pages + Supabase (precisam das mensagens da sala
 
 | Cenário | O quê |
 |---|---|
-| Boteco | sinuca (mesa maior), truco mineiro, damas, dominó; TV do Rolê FM, placar do truco ao vivo (no fim mostra os campeões), barman e violeiro (NPCs), quadro da sambista, tacos, baleiro, caixas de cerveja e a cidade boêmia lá fora |
+| Boteco | sinuca (mesa maior), truco mineiro, damas, dominó; TV do Rolê FM, placar do truco ao vivo (no fim mostra os campeões), barman (NPC) que passeia atrás do balcão, quadro da sambista, tacos, baleiro, caixas de cerveja e a cidade boêmia lá fora |
 | Parque com lago | xadrez, dominó |
-| Templo e lago de carpas | damas, pesca de carpas (4 banquinhos), panda, gueixa com leque (NPC), tatames para sentar |
+| Templo e lago de carpas | damas, pesca de carpas (4 banquinhos), panda, tatames para sentar |
 | Noite do pijama | jogo da memória (2); pôster da guerreira de marinheiro, quadro da cruz, escrivaninha, plantas de folha grossa, TV, almofadas, mesa de comida e ursinhos |
 | Festa em casa | só a decoração e o som |
 | Boate | barwoman (NPC) com falas e cantadas, telão do Rolê FM, focos de luz, puffs e caixas de som para sentar |

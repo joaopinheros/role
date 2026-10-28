@@ -2,7 +2,7 @@
  * Ninguém retransmite áudio: cada pessoa toca o vídeo no próprio aparelho, pelo player oficial do YouTube, e só
  * quando toca em "Ouvir junto" (quem não quer ouvir não baixa nada do YouTube). O servidor guarda o que está tocando,
  * desde quando (relógio dele) e a fila; aqui a gente acerta o relógio e calcula em que segundo a música está.
- * Comandos no chat (/music, /skip, /pause, /play, /fila, /tocando, /dj, /undj, /limpar, /tirar) com regras em
+ * Comandos no chat (/music, /skip, /pause, /play, /fila, /tocando, /limpar, /tirar) com regras em
  * src/engine/fmcore.js. O desenho (dirigível no computador, palco no celular) fica em fmvisual.js.
  * Ajustes visuais e de tempo: FMV.
  */
@@ -28,8 +28,9 @@ const FM_ERR={
   notfound:'Não achei esse vídeo no YouTube.',live:'Transmissão ao vivo não dá. Escolhe um vídeo.',vazio:'Não tem música sua na fila.',
   ninguem:'Não achei essa pessoa no rolê.',dono:'O dono já é DJ.',cedo:'A música ainda não acabou.',
   ocupado:'Já tem uma busca rodando nesta sala. Espera um instante.',buscas:'Você já fez 10 buscas nesta hora. Cola o link, que funciona sempre.',
-  cota:'A busca por nome está no limite de hoje. Cola o link que funciona.',semchave:'A busca por nome ainda não está ligada. Cola o link que funciona.',
+  cota:'A busca por nome está no limite de hoje. Cola o link que funciona.',semchave:'Falta a YOUTUBE_API_KEY nos segredos do Supabase (supabase secrets set YOUTUBE_API_KEY=...). Por enquanto cola o link.',
   nada:'Não achei nada com esse nome. Tenta outras palavras ou cola o link.',tarde:'Já passou o tempo de trocar (60 segundos).',
+  fnvelha:'A busca por nome precisa da função music-resolve nova: publica de novo (supabase functions deploy music-resolve --no-verify-jwt) e guarda a YOUTUBE_API_KEY.',
   nofn:'O Rolê FM ainda não está ligado aqui (falta publicar a função music-resolve).',
   off:'O Rolê FM ainda não está ligado neste servidor.',server:'Não deu pra falar com o servidor agora. Tenta de novo.',
 };
@@ -124,15 +125,10 @@ async function fmCommand(text){
   const need=a=>{if(fmCan(papel,a,sala))return true;fmSay(a==='dj'||a==='undj'?'Só o dono da sala dá ou tira DJ.':'Só o dono ou os DJs podem pular ou pausar.');return false;};
   switch(c.cmd){
     case 'ajuda':fmSay('Comandos: '+FM_HELP.filter(h=>fmHelpOk(h[2])).map(h=>h[1]).join(' · '));break;
-    case 'music':case 'buscar':
+    case 'music':
       if(!c.arg){fmSay('Cola um link do YouTube: /music https://youtu.be/…');break;}
       if(!fmCan(papel,'add',sala)){fmSay(FM_ERR.djs);break;}
       if(fmRoomFor(st.queue,st.eu,papel)<=0){fmSay(FM_ERR.limite);break;}
-      if(c.cmd==='buscar'){   // mostra 5 resultados só para quem pediu, sem tocar
-        if(fmIsLink(c.arg)){fmSay('Pra link, use /music <link>. O /buscar é pra procurar por nome.');break;}
-        fmSay('Procurando no YouTube…');
-        try{const r=await FM.api.search(FM.role,c.arg);fmShowResults(r.results||[]);}catch(e){fmSay(fmErr(e));}
-        break;}
       fmSay(fmIsLink(c.arg)?'Conferindo o link…':'Procurando no YouTube…');
       await run(FM.api.add(FM.role,c.arg),r=>{if(r&&!r.tocando)fmSay(`Na fila (posição ${r.pos}): ${r.title}`);});
       break;
@@ -142,9 +138,6 @@ async function fmCommand(text){
     case 'limpar':if(need('limpar'))await run(FM.api.act(FM.role,'limpar'),n=>{if(!n)fmSay('A fila já estava vazia.');});break;
     case 'fila':{const q=st.queue;fmSay(q.length?`Próximas (${q.length}): `+q.slice(0,5).map((x,i)=>`${i+1}. ${x.title} (@${x.by})`).join(' · '):'A fila está vazia. Põe uma: /music <link>');break;}
     case 'tocando':fmSay(np.status==='parado'?'Nada tocando agora.':`${np.status==='pausado'?'Pausada':'Tocando'}: ${np.title} · ${fmClock(fmCurPos())}${np.dur?' de '+fmClock(np.dur):''} · por @${np.by}`);break;
-    case 'dj':case 'undj':
-      if(!need(c.cmd))break;if(!c.arg){fmSay(`Use /${c.cmd} @usuario`);break;}
-      await run(FM.api.act(FM.role,'dj',{u:c.arg,on:c.cmd==='dj'}));break;
     case 'tirar':
       if(c.arg>0&&!(st.queue[c.arg-1]&&st.queue[c.arg-1].by===st.eu)&&!need('tirarQualquer'))break;
       await run(FM.api.act(FM.role,'tirar',{pos:c.arg}),t=>fmSay('Saiu da fila: '+t));break;

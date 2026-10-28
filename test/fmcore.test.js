@@ -20,7 +20,6 @@ test('comandos do chat', () => {
   assert.deepEqual(F.fmParse('/music https://youtu.be/dQw4w9WgXcQ'), { cmd: 'music', arg: 'https://youtu.be/dQw4w9WgXcQ' });
   assert.deepEqual(F.fmParse('/m ai se eu te pego'), { cmd: 'music', arg: 'ai se eu te pego' });
   assert.deepEqual(F.fmParse('  /SKIP  '), { cmd: 'skip', arg: '' });
-  assert.deepEqual(F.fmParse('/dj @Bia.Souza'), { cmd: 'dj', arg: 'bia.souza' });
   assert.deepEqual(F.fmParse('/tirar'), { cmd: 'tirar', arg: 0 });
   assert.deepEqual(F.fmParse('/tirar 3'), { cmd: 'tirar', arg: 3 });
   assert.equal(F.fmParse('oi gente'), null);
@@ -43,9 +42,8 @@ test('posição da música: andando, pausada e parada; com a diferença de reló
 test('quem pode o quê', () => {
   const sala = { quem: 'todos', priv: 'link' };
   for (const a of ['add', 'ver', 'tirarMinha']) assert.ok(F.fmCan('membro', a, sala), 'membro ' + a);
-  for (const a of ['skip', 'pause', 'play', 'limpar', 'tirarQualquer', 'dj']) assert.ok(!F.fmCan('membro', a, sala), 'membro não ' + a);
+  for (const a of ['skip', 'pause', 'play', 'limpar', 'tirarQualquer']) assert.ok(!F.fmCan('membro', a, sala), 'membro não ' + a);
   for (const a of ['skip', 'pause', 'limpar', 'tirarQualquer']) assert.ok(F.fmCan('dj', a, sala), 'dj ' + a);
-  assert.ok(!F.fmCan('dj', 'dj', sala) && F.fmCan('dono', 'dj', sala) && F.fmCan('dono', 'undj', sala), 'só o dono dá DJ');
   assert.ok(!F.fmCan('membro', 'add', { ...sala, quem: 'djs' }) && F.fmCan('dj', 'add', { ...sala, quem: 'djs' }), 'sala fechada para DJs');
   assert.ok(!F.fmCan('dono', 'add', { quem: 'todos', priv: 'publica' }), 'sala pública não tem Rolê FM');
   assert.ok(F.fmCan('dono', 'skip', { quem: 'todos', priv: 'fechado' }));

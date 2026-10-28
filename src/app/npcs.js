@@ -24,6 +24,8 @@ function npcSpawn(){
 }
 const npcLine=(a,s)=>{const l=Array.isArray(s.lines)?s.lines[ri(s.lines.length)]:s.lines;return typeof l==='function'?l(a):l;};
 function npcThink(a){
+  WALK_NPC=true;try{npcThink_(a);}finally{WALK_NPC=false;}}
+function npcThink_(a){
   const s=a.npc;
   if(now>=a.npcNext&&s.lines){
     a.bubble={text:npcLine(a,s),t:now};

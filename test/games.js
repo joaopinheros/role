@@ -390,7 +390,7 @@ async function solo(browser) {
   console.log('telescópio (rooftop)');
   {
     const { a, b } = await setup(browser, 11, 'e');
-    await go(a, 2, 0);   // o telescópio ficou no lado dos prédios
+    await go(a, 6, 6);   // o telescópio fica no meio do terraço
     ok(!!await waitFor(async () => /telesc/.test(await label(a)), 15000), 'perto da luneta aparece "' + (await label(a)) + '"');
     await a.click('#rAct'); await waitFor(() => stageOn(a), 5000);
     for (const e of ['casal', 'chuveiro', 'vigilante']) {
@@ -409,8 +409,10 @@ async function solo(browser) {
   {
     const { a, b } = await setup(browser, 6, 'n');
     const npcs = await a.evaluate(() => window.__role.npcs());
-    ok(npcs.length === 2 && npcs.some(n => n.n === 'Zé do Balcão') && npcs.some(n => n.n === 'Seu Tonho'), 'o boteco tem o barman e o violeiro: ' + npcs.map(n => n.n).join(', '));
-    ok(npcs.find(n => n.n === 'Seu Tonho').act === 'sit', 'o violeiro está sentado');
+    ok(npcs.length === 1 && npcs[0].n === 'Zé do Balcão', 'o boteco tem só o barman: ' + npcs.map(n => n.n).join(', '));
+    ok(!!await waitFor(async () => (await a.evaluate(() => window.__role.npcs()[0])).x === 0, 3000), 'o barman fica atrás do balcão');
+    const ys = new Set(); for (let i = 0; i < 40; i++) { ys.add((await a.evaluate(() => window.__role.npcs()[0])).y); await sleep(500); }
+    ok(ys.size > 1, 'e passeia por lá: ' + [...ys]);
     ok((await a.textContent('#count')).trim() === '2 na sala', 'os NPCs não contam como gente na sala: "' + (await a.textContent('#count')).trim() + '"');
     await a.evaluate(() => window.__role.go(5, 0));   // o balcão é fechado: não dá para entrar atrás dele
     const behind = await a.evaluate(() => window.__role.go(0, 3));

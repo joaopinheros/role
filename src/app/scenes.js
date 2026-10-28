@@ -226,7 +226,7 @@ function waterFx(){B.ground.push(()=>{for(const W of SCN.water){const pool=W.kin
 
 /* ---------- montar cena ---------- */
 function buildScene(id,isNight){const sc=sceneById(id);
-  B={id,sc,night:!!isNight,acts:[],npcs:[],swim:null,furn:[],blocked:new Set(),seats:new Map(),ground:[],air:[],glowsG:[],glowsA:[],water:[],cfg:{},rugs:[],dance:null,mixer:null,lava:null,bridge:null,floorAt:()=>'grass',walls:()=>{}};
+  B={id,sc,night:!!isNight,acts:[],npcs:[],keep:new Set(),swim:null,furn:[],blocked:new Set(),seats:new Map(),ground:[],air:[],glowsG:[],glowsA:[],water:[],cfg:{},rugs:[],dance:null,mixer:null,lava:null,bridge:null,floorAt:()=>'grass',walls:()=>{}};
   sc.build();if(B.water.length){waterFx();B.ground.unshift(B.ground.pop());}
   if(sc.stageSpot)fmStageReg(sc.stageSpot);   // palco do Rolê FM (só aparece no celular)
   const st=document.createElement('canvas');st.width=WB;st.height=HB;const prev=ctx;ctx=st.getContext('2d');ctx.setTransform(WS,0,0,WS,0,0);

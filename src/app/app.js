@@ -1,6 +1,7 @@
 
 /* ================= caminho ================= */
-function walkable(x,y,tx,ty){if(!SCN||x<0||y<0||x>=GW||y>=GH||SCN.blocked.has(key(x,y)))return false;const s=SCN.seats.get(key(x,y));return !s||s.soft||(x===tx&&y===ty);}   // tapete (soft) dá para atravessar; só senta se o caminho terminar nele
+let WALK_NPC=false;   // true enquanto um NPC decide por onde andar: ele pode usar SCN.keep (atrás do balcão)
+function walkable(x,y,tx,ty){if(!SCN||x<0||y<0||x>=GW||y>=GH)return false;const k=key(x,y);if(SCN.blocked.has(k)&&!(WALK_NPC&&SCN.keep&&SCN.keep.has(k)))return false;const s=SCN.seats.get(k);return !s||s.soft||(x===tx&&y===ty);}   // tapete (soft) dá para atravessar; só senta se o caminho terminar nele
 function findPath(sx,sy,tx,ty){
   if(!walkable(tx,ty,tx,ty))return null;if(sx===tx&&sy===ty)return[];
   const prev=new Map([[key(sx,sy),null]]),q=[[sx,sy]],W=(x,y)=>walkable(x,y,tx,ty);

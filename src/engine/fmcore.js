@@ -46,14 +46,13 @@ const fmIsLink = s => /^(https?:\/\/)?([a-z0-9-]+\.)*(youtube\.com|youtu\.be)(\/
 
 const FM_CMDS = {
   music: 'music', m: 'music', skip: 'skip', pular: 'skip', pause: 'pause', pausar: 'pause', play: 'play',
-  fila: 'fila', tocando: 'tocando', dj: 'dj', undj: 'undj', limpar: 'limpar', tirar: 'tirar', buscar: 'buscar',
+  fila: 'fila', tocando: 'tocando', limpar: 'limpar', tirar: 'tirar',
   fm: 'ajuda', ajuda: 'ajuda',
 };
 /* lista para o autocompletar: [comando, uso, quem pode] */
 const FM_HELP = [
-  ['music', '/music <link ou nome>', 'add'], ['buscar', '/buscar <nome>', 'add'], ['fila', '/fila', 'ver'], ['tocando', '/tocando', 'ver'],
+  ['music', '/music <link ou nome>', 'add'], ['fila', '/fila', 'ver'], ['tocando', '/tocando', 'ver'],
   ['tirar', '/tirar', 'ver'], ['skip', '/skip', 'dj'], ['pause', '/pause', 'dj'], ['play', '/play', 'dj'], ['limpar', '/limpar', 'dj'],
-  ['dj', '/dj @usuario', 'dono'], ['undj', '/undj @usuario', 'dono'],
 ];
 
 /* "/music https://…" → { cmd: 'music', arg: 'https://…' }; texto comum → null; "/xyz" → { cmd: '?', name: 'xyz' } */
@@ -62,7 +61,6 @@ function fmParse(t) {
   if (!m) return null;
   const name = m[1].toLowerCase(), cmd = FM_CMDS[name], arg = (m[2] || '').trim();
   if (!cmd) return { cmd: '?', name, arg };
-  if (cmd === 'dj' || cmd === 'undj') return { cmd, arg: arg.replace(/^@/, '').toLowerCase() };
   if (cmd === 'tirar') return { cmd, arg: arg ? Math.max(0, parseInt(arg, 10) || 0) : 0 };
   return { cmd, arg };
 }
