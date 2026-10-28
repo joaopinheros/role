@@ -5,7 +5,7 @@
  * paredão de caixas. Cada cenário diz onde (stageSpot no catalog.js).
  * Tocar no dirigível ou no palco liga o "Ouvir junto". Tudo que é fixo é desenhado uma vez em cache.
  */
-const FMVIS={sky:null,stage:null,notes:[],hulls:new Map(),stages:new Map(),leds:new Map(),glow:null,perf:{sky:0,stage:0,n:0}};
+const FMVIS={sky:null,stage:null,tvs:new Map(),notes:[],hulls:new Map(),stages:new Map(),leds:new Map(),glow:null,perf:{sky:0,stage:0,n:0}};
 
 /* ---------- letreiro de LED: fonte 3x5 desenhada à mão ---------- */
 /* cada letra: 5 linhas de 3 pontos */
@@ -230,11 +230,36 @@ function fmStageAir(x0,len){
   ctx.restore();
 }
 
+/* tela de TV (boteco, pijama, balada): capa e título do que toca, ou barras de teste quando está parado.
+ * (x,y,w,h) no plano atual do contexto g; o YouTube exige o player visível, então o vídeo em si fica no quadro do canto */
+function fmScreen(g,x,y,w,h){
+  const np=fmNp(),on=FM.on&&FM.ok&&np.status!=='parado';
+  g.fillStyle='#0a0612';g.fillRect(x,y,w,h);
+  if(!on){
+    const bars=['#e8e8e8','#e8e820','#20e8e8','#20e820','#e820e8','#e82020','#2020e8'],bw=w/7;
+    bars.forEach((c,i)=>{g.fillStyle=c;g.fillRect(Math.round(x+i*bw),y,Math.ceil(bw),Math.round(h*.7));});
+    g.fillStyle='#000';g.fillRect(x,y+Math.round(h*.7),w,h-Math.round(h*.7));
+    const s=fmLed(FM.on&&FM.ok?'ROLE FM':'SEM SINAL','#ffb02e','#3a2410'),sw=Math.min(w-4,s.width-4);
+    g.drawImage(s,4,0,sw,5,Math.round(x+(w-sw)/2),Math.round(y+h*.7+(h*.3-5)/2),sw,5);
+    return;
+  }
+  const ch=Math.round(h*.68);
+  if(FM.covers)g.drawImage(FM.covers.wide,x+1,y+1,Math.round(w*.5),ch);else{g.fillStyle='#2a1f45';g.fillRect(x+1,y+1,Math.round(w*.5),ch);}
+  g.fillStyle='#1a1030';g.fillRect(x+Math.round(w*.5)+2,y+1,w-Math.round(w*.5)-3,ch);
+  g.fillStyle='#ff3d8b';g.fillRect(x+Math.round(w*.5)+4,y+3,Math.round((w*.5-8)*Math.min(1,np.dur?fmCurPos()/np.dur:0)),2);
+  const by=fmLed('@'+(np.by||''),'#43d9e8','#10262a');g.drawImage(by,4,0,Math.min(Math.round(w*.5)-8,by.width-4),5,x+Math.round(w*.5)+4,y+9,Math.min(Math.round(w*.5)-8,by.width-4),5);
+  if(!FM.listen&&Math.floor(now/500)%2){g.fillStyle='#ffd23f';g.fillRect(x+Math.round(w*.5)+4,y+ch-9,Math.min(Math.round(w*.5)-8,22),6);}
+  g.fillStyle='#120c1c';g.fillRect(x,y+ch+1,w,h-ch-1);
+  const strip=fmLed(np.title||'','#ffb02e','#3a2410');
+  fmLedRun(g,strip,x+2,y+ch+Math.round((h-ch-5)/2),w-4,70);
+}
+
 /* ---------- toque no dirigível ou no palco ---------- */
 function fmHit(e,wx,wy){
   if(!FM.on||!FM.ok)return false;
   const s=FMVIS.sky;if(s){const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;if(x>=s.x&&x<=s.x+s.w&&y>=s.y&&y<=s.y+s.h){fmActivate();return true;}}
   const p=FMVIS.stage;if(p&&wx>=p.x&&wx<=p.x+p.w&&wy>=p.y+60&&wy<=p.y+p.h){fmActivate();return true;}
+  for(const t of FMVIS.tvs.values())if(wx>=t.x&&wx<=t.x+t.w&&wy>=t.y&&wy<=t.y+t.h){fmActivate();return true;}   // TV, telão
   return false;
 }
 /* balão sobre o palco (em pixels da tela, depois do mundo) */

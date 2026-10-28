@@ -150,7 +150,7 @@ function bookshelf(gx,gy){addF(gx,gy,()=>{box(gx+.1,gy+.2,.8,.6,80,0,'#7a5236','
 function floorLamp(gx,gy){addF(gx,gy,()=>{const c=S(gx+.5,gy+.5);ell(c[0],c[1],8,4,'#3a3646');R(c[0]-1,c[1]-80,2,80,'#3a3646');poly([[c[0]-12,c[1]-78],[c[0]+12,c[1]-78],[c[0]+8,c[1]-96],[c[0]-8,c[1]-96]],'#f3e2b8');},{block:false});
   glowG(gx+.5,gy+.5,90,'#ffd890',.3);glowA(gx+.5,gy+.5,86,30,'#ffe2a0',.5);}
 function rug(x0,y0,w,d,c1,c2,seats){B.ground.push(()=>{for(let i=0;i<w*3;i++)for(let j=0;j<d*3;j++){const fx=x0+.05+i*(w-.1)/(w*3),fy=y0+.05+j*(d-.1)/(d*3),s1=(w-.1)/(w*3),s2=(d-.1)/(d*3);poly([S(fx,fy),S(fx+s1,fy),S(fx+s1,fy+s2),S(fx,fy+s2)],((i+j)%2||(i%3===1&&j%3===1))?c1:c2);}});
-  if(seats)for(let i=0;i<w;i++)for(let j=0;j<d;j++)B.seats.set(key(x0+i,y0+j),{...FACES.y,kind:2});}
+  if(seats)for(let i=0;i<w;i++)for(let j=0;j<d;j++)B.seats.set(key(x0+i,y0+j),{...FACES.y,kind:2,soft:true});}
 function tent(gx,gy){addF(gx,gy,()=>{const a=S(gx,gy+.5),b=S(gx+1,gy+.5),c=S(gx+.5,gy);const tp=up(S(gx+.5,gy+.5),70);
   poly([up(S(gx+.05,gy+.95),0),up(S(gx+.95,gy+.95),0),tp],'#f2efe9');poly([up(S(gx+.95,gy+.95),0),up(S(gx+.95,gy+.05),0),tp],'#d8d2c4');
   poly([up(S(gx+.35,gy+.95),0),up(S(gx+.65,gy+.95),0),up(S(gx+.5,gy+.95),40)],'#3a2a4a');

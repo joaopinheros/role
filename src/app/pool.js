@@ -18,7 +18,7 @@ function gamePoolPlaying(gx,gy){const s=G.acts['sinuca@'+gx+'_'+gy];return !!(s&
 function gamePoolDraw(gx,gy){
   if(!gamePoolPlaying(gx,gy))return false;
   const m=G.acts['sinuca@'+gx+'_'+gy].m;
-  const P=(lx,ly)=>up(S(gx+.1+(lx/TBW)*1.8,gy+.2+(ly/TBH)*.6),27);
+  const P=(lx,ly)=>up(S(gx+.12+(lx/TBW)*2.76,gy+.17+(ly/TBH)*.66),27);
   for(const b of m.balls){
     if(b.in)continue;const[x,y]=P(b.x,b.y);
     circ(x,y+.9,1.8,'rgba(0,0,0,.35)');
@@ -38,7 +38,7 @@ function gamePoolDraw(gx,gy){
 G.defs.sinuca={
   name:'Sinuca',verb:'Jogar sinuca',icon:'dice',n:2,
   /* onde os jogadores ficam em volta da mesa: um de cada lado */
-  stand(a,i){const{x,y,w}=a;return i===0?[[x,y+1],[x+1,y+1],[x-1,y+1],[x+w,y+1],[x-1,y],[x+w,y]]:[[x+1,y-1],[x,y-1],[x+w,y-1],[x-1,y-1],[x+w,y],[x-1,y]];},
+  stand(a,i){const{x,y,w}=a,row=yy=>[1,0,2].filter(k=>k<w).map(k=>[x+k,yy]);return i===0?[...row(y+1),[x-1,y],[x+w,y]]:[...row(y-1),[x+w,y],[x-1,y]];},   // qualquer casa ao longo da mesa
   plates:()=>['tl','tr'],
   init(seed,players){return {balls:poolRack(seed),groups:[null,null],turn:0,shotN:0,sim:null,aim:null,winner:-1,fx:[],potted:[[],[]]};},
   toWire(m){return {b:poolSnap(m.balls),g:m.groups,t:m.turn,n:m.shotN,pt:m.potted};},

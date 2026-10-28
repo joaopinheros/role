@@ -55,7 +55,7 @@ function fmStop(){
   FM.timers.forEach(clearInterval);FM.timers=[];
   if(FM.unsub){FM.unsub();FM.unsub=null;}
   fmListen(false,true);
-  Object.assign(FM,{on:false,ok:false,st:null,role:null,covers:null,coverVid:null,vid:null});
+  Object.assign(FM,{on:false,ok:false,st:null,role:null,covers:null,coverVid:null,vid:null});FMVIS.tvs.clear();
   fmUi();fmHint('');
 }
 /* diferença entre o relógio daqui e o do servidor: 3 medidas, descontando metade da ida e volta */

@@ -74,6 +74,7 @@ function trucoHandOver(a,st){
   if(TS&&TS.st===st&&me_>=0)gBanner(trTeam(me_)===w?'NOSSA!':'ELES',trTeam(me_)===w?'#8fd42a':'#ff8fc7');
   if(m.over>=0){
     if(TS&&TS.st===st&&me_>=0)setTimeout(()=>gBanner(trTeam(me_)===m.over?'VOCÊS VENCERAM!':'ELES VENCERAM',trTeam(me_)===m.over?'#8fd42a':'#ff3d8b'),700);
+    TRUCO_LAST={names:[0,1,2,3].filter(i=>trTeam(i)===m.over).map(i=>tFirst(st,i).slice(0,7)),score:`${pts[0]} x ${pts[1]}`,at:Date.now()};
     gFinish(a,st,m.over,`${pts[0]} x ${pts[1]}`,[0,1,2,3].filter(i=>trTeam(i)===m.over));
   }else if(st.host===live.me){
     const mm=m;setTimeout(()=>{if(st.status==='playing'&&st.m===mm&&mm.phase==='done')trucoHostDeal(a,st);},3400);

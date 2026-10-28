@@ -170,11 +170,12 @@ function fridge(gx,gy){addF(gx,gy,()=>{box(gx+.12,gy+.15,.76,.7,72,0,'#e9e7e2','
 function jukebox(gx,gy){addF(gx,gy,()=>{box(gx+.15,gy+.2,.7,.6,50,0,'#6a2a3a','#4e1f2c','#421a25');const c=up(S(gx+.5,gy+.5),50);ell(c[0],c[1],18,9,'#8a3a4e');
   const D=S(gx+.15,gy+.8);ctx.save();ctx.transform(1,.5,0,1,D[0],D[1]);const cs=['#ffb347','#ff4fa3','#43d9e8'];for(let i=0;i<3;i++){R(3+i*6,-44,4,30,cs[(i+Math.floor(now/400))%3]);}ctx.restore();});
   glowG(gx+.5,gy+1,60,'#ff8fc7',.25,1);}
-function poolTable(gx,gy){actReg('sinuca',gx,gy,2,1);[[gx,gy],[gx+1,gy]].forEach(([x,y],i)=>addF(x,y,()=>{
-  const fx=i?x:x+.1,fw=i?.9:.9;[[x+.15,gy+.2],[x+.8,gy+.7]].forEach(([lx,ly])=>bx(lx,ly,.08,.08,22,0,'#4a3020'));
-  box(fx,gy+.12,fw,.76,4,22,'#7a4a2a','#5a3420','#4a2a18');box(fx+(i?0:.08),gy+.2,fw-.08,.6,1,26,'#2f8a5a','#256f48','#1f5f3e');
-  if(i){if(!gamePoolDraw(gx,gy)){const c=up(S(x+.4,gy+.5),27);[['#f2efe9',-6,0],['#c23b3b',4,2],['#f0c24a',8,-1],['#2f4f7a',10,3],['#26242b',0,4]].forEach(([col,dx,dy])=>circ(c[0]+dx,c[1]+dy,1.6,col));}}
-  else if(!gamePoolPlaying(gx,gy)){const c=up(S(x+.5,gy+.5),27);ctx.strokeStyle='#d8b57e';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(c[0]-14,c[1]+6);ctx.lineTo(c[0]+12,c[1]-6);ctx.stroke();}}));}
+function poolTable(gx,gy){actReg('sinuca',gx,gy,3,1);[0,1,2].forEach(i=>{const x=gx+i;addF(x,gy,()=>{   // 3 casas de comprimento
+  const fx=i===0?x+.08:x,fw=i===1?1:.92-(i===0?0:0);
+  if(i!==1)[[i===0?x+.16:x+.78,gy+.14],[i===0?x+.16:x+.78,gy+.78]].forEach(([lx,ly])=>bx(lx,ly,.08,.08,22,0,'#4a3020'));
+  box(fx,gy+.07,fw,.86,4,22,'#7a4a2a','#5a3420','#4a2a18');box(fx+(i===0?.08:0),gy+.15,fw-(i===0?.08:0)-(i===2?.08:0),.7,1,26,'#2f8a5a','#256f48','#1f5f3e');
+  if(i===2){if(!gamePoolDraw(gx,gy)){const c=up(S(x+.4,gy+.5),27);[['#f2efe9',-6,0],['#c23b3b',4,2],['#f0c24a',8,-1],['#2f4f7a',10,3],['#26242b',0,4]].forEach(([col,dx,dy])=>circ(c[0]+dx,c[1]+dy,1.6,col));}}
+  else if(i===0&&!gamePoolPlaying(gx,gy)){const c=up(S(x+.5,gy+.5),27);ctx.strokeStyle='#d8b57e';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(c[0]-14,c[1]+6);ctx.lineTo(c[0]+12,c[1]-6);ctx.stroke();}});});}
 /* mesa de xadrez: tampo com o tabuleiro; as peças aparecem na posição inicial e acompanham a partida */
 let CP_IDLE=null;
 function chessTable(gx,gy){actReg('xadrez',gx,gy,1,1);addF(gx,gy,()=>{
@@ -186,7 +187,11 @@ function chessTable(gx,gy){actReg('xadrez',gx,gy,1,1);addF(gx,gy,()=>{
 });}
 function plasticTable(gx,gy,col,truco){if(truco)actReg('truco',gx,gy,1,1);addF(gx,gy,()=>{bx(gx+.46,gy+.46,.08,.08,22,0,mul(col,.8));const c=up(S(gx+.5,gy+.5),22);ell(c[0],c[1]+1,17,9,mul(col,.75));ell(c[0],c[1],17,9,col);
   if(truco){drawItem([gx+.16,gy+.2,'garrafa','#b9822a'],22);drawItem([gx+.84,gy+.82,'copo','#f0c24a'],22);gameTrucoDraw(gx,gy);}   // na do truco, a garrafa vai pro canto e as cartas ficam no meio
-  else{drawItem([gx+.4,gy+.45,'garrafa','#b9822a'],22);drawItem([gx+.6,gy+.55,'copo','#f0c24a'],22);}});}
+  else{drawItem([gx+.4,gy+.45,'garrafa','#b9822a'],22);drawItem([gx+.6,gy+.55,'copo','#f0c24a'],22);}
+  const q=up(S(gx+.5,gy+.5),22),v=(gx*3+gy)%3;   // características de mesa de boteco: porta-guardanapo, porção de amendoim ou balde de gelo
+  if(!truco){if(v===0){R(Math.round(q[0])-9,Math.round(q[1])-5,5,6,'#c23b3b');R(Math.round(q[0])-9,Math.round(q[1])-8,5,3,'#fff');}
+    else if(v===1){ell(q[0]+8,q[1]+2,5,2.5,'#e8c03a');ell(q[0]+8,q[1]+1,3.5,1.6,'#c9902a');}
+    else{R(Math.round(q[0])+4,Math.round(q[1])-8,8,9,'#c9ced8');R(Math.round(q[0])+5,Math.round(q[1])-12,2,5,'#3f8a4a');R(Math.round(q[0])+8,Math.round(q[1])-11,2,4,'#3f8a4a');}}});}
 function barCounter(fx,y0,n,face){for(let j=0;j<n;j++){const gy=y0+j;addF(fx,gy,()=>{bx(fx+.05,gy,.75,1,32,0,'#7a4a2e');box(fx,gy,.85,1,4,32,'#c98a5a','#9a6440','#b07048');
   if(j%2===0)drawItem([fx+.4,gy+.4,'garrafa',['#3f8a4a','#c23b3b','#b9822a'][j%3]],36);else drawItem([fx+.4,gy+.5,'copo'],36);});}}
 function djBooth(x0,gy,n){for(let i=0;i<n;i++){const gx=x0+i;addF(gx,gy,()=>{box(gx,gy+.15,1,.85,32,0,'#2e2838','#221d2c','#1b1724');
@@ -221,7 +226,7 @@ function waterFx(){B.ground.push(()=>{for(const W of SCN.water){const pool=W.kin
 
 /* ---------- montar cena ---------- */
 function buildScene(id,isNight){const sc=sceneById(id);
-  B={id,sc,night:!!isNight,acts:[],furn:[],blocked:new Set(),seats:new Map(),ground:[],air:[],glowsG:[],glowsA:[],water:[],cfg:{},rugs:[],dance:null,mixer:null,lava:null,bridge:null,floorAt:()=>'grass',walls:()=>{}};
+  B={id,sc,night:!!isNight,acts:[],npcs:[],swim:null,furn:[],blocked:new Set(),seats:new Map(),ground:[],air:[],glowsG:[],glowsA:[],water:[],cfg:{},rugs:[],dance:null,mixer:null,lava:null,bridge:null,floorAt:()=>'grass',walls:()=>{}};
   sc.build();if(B.water.length){waterFx();B.ground.unshift(B.ground.pop());}
   if(sc.stageSpot)fmStageReg(sc.stageSpot);   // palco do Rolê FM (só aparece no celular)
   const st=document.createElement('canvas');st.width=WB;st.height=HB;const prev=ctx;ctx=st.getContext('2d');ctx.setTransform(WS,0,0,WS,0,0);
@@ -230,7 +235,7 @@ function buildScene(id,isNight){const sc=sceneById(id);
   for(const W of B.water){const P=W.kind==='pool'||W.kind==='jacuzzi';poly([S(W.x0-.08,W.y0-.08),S(W.x0+W.w+.08,W.y0-.08),S(W.x0+W.w+.08,W.y0+W.d+.08),S(W.x0-.08,W.y0+W.d+.08)],P?'#e8e2d4':W.kind==='koi'?'#7a7670':'#8a8a80');
     poly([S(W.x0+.08,W.y0+.08),S(W.x0+W.w-.08,W.y0+.08),S(W.x0+W.w-.08,W.y0+W.d-.08),S(W.x0+.08,W.y0+W.d-.08)],P?'#2f86b8':W.kind==='koi'?'#1f5a6a':'#2a5a7a');}
   B.rugs.forEach(([x0,y0,c1,c2])=>{const n=8,s=(2-.16)/n;for(let i=0;i<n;i++)for(let j=0;j<n;j++){const fx=x0+.08+i*s,fy=y0+.08+j*s;poly([S(fx,fy),S(fx+s,fy),S(fx+s,fy+s),S(fx,fy+s)],(i+j)%2?c1:c2);}
-    for(let i=0;i<2;i++)for(let j=0;j<2;j++)B.seats.set(key(x0+i,y0+j),{...FACES.y,kind:2});});
+    for(let i=0;i<2;i++)for(let j=0;j<2;j++)B.seats.set(key(x0+i,y0+j),{...FACES.y,kind:2,soft:true});});
   if(sc.outdoor){const flr=rng(33),FC=['#ff8fc7','#ffe27a','#9fd3ff','#ffffff','#c49bff'];for(let k=0;k<18;k++){const gx=flr()*12|0,gy=flr()*12|0;if(B.floorAt(gx,gy)!=='grass'||B.blocked.has(key(gx,gy)))continue;
     const c=FC[flr()*FC.length|0];for(let m=0;m<5;m++){const[x,y]=S(gx+.2+flr()*.6,gy+.2+flr()*.6);R(x|0,(y|0)+1,1,3,'#2c6b36');R((x|0)-1,(y|0)-1,3,2,c);}}}
   ctx=prev;B.st=st;B.tint=sc.tint||(sc.dark?'#625a80':sc.outdoor?'#414b78':'#77738f');

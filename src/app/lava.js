@@ -38,6 +38,7 @@ function lavaStart(seed,by){
   addLog(null,'O chão é lava! Fuja das casas que começarem a brilhar.');
 }
 function lavaRecv(d,from){
+  if(d.t==='fire'){const a=peerAvs.get(from);if(a){a.burnUntil=now+LV_BURN;a.bubble={text:'AI! QUEIMEI!',t:now};}return;}   // fogo do dragão
   if(!LV.inScene)return;
   if(d.t==='start')lavaStart(d.seed>>>0,String(d.by||''));
   else if(d.t==='burn'&&LV.on){
@@ -117,7 +118,7 @@ function lavaAir(){
 
 /* fogo em quem queimou (por cima de tudo, na tela) */
 function lavaOverlay(){
-  if(!LV.inScene)return;
+  if(!(SCN&&SCN.id==='vulcao'))return;
   const k=bs*WS/dpr;   // px de tela por unidade do mundo
   for(const a of avatars){
     if(!(a.burnUntil>now))continue;

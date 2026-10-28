@@ -29,9 +29,10 @@ const VIEW = (process.env.VIEW || '1100x760').split('x').map(Number).reduce((w, 
 async function signup(page, nome, user) {
   await page.fill('#suNome', nome); await page.fill('#suUser', user);
   await page.fill('#suEmail', user + '@exemplo.com'); await page.fill('#suTel', '11' + (user.charCodeAt(0) % 2 ? '9' : '9') + rnd(8));
+  await sleep(120);   // dá tempo de os campos formatarem o que foi preenchido antes de enviar
   await page.click('#fSignup button[type=submit]');
   try { await page.waitForSelector('#smsText:not(:empty)'); }
-  catch (e) { console.log('   cadastro travou:', JSON.stringify(await page.evaluate(() => ({ err: document.querySelector('#suErr').textContent, auth: !document.querySelector('#scrAuth').hidden })))); throw e; }
+  catch (e) { console.log('   cadastro travou:', JSON.stringify(await page.evaluate(() => ({ err: document.querySelector('#suErr').textContent, auth: !document.querySelector('#scrAuth').hidden, nome: document.querySelector('#suNome').value, user: document.querySelector('#suUser').value, email: document.querySelector('#suEmail').value, tel: document.querySelector('#suTel').value })))); throw e; }
   await page.fill('#vCode', (await page.textContent('#smsText')).match(/\d{4}/)[0]);
 }
 const inRoom = p => p.waitForFunction(() => !document.querySelector('#roomUI').hidden, null, { timeout: 20000 });
@@ -161,8 +162,9 @@ async function truco(browser) {
   const players = [a];
   for (let i = 0; i < 3; i++) players.push(await join(i));
   await sleep(1500);
-  const seatTiles = [[8, 3], [10, 3], [8, 1], [10, 1]];
+  const seatTiles = [[8, 2], [10, 2], [9, 1], [9, 3]];   // as quatro cadeiras da mesa
   for (let i = 0; i < 4; i++) await players[i].evaluate(([x, y]) => window.__role.go(x, y), seatTiles[i]);
+  await waitFor(async () => (await Promise.all(players.map(p => p.evaluate(() => window.__role.avs()[0].p === 0)))).every(Boolean), 30000);   // só olha o botão com todos parados
   ok(!!await waitFor(async () => (await Promise.all(players.map(label))).every(Boolean), 25000), 'os quatro chegam perto da mesa e veem o botão: "' + (await label(players[0])) + '"');
   await players[0].click('#rAct');
   ok(!!await waitFor(async () => /Entrar na mesa \(1\/4\)/.test(await label(players[1])), 8000), 'a mesa fica esperando gente: "' + (await label(players[1])) + '"');
@@ -266,7 +268,7 @@ const logHas = (p, re) => p.evaluate(src => [...document.querySelectorAll('#log 
 async function damas(browser) {
   console.log('\ndamas (templo)');
   const { a, b, join } = await setup(browser, 9, 'd');
-  await startMatch(a, b, [2, 6], [4, 6], 'damas', 'damas');
+  await startMatch(a, b, [1, 6], [3, 6], 'damas', 'damas');
   const sq = async (p, r, c, flip) => { if (flip) { r = 7 - r; c = 7 - c; } await clickAt(p, 128 + c * 28 + 14, 42 + r * 28 + 14); };
   const mv = async (p, flip, [r0, c0], [r1, c1]) => { await sq(p, r0, c0, flip); await sleep(150); await sq(p, r1, c1, flip); await sleep(500); };
   const board = async p => (await dbgOf(p, 'damas'))?.b;
@@ -284,7 +286,7 @@ async function damas(browser) {
   ok(!!await waitFor(async () => (await board(c)) === (await board(a)), 10000), 'quem chega no meio recebe o tabuleiro atual');
   await mv(a, false, [4, 3], [2, 5]);
   ok(!!await waitFor(async () => (await Promise.all([a, b, c].map(p => dbgOf(p, 'damas')))).every(d => d.escuras === 11), 5000), 'as claras tomam uma peça: 11 escuras nos três');
-  await c.evaluate(() => { window.__role.go(3, 8); }); await sleep(2500); await c.evaluate(() => window.__role.look(3, 6));
+  await c.evaluate(() => { window.__role.go(2, 8); }); await sleep(2500); await c.evaluate(() => window.__role.look(2, 6));
   await shot(a, 'damas_a'); await shot(b, 'damas_b'); await shot(c, 'damas_assistindo');
   await b.click('#stageExit'); await b.waitForTimeout(300); await b.click('#stageExit');
   ok(!!await waitFor(async () => { const g = mine(await games(a), 'damas'); return !g || g.status !== 'playing'; }, 8000), 'desistir encerra a partida');
@@ -388,7 +390,7 @@ async function solo(browser) {
   console.log('telescópio (rooftop)');
   {
     const { a, b } = await setup(browser, 11, 'e');
-    await go(a, 10, 11);
+    await go(a, 2, 0);   // o telescópio ficou no lado dos prédios
     ok(!!await waitFor(async () => /telesc/.test(await label(a)), 15000), 'perto da luneta aparece "' + (await label(a)) + '"');
     await a.click('#rAct'); await waitFor(() => stageOn(a), 5000);
     for (const e of ['casal', 'chuveiro', 'vigilante']) {
@@ -401,6 +403,36 @@ async function solo(browser) {
     const clash = sp.flatMap(([k, p], i) => sp.slice(i + 1).filter(([, q]) => Math.abs(p.x - q.x) < 36 && Math.abs(p.y - q.y) < 26).map(([j]) => k + '/' + j));
     ok(!clash.length, 'as janelas especiais não se sobrepõem' + (clash.length ? ': ' + clash.join(', ') : ''));
     await a.click('#stageExit');
+    await Promise.all([a, b].map(p => p.context().close()));
+  }
+  console.log('NPCs, piscina e dragão');
+  {
+    const { a, b } = await setup(browser, 6, 'n');
+    const npcs = await a.evaluate(() => window.__role.npcs());
+    ok(npcs.length === 2 && npcs.some(n => n.n === 'Zé do Balcão') && npcs.some(n => n.n === 'Seu Tonho'), 'o boteco tem o barman e o violeiro: ' + npcs.map(n => n.n).join(', '));
+    ok(npcs.find(n => n.n === 'Seu Tonho').act === 'sit', 'o violeiro está sentado');
+    ok((await a.textContent('#count')).trim() === '2 na sala', 'os NPCs não contam como gente na sala: "' + (await a.textContent('#count')).trim() + '"');
+    await a.evaluate(() => window.__role.go(5, 0));   // o balcão é fechado: não dá para entrar atrás dele
+    const behind = await a.evaluate(() => window.__role.go(0, 3));
+    ok(behind === false, 'ninguém entra atrás do balcão (fechado)');
+    await Promise.all([a, b].map(p => p.context().close()));
+  }
+  {
+    const { a, b } = await setup(browser, 7, 'w');
+    ok(!(await a.evaluate(() => window.__role.nadando())), 'fora da piscina, ninguém está nadando');
+    ok(await a.evaluate(() => window.__role.go(6, 5)), 'dá para andar para dentro da piscina');
+    ok(!!await waitFor(() => a.evaluate(() => window.__role.nadando()), 12000), 'e lá dentro o boneco nada');
+    await sleep(300); await shot(a, 'piscina_nadando');
+    await Promise.all([a, b].map(p => p.context().close()));
+  }
+  {
+    const { a, b } = await setup(browser, 8, 'g');
+    ok(!!await a.evaluate(() => window.__role.pets().some(p => p.t === 'dragao')), 'o pet do vulcão é o dragão-de-Komodo');
+    ok(await a.evaluate(() => window.__role.dragonTest()), 'posiciona o dragão e a pessoa na frente dele');
+    ok(!!await waitFor(async () => (await a.evaluate(() => window.__role.lava())).queimando, 5000), 'o fogo do dragão queima quem está na frente');
+    const bu = (await a.evaluate(() => window.__role.avs()))[0].u;
+    ok(!!await waitFor(async () => (await b.evaluate(() => window.__role.lava())).burns !== undefined && await b.evaluate(() => window.__role.avs().some(v => v.u && v.p === 0)), 3000), 'o outro está na sala e vê a cena');
+    ok(!!await waitFor(async () => !(await a.evaluate(() => window.__role.lava())).queimando, 4000), 'e a queimadura passa (1,5 s)');
     await Promise.all([a, b].map(p => p.context().close()));
   }
   console.log('o chão é lava (vulcão)');

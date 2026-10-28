@@ -6,7 +6,8 @@
  * (e fica guardada neste aparelho). Quem está na sala vê a pessoa na luneta e fica sabendo do que ela achou.
  *   achou {e}   achei a coisa e (só para avisar a sala)
  */
-const TPW=1000,TPH=400,TR_=118;   // tamanho da cidade e raio da luneta (em pixels da tela do jogo)
+const TPW=1900,TPH=520,TR_=118;   // tamanho da cidade (panorâmica) e raio da luneta (em pixels da tela do jogo)
+const TS_ZOOMS=[.5,1,2,3,5];   // começa de longe, no panorama, e chega a 5x
 const TEV=[   // o que dá para achar: nome curto (aviso), frase para a sala
   {id:'casal',n:'CASAL!',f:'um casal se beijando'},
   {id:'chuveiro',n:'CHUVEIRO!',f:'alguém cantando no chuveiro'},
@@ -33,37 +34,39 @@ G.defs.telescopio={
   test(cmd,arg){if(!TS_)return null;if(cmd==='look'){const e=tsEvents().find(x=>x.id===arg);if(!e)return false;TS_.cx=e.x;TS_.cy=e.y;return true;}return null;},
 };
 
-/* ---------- a cidade (parte fixa, desenhada uma vez) ---------- */
+/* ---------- a cidade: três camadas (torres lá no fundo, prédios do meio, e os mais baixos e mais perto) ---------- */
 function tsCity(night){
   const c=document.createElement('canvas');c.width=TPW;c.height=TPH;const g=c.getContext('2d'),r=rng(77);
   const sky=g.createLinearGradient(0,0,0,TPH);
-  if(night){sky.addColorStop(0,'#05081c');sky.addColorStop(.6,'#1a1840');sky.addColorStop(1,'#3d2c56');}else{sky.addColorStop(0,'#3f8ed8');sky.addColorStop(.7,'#9cd0f0');sky.addColorStop(1,'#e8f0f0');}
+  if(night){sky.addColorStop(0,'#05081c');sky.addColorStop(.55,'#1a1840');sky.addColorStop(1,'#3d2c56');}else{sky.addColorStop(0,'#3f8ed8');sky.addColorStop(.6,'#9cd0f0');sky.addColorStop(1,'#e8f0f0');}
   g.fillStyle=sky;g.fillRect(0,0,TPW,TPH);
-  if(night)for(let i=0;i<160;i++){g.fillStyle=r()<.2?'#fff1d6':'#ffffff';g.fillRect(r()*TPW|0,r()*TPH*.5|0,1,1);}
-  // prédios lá do fundo
-  for(let x=0;x<TPW;){const w=30+r()*50,h=120+r()*160;g.fillStyle=night?'#151a34':'#7f9cb8';g.fillRect(x|0,TPH-h|0,w|0,h|0);
-    if(night)for(let k=0;k<w*h/260;k++)if(r()<.5){g.fillStyle='rgba(255,216,144,.55)';g.fillRect(x+r()*w|0,TPH-h+r()*h|0,2,2);}x+=w;}
-  // prédios da frente, com janelas
-  const bs=[];
-  for(let x=-10;x<TPW;){
-    const w=70+Math.floor(r()*70),h=150+Math.floor(r()*190),top=TPH-h,style=Math.floor(r()*3);
-    const col=night?['#2a2840','#30283a','#22303a'][style]:['#b8a890','#a87a62','#8aa0b8'][style];
-    g.fillStyle='#000';g.fillRect(x-1,top-1,w+2,h+1);g.fillStyle=col;g.fillRect(x,top,w,h);
-    g.fillStyle=night?'rgba(255,255,255,.05)':'rgba(255,255,255,.18)';g.fillRect(x,top,3,h);
-    const wins=[];
-    for(let yy=top+14;yy<TPH-20;yy+=18)for(let xx=x+8;xx<x+w-12;xx+=14){
-      const lit=night?r()<.42:false;wins.push([xx,yy,lit]);
-      g.fillStyle=lit?(r()<.7?'#ffd890':'#cfe4ff'):night?'#141428':(r()<.5?'#7ab0d8':'#a8d0ec');g.fillRect(xx,yy,8,11);
-      g.fillStyle=night?'rgba(0,0,0,.35)':'rgba(255,255,255,.35)';g.fillRect(xx,yy+10,8,1);
+  if(night)for(let i=0;i<260;i++){g.fillStyle=r()<.2?'#fff1d6':'#ffffff';g.fillRect(r()*TPW|0,r()*TPH*.45|0,1,1);}
+  /* uma camada: faixa de prédios apoiados na linha de baixo; devolve os prédios (para colocar as coisas) */
+  const layer=(o)=>{
+    const out=[];
+    for(let x=o.x0||-10;x<TPW;){
+      const w=o.w[0]+Math.floor(r()*(o.w[1]-o.w[0])),h=o.h[0]+Math.floor(r()*(o.h[1]-o.h[0])),top=o.base-h,st=Math.floor(r()*3);
+      const col=o.col[st%o.col.length];
+      g.fillStyle='#000';g.fillRect(x-1,top-1,w+2,h+1);g.fillStyle=col;g.fillRect(x,top,w,h);
+      g.fillStyle=night?'rgba(255,255,255,.05)':'rgba(255,255,255,.18)';g.fillRect(x,top,Math.max(2,o.win-1),h);
+      if(o.spire&&r()<.3){const cx=x+w/2;for(let k=0;k<16;k++){g.fillStyle=k<2?'#000':col;g.fillRect(cx-Math.max(1,(16-k)/4)|0,top-2-k,Math.max(2,(16-k)/2)|0,1);}g.fillStyle='#000';g.fillRect(cx|0,top-34,1,18);}
+      const wins=[];
+      for(let yy=top+o.gap;yy<o.base-o.gap;yy+=o.gap+o.win+1)for(let xx=x+o.gap;xx<x+w-o.gap-o.win;xx+=o.gap+o.win){
+        const lit=night?r()<o.lit:false;wins.push([xx,yy,lit,o.win,o.win+Math.ceil(o.win*.4)]);
+        g.fillStyle=lit?(r()<.7?'#ffd890':'#cfe4ff'):night?'#141428':(r()<.5?'#7ab0d8':'#a8d0ec');g.fillRect(xx,yy,o.win,o.win+Math.ceil(o.win*.4));
+      }
+      if(o.roof&&r()<.5){g.fillStyle=night?'#3a3048':'#6a5a4a';g.fillRect(x+w*.6|0,top-12,12,12);g.fillRect(x+w*.6+2|0,top-15,8,3);}
+      out.push({x,w,h,top,wins,layer:o.id});
+      x+=w+(r()<.3?4+Math.floor(r()*10):0);
     }
-    // coisas no telhado
-    if(r()<.5){g.fillStyle=night?'#3a3048':'#6a5a4a';g.fillRect(x+w*.6|0,top-16,16,16);g.fillRect(x+w*.6+2|0,top-20,12,4);}
-    if(r()<.4){g.fillStyle='#000';g.fillRect(x+w*.3|0,top-30,1,30);}
-    bs.push({x,w,h,top,wins});x+=w+(r()<.35?8+Math.floor(r()*14):0);
-  }
-  // chão da rua
-  g.fillStyle=night?'#0c0c18':'#5a5a60';g.fillRect(0,TPH-10,TPW,10);
-  return{c,bs};
+    return out;
+  };
+  layer({id:0,w:[18,34],h:[190,360],base:TPH-30,col:night?['#151a34','#181c38']:['#8aa0be','#7e96b6'],win:2,gap:3,lit:.28,spire:true});
+  const fog=g.createLinearGradient(0,TPH-230,0,TPH);fog.addColorStop(0,'rgba(0,0,0,0)');fog.addColorStop(1,night?'rgba(70,60,120,.4)':'rgba(220,232,246,.5)');g.fillStyle=fog;g.fillRect(0,TPH-230,TPW,230);
+  const mid=layer({id:1,w:[34,64],h:[120,270],base:TPH-12,col:night?['#1f2140','#242240','#1c2a3a']:['#9aa8c0','#a89aa8','#8aa0b0'],win:3,gap:4,lit:.34,spire:true,roof:true});
+  const near=layer({id:2,w:[60,110],h:[56,150],base:TPH,col:night?['#2a2840','#30283a','#22303a']:['#b8a890','#a87a62','#8aa0b8'],win:5,gap:6,lit:.42,roof:true,x0:-30});
+  g.fillStyle=night?'#0c0c18':'#5a5a60';g.fillRect(0,TPH-6,TPW,6);
+  return{c,bs:mid.concat(near)};
 }
 
 /* onde fica cada coisa (centro, em pixels da cidade): sai dos prédios gerados, sempre igual */
@@ -85,7 +88,7 @@ const tsUfoOn=()=>(now/1000)%70<9;
 function tsStageOpen(a,st,idx,cv){
   tsStageClose();cv.width=SW;cv.height=SH;
   const night=!!(SCN&&SCN.night),saved=LS.get('role-telescopio',[]);
-  TS_={a,st,cv,g:cv.getContext('2d'),raf:0,city:tsCity(night),night,cx:TPW/2,cy:TPH*.55,z:2,drag:null,keys:{},found:new Set(saved),seen:{},last:now};
+  TS_={a,st,cv,g:cv.getContext('2d'),raf:0,city:tsCity(night),night,cx:TPW/2,cy:TPH*.55,z:.5,drag:null,keys:{},found:new Set(saved),seen:{},last:now};
   cv.onpointerdown=e=>{TS_.drag={x:e.clientX,y:e.clientY,cx:TS_.cx,cy:TS_.cy};try{cv.setPointerCapture(e.pointerId);}catch(_){}};
   cv.onpointermove=e=>{const d=TS_&&TS_.drag;if(!d)return;const r=cv.getBoundingClientRect(),k=SW/r.width/TS_.z;TS_.cx=d.cx-(e.clientX-d.x)*k;TS_.cy=d.cy-(e.clientY-d.y)*k;tsClamp();};
   cv.onpointerup=cv.onpointercancel=()=>{if(TS_)TS_.drag=null;};
@@ -101,15 +104,15 @@ function tsClamp(){const v=TR_/TS_.z;TS_.cx=Math.max(v,Math.min(TPW-v,TS_.cx));T
 function tsStep(){
   const T=TS_,dt=Math.min(.05,(now-T.last)/1000);T.last=now;
   const kx=(T.keys.ArrowRight||T.keys.KeyD?1:0)-(T.keys.ArrowLeft||T.keys.KeyA?1:0),ky=(T.keys.ArrowDown||T.keys.KeyS?1:0)-(T.keys.ArrowUp||T.keys.KeyW?1:0);
-  if(kx||ky){T.cx+=kx*160*dt/T.z*2;T.cy+=ky*160*dt/T.z*2;tsClamp();}
+  if(kx||ky){T.cx+=kx*260*dt/Math.max(.6,T.z);T.cy+=ky*260*dt/Math.max(.6,T.z);tsClamp();}
   // achou? a coisa precisa ficar perto do centro por um instante (e estar acontecendo)
   for(const e of tsEvents()){
     if(T.found.has(e.id)||e.on===false)continue;
-    const near=Math.hypot(e.x-T.cx,e.y-T.cy)<46/T.z+12;
+    const near=Math.hypot(e.x-T.cx,e.y-T.cy)<30/T.z+8;
     if(near){T.seen[e.id]=(T.seen[e.id]||0)+dt;if(T.seen[e.id]>.7){T.found.add(e.id);LS.set('role-telescopio',[...T.found]);const ev=TEV.find(x=>x.id===e.id);T.toast={t:'ACHOU: '+ev.n,at:now};gSend(T.a,'achou',{e:e.id});addLog(null,`Você viu ${ev.f}!`);}}
     else T.seen[e.id]=0;
   }
-  gBtns([{t:'ZOOM '+(T.z===2?'3x':'2x'),hot:false,f:()=>{T.z=T.z===2?3:2;tsClamp();}}]);
+  gBtns([{t:'ZOOM '+TS_ZOOMS[(TS_ZOOMS.indexOf(T.z)+1)%TS_ZOOMS.length]+'x',hot:false,f:()=>{const i=TS_ZOOMS.indexOf(T.z);T.z=TS_ZOOMS[(i+1)%TS_ZOOMS.length];tsClamp();}}]);
   gInfo(`Achados: ${T.found.size} de ${TEV.length}\n`+TEV.map(e=>(T.found.has(e.id)?'✓ ':'· ')+(T.found.has(e.id)?e.n.replace(/[!?]+$/,'').toLowerCase():'???')).join('\n'));
 }
 
@@ -118,11 +121,11 @@ function tsLive(g){
   const T=TS_,n=T.night,R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(x),Math.round(y),w,h);};
   const ev=Object.fromEntries(tsEvents().map(e=>[e.id,e]));
   // janelas que acendem e apagam, e gente passando
-  T.city.bs.forEach((b,bi)=>b.wins.forEach(([x,y,lit],wi)=>{
+  T.city.bs.forEach((b,bi)=>b.wins.forEach(([x,y,lit,ww,hh],wi)=>{
     if((bi*7+wi*13)%11!==0)return;
     const on=n?(Math.sin(now/(2600+wi*37)+wi)>.2):false;
-    if(n&&on!==lit)R(x,y,8,11,on?'#ffd890':'#141428');
-    if((wi+bi)%3===0){const k=((now/(5200+wi*91))+wi*.37)%1;if(k<.5)R(x+k*2*10-2,y+3,3,8,n?'rgba(20,10,30,.8)':'rgba(30,30,50,.55)');}
+    if(n&&on!==lit)R(x,y,ww,hh,on?'#ffd890':'#141428');
+    if((wi+bi)%3===0){const k=((now/(5200+wi*91))+wi*.37)%1;if(k<.5)R(x+k*2*ww-2,y+1,Math.max(1,ww-2),hh-2,n?'rgba(20,10,30,.8)':'rgba(30,30,50,.55)');}
   }));
   const frame=(e,w,h,col)=>{R(e.x-w/2-2,e.y-h/2-2,w+4,h+4,'#000');R(e.x-w/2,e.y-h/2,w,h,col);R(e.x-w/2,e.y+h/2,w,2,n?'#3a3048':'#d8d0c0');};
   const sil=n?'#1a0c20':'#2a2440';
@@ -203,5 +206,5 @@ function tsDraw(){
     g.fillStyle='#000';g.fillRect(Math.round(cx-w/2)-2,y-2,Math.round(w)+4,24);g.fillStyle='#ffd23f';g.fillRect(Math.round(cx-w/2),y,Math.round(w),20);g.fillStyle='#000';g.textBaseline='middle';g.fillText(T.toast.t,cx,y+11);g.textBaseline='alphabetic';g.textAlign='left';}
   // minimapa embaixo: onde estou na cidade
   const mw=160,mx=(SW-mw)/2,my=SH-14;g.fillStyle='#22222e';g.fillRect(mx,my,mw,4);g.fillStyle='#ffd23f';g.fillRect(mx+Math.round(T.cx/TPW*mw)-2,my-1,5,6);
-  g.font='700 9px Anybody, sans-serif';g.fillStyle='#8a8aa0';g.textAlign='center';g.fillText('arraste para olhar · setas também',SW/2,SH-20);g.textAlign='left';
+  g.font='700 9px Anybody, sans-serif';g.fillStyle='#8a8aa0';g.textAlign='center';g.fillText('arraste para olhar · setas também · zoom até 5x',SW/2,SH-20);g.textAlign='left';
 }

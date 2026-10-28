@@ -42,6 +42,7 @@ Para testar com duas pessoas: abra uma janela normal e uma anônima, crie a cont
 | `npm run assets` | regera ícones e a imagem de prévia `public/og.png` |
 | `npm test` | teste de ponta a ponta com navegador real (precisa de `npx playwright install chromium` uma vez) |
 | `node test/games.js [nomes]` | testa os jogos com 2 a 5 navegadores (`sinuca,xadrez,truco,damas,domino,memoria,volei,solo` ou `todos`) |
+| `node test/cenarios.js` | confere que todo assento e atividade dos 11 cenários é alcançável a pé (sem servidor) |
 | `node test/fm.js` | testa o Rolê FM (música sincronizada) com 3 navegadores e o player do YouTube simulado |
 | `node --test test/*.test.js` | regras dos jogos (sinuca, truco, damas, dominó) e o servidor de tempo real |
 
@@ -57,13 +58,18 @@ Funcionam no modo servidor e no Pages + Supabase (precisam das mensagens da sala
 
 | Cenário | O quê |
 |---|---|
-| Boteco | sinuca (2), truco mineiro (4, em duplas) |
-| Parque com lago | xadrez (2), dominó (2) |
-| Templo e lago de carpas | damas (2), pesca de carpas (1 por banquinho, 4 banquinhos) |
-| Noite do pijama | jogo da memória com 10 pares (2) |
-| Luau na praia | vôlei de praia (2, um toque) |
-| Ilha do vulcão | o chão é lava (de tempos em tempos ou batendo o gongo) |
-| Rooftop | telescópio para espiar a cidade |
+| Boteco | sinuca (mesa maior), truco mineiro, damas, dominó; TV do Rolê FM, placar do truco ao vivo (no fim mostra os campeões), barman e violeiro (NPCs), quadro da sambista, tacos, baleiro, caixas de cerveja e a cidade boêmia lá fora |
+| Parque com lago | xadrez, dominó |
+| Templo e lago de carpas | damas, pesca de carpas (4 banquinhos), panda, gueixa com leque (NPC), tatames para sentar |
+| Noite do pijama | jogo da memória (2); pôster da guerreira de marinheiro, quadro da cruz, escrivaninha, plantas de folha grossa, TV, almofadas, mesa de comida e ursinhos |
+| Festa em casa | só a decoração e o som |
+| Boate | barwoman (NPC) com falas e cantadas, telão do Rolê FM, focos de luz, puffs e caixas de som para sentar |
+| Luau na praia | vôlei de praia (2), cangas, troncos e cadeiras para sentar |
+| Casa com piscina | dá para entrar e nadar |
+| Ilha do vulcão | o chão é lava (de tempos em tempos ou batendo o gongo) e um dragão-de-Komodo que cospe fogo e queima por 1,5 s |
+| Rooftop | cidade em camadas atrás do terraço (paralaxe), telescópio panorâmico (zoom de 0,5x a 5x) |
+
+NPCs (`src/app/npcs.js`) são bonecos fixos ou passeando, com falas no balão; não contam como gente na sala. Cenários de fundo com paralaxe ficam em `src/app/backdrops.js`. `node test/cenarios.js` confere se todo assento e toda atividade de cada cenário pode ser alcançado a pé.
 
 As regras ficam em `src/engine/` (sem tela, com testes) e as telas em `src/app/` (um arquivo por jogo; a base comum é `games.js`). Não há servidor no meio das partidas: é jogo entre amigos, quem fuçar no navegador consegue trapacear.
 

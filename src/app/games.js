@@ -138,7 +138,8 @@ function gFinish(a,st,win,why,winners){
 function gNear(){
   if(!me||!SCN||!SCN.acts)return null;
   const d=a=>(me.gx-gcx(a))**2+(me.gy-gcy(a))**2;
-  const pri=a=>{const st=G.acts[a.id];return st&&(st.status==='waiting'||gMine(st)>=0)?0:1;};
+  const mineSpot=a=>{const def=G.defs[a.type];if(!def||!def.stand)return false;for(let i=0;i<gN(a.type);i++)if(def.stand(a,i).some(([x,y])=>x===me.gx&&y===me.gy))return true;return false;};   // estou num lugar desta mesa
+  const pri=a=>{if(mineSpot(a))return 0;const st=G.acts[a.id];return st&&(st.status==='waiting'||gMine(st)>=0)?1:2;};
   const near=SCN.acts.filter(a=>Math.abs(me.gx-gcx(a))<=a.w/2+1.2&&Math.abs(me.gy-gcy(a))<=a.d/2+1.2);
   const best=near.sort((p,q)=>pri(p)-pri(q)||d(p)-d(q))[0]||null;
   const cur=near.find(a=>a.id===G.nearId);
