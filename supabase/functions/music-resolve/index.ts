@@ -90,7 +90,11 @@ Deno.serve(async req => {
   try { body = await req.json(); } catch { return json({ error: 'invalid' }, 400); }
   const role = String(body.role || '');
   if (!/^[a-z0-9]{6,16}$/.test(role)) return json({ error: 'invalid' }, 400);
-  const yk = Deno.env.get('YOUTUBE_API_KEY');
+  // aceita o segredo mesmo com espaço sobrando no nome ou no valor; se não achar, o log mostra os nomes que a função enxerga
+  const envAll = Deno.env.toObject();
+  const ykName = Object.keys(envAll).find(k => k.trim().toUpperCase() === 'YOUTUBE_API_KEY');
+  const yk = ykName ? envAll[ykName].trim() || undefined : undefined;
+  if (!yk && (body.q != null || body.link != null)) console.warn('YOUTUBE_API_KEY vazia. Variáveis visíveis:', Object.keys(envAll).join(', '));
   const dbError = (error: { message: string }) => {
     const code = KNOWN.find(k => error.message === k || error.message.endsWith(': ' + k));
     if (!code) console.error('rpc', error);
