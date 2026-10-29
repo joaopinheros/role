@@ -138,7 +138,8 @@ const ownOrigin=()=>/^https?:$/.test(location.protocol)&&!(window.claude&&claude
 const inviteLink=eid=>SRV||ownOrigin()?location.origin+'/r/'+eid:ARTIFACT_URL+'#r-'+eid;
 async function copyText(text,btn){const done=()=>{if(btn){const o=btn.innerHTML;setBtn(btn,'check','Copiado');setTimeout(()=>btn.innerHTML=o,1500);}toast('Link copiado. Agora é só colar no grupo.');};
   try{await navigator.clipboard.writeText(text);done();}catch(e){const i=document.createElement('textarea');i.value=text;document.body.append(i);i.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}i.remove();ok?done():toast('Não deu pra copiar sozinho. Seleciona o link e copia.');}}
-const CART={churrasco:'#8fd42a',festa:'#ff3d8b',pijama:'#c9a5ff',parque:'#13b3c4',boate:'#6c3ce0',boteco:'#ffd23f',piscina:'#4fc3f7',vulcao:'#ff6a3d',templo:'#ff5a5a',praia:'#ffd23f',rooftop:'#6c3ce0'};
+/* a paleta dos cartuchos: os seis blocos de cor do pôster de Cowboy Bebop (laranja, amarelo, vermelho, azul-céu, magenta, azul-fundo) */
+const CART={churrasco:'#f2e300',festa:'#b83a9c',pijama:'#1a9bdc',parque:'#ec3f0a',boate:'#0a6aa5',boteco:'#c4122f',piscina:'#1a9bdc',vulcao:'#ec3f0a',templo:'#c4122f',praia:'#f2e300',rooftop:'#b83a9c'};
 const cartColor=id=>CART[id]||'#6c3ce0';
 function setTime(n){document.body.dataset.time=n?'night':'day';}
 function chipsFor(el,r){el.innerHTML='';const sc=sceneById(r.cena);
