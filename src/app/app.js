@@ -242,14 +242,19 @@ async function afterAuth(){applyFig(false);
 
 /* ---------- início ---------- */
 async function openHome(){go('#scrHome');$('#homeName').textContent=ME.nome;$('#homeUser').textContent='@'+ME.usuario;drawHomeAv();
-  const box=$('#myRoles');box.innerHTML='<div class="empty">Carregando…</div>';vitrine('festa',true);
+  const box=$('#myRoles');box.innerHTML='<div class="empty">Carregando…</div>';vitrine('churrasco',true);
   try{const mine=(await DB.list(`data/users/${UID}`)).filter(d=>d.id.startsWith('r_'));
     const roles=(await Promise.all(mine.map(async m=>{const r=await DB.get('roles/'+m.data.eid);return r&&{...r,eid:m.data.eid,papel:m.data.papel};}))).filter(Boolean).sort((a,b)=>(b.criado||0)-(a.criado||0));
-    box.innerHTML='';if(!roles.length){box.innerHTML='<div class="empty">Nenhum rolê ainda. Cria o primeiro e chama a galera.</div>';return;}
-    roles.forEach(r=>{const cart=document.createElement('div');cart.className='cart';cart.style.setProperty('--cc',cartColor(r.cena));const d=document.createElement('div');d.className='label ev';d.style.padding='8px';const c=document.createElement('canvas');c.width=192;c.height=160;sceneThumb(r.cena,r.noite,c);
-      const t=document.createElement('div');t.className='t';const b=document.createElement('b');b.textContent=r.nome;const s=document.createElement('span');s.textContent=leftTxt(r);const s2=document.createElement('span');s2.textContent=r.papel==='dono'?'Você criou':'Você foi chamado';t.append(b,s,s2);
-      const bar=document.createElement('div');bar.className='bar';const lk=document.createElement('button');lk.className='px icon';lk.setAttribute('aria-label','Copiar link do convite');setBtn(lk,'link');lk.addEventListener('click',()=>copyText(inviteLink(r.eid),lk));
-      const en=document.createElement('button');en.className='px hot';en.textContent='Entrar';en.disabled=roomLeft(r)<=0;en.addEventListener('click',()=>enterRoom(r.eid));bar.append(lk,en);t.append(bar);d.append(c,t);cart.append(d);box.append(cart);});
+    const vivos=roles.filter(r=>roomLeft(r)>0);   // sala encerrada some da lista
+    const cnt=$('#roomsCount');cnt.hidden=!vivos.length;cnt.textContent=vivos.length+(vivos.length===1?' no ar':' no ar');
+    box.innerHTML='';if(!vivos.length){box.innerHTML='<div class="empty">Nenhuma sala ativa agora. Cria uma e chama a galera.</div>';return;}
+    vivos.forEach(r=>{const row=document.createElement('div');row.className='rrow';row.style.setProperty('--cc',cartColor(r.cena));
+      const c=document.createElement('canvas');c.width=192;c.height=160;sceneThumb(r.cena,r.noite,c);
+      const t=document.createElement('div');t.className='rt';const b=document.createElement('b');b.textContent=r.nome;
+      const m=document.createElement('div');m.className='rm';const c1=document.createElement('span');c1.className='chip live';c1.textContent=leftTxt(r);const c2=document.createElement('span');c2.className='chip';c2.textContent=r.papel==='dono'?'Você criou':'Você foi chamado';m.append(c1,c2);t.append(b,m);
+      const bar=document.createElement('div');bar.className='ra';const lk=document.createElement('button');lk.className='px icon';lk.setAttribute('aria-label','Copiar link do convite');setBtn(lk,'link');lk.addEventListener('click',()=>copyText(inviteLink(r.eid),lk));
+      const en=document.createElement('button');en.className='px hot';en.textContent='Entrar';en.addEventListener('click',()=>enterRoom(r.eid));bar.append(en,lk);
+      row.append(c,t,bar);box.append(row);});
   }catch(e){box.innerHTML='<div class="empty">Não deu pra carregar seus rolês.</div>';console.warn(e);}}
 function drawHomeAv(){const g=$('#homeAv').getContext('2d');g.clearRect(0,0,112,236);const sp=getSprite(fig,'f',IDLE);g.drawImage(sp,0,-22);}
 $('#homeWard').addEventListener('click',()=>setWard(true));
@@ -262,7 +267,7 @@ function openCreate(){
   $('#cNome').value='';errOn('#c1Err');cStep(1);go('#scrCreate');}
 function cStep(n){cstep=n;show($('#c1'),n===1);show($('#c2'),n===2);show($('#c3'),n===3);$('#cStepLbl').textContent=n+' de 3';
   document.querySelectorAll('.steps i').forEach((i,k)=>i.classList.toggle('on',k<n));$('#createCard').classList.toggle('wide',n===2);
-  show($('#cBack'),n!==3);if(n===2)renderSceneGrid();if(n===1)vitrine(draft.cena,draft.noite);}
+  show($('#cBack'),n!==3);if(n===2)renderSceneGrid();vitrine('churrasco',true);}
 $('#cBack').addEventListener('click',()=>{if(cstep===2)cStep(1);else openHome();});
 $('#c1').addEventListener('submit',e=>{e.preventDefault();draft.nome=$('#cNome').value.trim();
   if(draft.nome.length<2)return errOn('#c1Err','Dá um nome pro rolê.');errOn('#c1Err');cStep(2);});
@@ -270,9 +275,10 @@ document.querySelectorAll('#c2 [data-n]').forEach(b=>b.addEventListener('click',
 function renderSceneGrid(){document.querySelectorAll('#c2 [data-n]').forEach(b=>b.setAttribute('aria-checked',String((b.dataset.n==='1')===draft.noite)));
   const g=$('#sceneGrid');g.innerHTML='';SCENES.forEach(s=>{const b=document.createElement('button');b.type='button';b.className='scn';b.setAttribute('role','radio');b.setAttribute('aria-checked',String(s.id===draft.cena));
     b.style.setProperty('--cc',cartColor(s.id));const lab=document.createElement('span');lab.className='label';const c=document.createElement('canvas');c.width=240;c.height=200;const t=document.createElement('b');t.textContent=s.nome;const d=document.createElement('span');d.textContent=s.desc;lab.append(c,t,d);b.append(lab);
-    b.addEventListener('click',()=>{draft.cena=s.id;g.querySelectorAll('.scn').forEach(x=>x.setAttribute('aria-checked',String(x===b)));vitrine(draft.cena,draft.noite);});g.append(b);
+    b.addEventListener('click',()=>{draft.cena=s.id;g.querySelectorAll('.scn').forEach(x=>x.setAttribute('aria-checked',String(x===b)));scenePrev();});g.append(b);
     setTimeout(()=>sceneThumb(s.id,draft.noite,c),0);});
-  vitrine(draft.cena,draft.noite);}
+  scenePrev();}
+function scenePrev(){const s=SCENES.find(x=>x.id===draft.cena)||SCENES[0];$('#spName').textContent=s.nome;$('#spDesc').textContent=s.desc;setTimeout(()=>sceneThumb(s.id,draft.noite,$('#spCv')),0);}
 $('#c2Next').addEventListener('click',async()=>{const btn=$('#c2Next');btn.disabled=true;
   try{const eid=genId(10),r={nome:draft.nome,cena:draft.cena,noite:draft.noite,dono:ME.usuario,donoNome:ME.nome,criado:Date.now()};
     await DB.set('roles/'+eid,r);await DB.set(`roles/${eid}/gente/${ME.usuario}`,{nome:ME.nome,at:Date.now(),papel:'dono'});await DB.set(`data/users/${UID}/r_${eid}`,{eid,papel:'dono',at:Date.now()});
