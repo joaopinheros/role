@@ -138,8 +138,8 @@ const ownOrigin=()=>/^https?:$/.test(location.protocol)&&!(window.claude&&claude
 const inviteLink=eid=>SRV||ownOrigin()?location.origin+'/r/'+eid:ARTIFACT_URL+'#r-'+eid;
 async function copyText(text,btn){const done=()=>{if(btn){const o=btn.innerHTML;setBtn(btn,'check','Copiado');setTimeout(()=>btn.innerHTML=o,1500);}toast('Link copiado. Agora é só colar no grupo.');};
   try{await navigator.clipboard.writeText(text);done();}catch(e){const i=document.createElement('textarea');i.value=text;document.body.append(i);i.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}i.remove();ok?done():toast('Não deu pra copiar sozinho. Seleciona o link e copia.');}}
-/* a paleta dos cartuchos: os seis blocos de cor do pôster de Cowboy Bebop (laranja, amarelo, vermelho, azul-céu, magenta, azul-fundo) */
-const CART={churrasco:'#f2e300',festa:'#b83a9c',pijama:'#1a9bdc',parque:'#ec3f0a',boate:'#0a6aa5',boteco:'#c4122f',piscina:'#1a9bdc',vulcao:'#ec3f0a',templo:'#c4122f',praia:'#f2e300',rooftop:'#b83a9c'};
+/* a paleta dos cartuchos: as cores chapadas dos cartazes de MF DOOM e Kanye (lima, rosa, índigo, laranja, roxo, vermelho) */
+const CART={churrasco:'#d9e24a',festa:'#f27ad8',pijama:'#4b3fd1',parque:'#e9772b',boate:'#6b2fa5',boteco:'#e8503a',piscina:'#4b3fd1',vulcao:'#e8503a',templo:'#f27ad8',praia:'#d9e24a',rooftop:'#6b2fa5'};
 const cartColor=id=>CART[id]||'#6c3ce0';
 function setTime(n){document.body.dataset.time=n?'night':'day';}
 function chipsFor(el,r){el.innerHTML='';const sc=sceneById(r.cena);

@@ -348,55 +348,57 @@ p{margin:0}
   .instage .chat-dock{left:76px;bottom:16px;width:calc(100% - 76px - 20px)}
   .fmon.instage .chat-dock{width:calc(100% - 76px - 290px)}
 }
-/* ===== telas de entrada (login, início, criar rolê, convite): paleta de Cowboy Bebop =====
-   Fundo preto, blocos chapados de laranja, amarelo, vermelho, azul-céu, magenta e azul-fundo, cantos retos, sem sombra,
-   retícula de pontos (meio-tom) nos blocos de título. Só vale para .screen: a sala continua com a paleta do console. */
-.screen{--bb-or:#ec3f0a;--bb-ye:#f2e300;--bb-re:#c4122f;--bb-sk:#1a9bdc;--bb-ma:#b83a9c;--bb-bl:#0a6aa5;--bb-paper:#f3eedd;
-  --text:#fff;--muted:#cfc8b6;--shell:var(--bb-bl);--shell-2:#16110f;--berry:var(--bb-or);--sun:var(--bb-ye);--kiwi:var(--bb-sk);--grape:var(--bb-ma);--sh:none;--sh-lg:none;--r:0px;--r-lg:0px;
-  color:#fff;background:linear-gradient(90deg,rgba(0,0,0,.82) 0,rgba(0,0,0,.55) 34%,transparent 66%)}
-.screen .card{background:#000;border:0;border-radius:0;box-shadow:none;padding:12px;gap:12px}
-.screen .card::after{display:none}
-.screen .card>*,.screen .card>form>*,.screen .card>div>*{min-width:0}
-.screen .card>form,.screen .card>div{padding:6px 8px 8px}
-.screen .brand{display:block;background:var(--bb-or);color:#000;text-shadow:none;-webkit-text-stroke:0;padding:20px 22px 16px;position:relative;overflow:hidden;letter-spacing:-.03em}
-.screen .brand::after{content:"";position:absolute;inset:0;background:radial-gradient(#000 1.3px,transparent 1.8px) 0 0/7px 7px;opacity:.5;-webkit-mask:linear-gradient(115deg,transparent 40%,#000);mask:linear-gradient(115deg,transparent 40%,#000);pointer-events:none}
-.screen h1{color:#fff;text-transform:uppercase;letter-spacing:.01em;font-stretch:118%}
-.screen h1::after{content:"";display:block;width:64px;height:7px;background:var(--bb-ye);margin-top:10px}
-.screen .muted,.screen .lbl{color:var(--muted)}.screen .lbl{color:#fff;text-transform:uppercase;letter-spacing:.08em;font-size:12px}
-.screen .px{border:0;border-radius:0;box-shadow:none;background:var(--bb-bl);color:#fff;text-transform:uppercase;letter-spacing:.07em;font-size:14px;transition:filter .1s,transform .08s}
-.screen .px:hover{transform:none;box-shadow:none;filter:brightness(1.18)}
-.screen .px:active{transform:translate(2px,2px)}
-.screen .px.hot{background:var(--bb-or);color:#000}
-.screen .px.alt{background:var(--bb-ye);color:#000}
-.screen .px.link{background:none;color:var(--bb-sk);text-transform:none;letter-spacing:0}
-.screen .px:disabled{opacity:.4;box-shadow:none}
-.screen .px.icon{background:var(--bb-sk);color:#000}
-.screen .field input,.screen .linkbox input{background:var(--bb-paper);color:#000;border:0;border-bottom:5px solid var(--bb-sk);border-radius:0;box-shadow:none}
-.screen .field input:focus,.screen .linkbox input:focus{outline:none;box-shadow:none;border-bottom-color:var(--bb-ye);background:#fff}
-.screen .field input::placeholder{color:#7a7566}
+/* ===== telas de entrada (login, início, criar rolê, convite): mistura das ilustrações de MF DOOM e Kanye (cartazes do MPC) =====
+   Papel creme, formas chapadas em roxo, índigo, rosa, laranja e vermelho, verde-limão de destaque, contorno preto grosso,
+   sombra dura (a letra e a caixa parecem extrudadas), cantos retos e textura de papel impresso. Só vale para .screen. */
+.screen{--c-cream:#f6dfbd;--c-cream2:#ecc99a;--c-lime:#d9e24a;--c-red:#e8503a;--c-pur:#6b2fa5;--c-ind:#4b3fd1;--c-pink:#f27ad8;--c-ora:#e9772b;
+  --shell:var(--c-cream);--shell-2:var(--c-cream2);--text:#000;--muted:#3b2d4a;--berry:var(--c-red);--sun:var(--c-lime);--kiwi:var(--c-lime);--grape:var(--c-pur);
+  --sh:5px 5px 0 #000;--sh-lg:9px 9px 0 #000;--r:0px;--r-lg:0px;color:#000;
+  background:linear-gradient(90deg,rgba(38,18,66,.62) 0,rgba(38,18,66,.28) 40%,transparent 68%)}
+.screen .card{background:var(--c-cream);border:4px solid #000;border-radius:0;box-shadow:var(--sh-lg);padding:26px;gap:18px;position:relative}
+.screen .card::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(rgba(60,20,0,.12) 1px,transparent 1.3px) 0 0/5px 5px}
+.screen .card>*{position:relative}
+.screen .card::after{display:block;right:18px;bottom:14px;width:64px;height:14px;background:repeating-linear-gradient(115deg,#000 0 3px,transparent 3px 9px);opacity:1}
+.screen .brand{position:relative;display:inline-block;align-self:flex-start;padding:10px 26px 14px 18px;color:var(--c-pink);text-shadow:1px 1px 0 #000,2px 2px 0 #000,3px 3px 0 #000,4px 4px 0 #000,5px 5px 0 #000,6px 6px 0 #000,7px 7px 0 #000;-webkit-text-stroke:3px #000;paint-order:stroke fill;z-index:0}
+.screen .brand::before{content:"";position:absolute;inset:0;background:var(--c-pur);clip-path:polygon(0 22%,18% 0,100% 8%,94% 100%,6% 90%);z-index:-1}
+.screen h1{color:#000;text-transform:uppercase;letter-spacing:.005em;font-stretch:125%}
+.screen h1::after{content:"";display:block;width:84px;height:11px;background:var(--c-red);border:3px solid #000;box-sizing:border-box;margin-top:10px;transform:skewX(-24deg)}
+.screen .muted{color:var(--muted)}.screen .lbl{color:#000;text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:900}
+.screen .px{border:3px solid #000;border-radius:0;background:var(--c-ind);color:#fff;box-shadow:var(--sh);text-transform:uppercase;letter-spacing:.06em;font-size:14px}
+.screen .px:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 #000}
+.screen .px:active{transform:translate(4px,4px);box-shadow:0 0 0 #000}
+.screen .px.hot{background:var(--c-red);color:#000}
+.screen .px.hot:hover{background:#f0634e}
+.screen .px.alt{background:var(--c-lime);color:#000}
+.screen .px.link{background:none;border-color:transparent;box-shadow:none;color:var(--c-pur);text-transform:none;letter-spacing:0;text-decoration:underline;text-decoration-thickness:2px}
+.screen .px.link:hover{transform:none;box-shadow:none;color:var(--c-red)}
+.screen .px:disabled{opacity:.5;transform:none;box-shadow:var(--sh)}
+.screen .px.icon{background:var(--c-pink);color:#000}
+.screen .field input,.screen .linkbox input{background:#fffaf0;color:#000;border:3px solid #000;border-radius:0;box-shadow:inset 4px 4px 0 rgba(0,0,0,.12)}
+.screen .field input:focus,.screen .linkbox input:focus{outline:none;box-shadow:0 0 0 4px var(--c-lime),inset 4px 4px 0 rgba(0,0,0,.12)}
+.screen .field input::placeholder{color:#7d6f64}
 .screen .field .pre span{color:#000}
-.screen .err{background:var(--bb-re);color:#fff;border:0;border-radius:0}
-.screen .banner{background:var(--bb-ye);border:0;border-radius:0}
-.screen .segb{border:0;border-radius:0;background:var(--bb-bl);color:#fff;text-transform:uppercase;letter-spacing:.07em;font-size:14px}
-.screen .segb[aria-checked="true"],.screen .segb[aria-selected="true"]{background:var(--bb-ye);color:#000;box-shadow:none}
-.screen .steps i{border:0;background:#2a2622;width:22px;height:10px}.screen .steps i.on{background:var(--bb-or)}
-.screen .chip{border:0;border-radius:0;background:var(--bb-sk);color:#000;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
-.screen .chip.sun{background:var(--bb-ye)}.screen .chip.moon{background:var(--bb-bl);color:#fff}.screen .chip.name{background:var(--bb-or)}
-.screen .cart,.screen .scn{background:var(--cc,var(--bb-bl));border:0;border-radius:0;box-shadow:none;padding:10px}
-.screen .cart::before,.screen .scn::before,.screen .cart::after,.screen .scn::after{display:none}
-.screen .cart .label,.screen .scn .label{background:#000;color:#fff;border:0;border-radius:0}
-.screen .scn b{color:#fff;text-transform:uppercase;letter-spacing:.02em;font-size:14px}
-.screen .scn span,.screen .ev .t span{color:#d8d2c2}
-.screen .scn canvas,.screen .inv-thumb,.screen .ev canvas{background:#000;border:0;border-radius:0;filter:saturate(1.15) contrast(1.05)}
-.screen .scn:hover{transform:none;box-shadow:none;filter:brightness(1.12)}
-.screen .scn[aria-checked="true"]{transform:none;box-shadow:none;outline:4px solid #fff;outline-offset:2px}
-.screen .cart .label h2{color:#fff;text-transform:uppercase;letter-spacing:.01em}
-.screen .me-row canvas{background:var(--bb-ye);border:0;border-radius:0;box-shadow:none}
-.screen .me-row .who strong{color:#fff;text-transform:uppercase}
-.screen .empty{border:3px dashed #3a342d;border-radius:0;color:var(--muted)}
-.screen .ev .t b{color:#fff}
+.screen .err{background:var(--c-red);color:#000;border:3px solid #000;border-radius:0;box-shadow:3px 3px 0 #000}
+.screen .banner{background:var(--c-lime);border:3px solid #000;border-radius:0}
+.screen .segb{border:3px solid #000;border-radius:0;background:var(--c-cream2);color:#000;text-transform:uppercase;letter-spacing:.06em;font-size:14px}
+.screen .segb[aria-checked="true"],.screen .segb[aria-selected="true"]{background:var(--c-lime);box-shadow:var(--sh)}
+.screen .steps i{border:3px solid #000;background:var(--c-cream2);border-radius:0;transform:skewX(-14deg)}.screen .steps i.on{background:var(--c-ind)}
+.screen .chip{border:3px solid #000;border-radius:0;background:var(--c-pink);color:#000;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.screen .chip.live{background:var(--c-lime)}.screen .chip.sun{background:var(--c-lime)}.screen .chip.moon{background:var(--c-ind);color:#fff}.screen .chip.name{background:var(--c-ora)}
+.screen .cart,.screen .scn{background:var(--cc,var(--c-ind));border:3px solid #000;border-radius:0;box-shadow:var(--sh);padding:18px 8px 8px}
+.screen .cart::after,.screen .scn::after{background:linear-gradient(to bottom left,var(--c-cream) calc(50% - 1px),#000 calc(50% - 1px) calc(50% + 2.5px),transparent calc(50% + 2.5px))}
+.screen .cart .label,.screen .scn .label{background:#fffaf0;color:#000;border:3px solid #000;border-radius:0}
+.screen .scn b,.screen .cart .label h2{color:#000;text-transform:uppercase;letter-spacing:.01em}
+.screen .scn span,.screen .ev .t span{color:#3b2d4a}
+.screen .scn canvas,.screen .inv-thumb,.screen .ev canvas{background:#1d1240;border-radius:0}
+.screen .scn:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 #000}
+.screen .scn[aria-checked="true"]{transform:translate(-3px,-3px);box-shadow:9px 9px 0 #000;outline:5px solid #fffaf0;outline-offset:1px}
+.screen .me-row canvas{background:var(--c-pink);border:3px solid #000;border-radius:0;box-shadow:var(--sh)}
+.screen .me-row .who strong{color:#000;text-transform:uppercase}
+.screen .empty{border:3px dashed #000;border-radius:0;color:var(--muted)}
+.screen .ev .t b{color:#000}
 .screen .linkbox .px{min-width:112px}
-@media (max-width:760px){.screen{background:linear-gradient(0deg,rgba(0,0,0,.8) 0,rgba(0,0,0,.35) 60%,transparent)}.screen .card{border-radius:0}}
+@media (max-width:760px){.screen{background:linear-gradient(0deg,rgba(38,18,66,.7) 0,rgba(38,18,66,.3) 55%,transparent)}.screen .card{padding:20px 18px 24px}}
 </style>
 
 <div class="app" id="frame">
