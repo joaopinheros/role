@@ -398,7 +398,26 @@ p{margin:0}
 .screen .empty{border:3px dashed #000;border-radius:0;color:var(--muted)}
 .screen .ev .t b{color:#000}
 .screen .linkbox .px{min-width:112px}
-@media (max-width:760px){.screen{background:linear-gradient(0deg,rgba(38,18,66,.7) 0,rgba(38,18,66,.3) 55%,transparent)}.screen .card{padding:20px 18px 24px}}
+/* formato: em vez de caixa flutuando, a tela vira um painel de cartaz colado na borda, de ponta a ponta, com faixas de cor
+   na lateral (como as listras das capas). O cenário aparece inteiro do outro lado, sem escurecer. */
+.screen{padding:0;align-items:stretch;background:none}
+.screen .card{width:min(520px,100%);min-height:100%;margin:0;justify-content:center;gap:20px;padding:40px max(28px,3.2vw) 44px;border:0;
+  box-shadow:6px 0 0 #000,22px 0 0 var(--c-lime),28px 0 0 #000,44px 0 0 var(--c-pink),50px 0 0 #000}
+#createCard{width:min(660px,100%)}
+.screen .card::after{display:none}
+.screen .card>.brand:first-child,.screen #scrAuth .brand{font-size:clamp(64px,9vw,104px);line-height:.9;margin-bottom:6px}
+.screen .card>.brand.sm:first-child{font-size:56px}
+.screen .bar .brand.sm{font-size:44px}
+.screen h1{font-size:clamp(34px,4.4vw,52px);line-height:.95}
+.screen .scenes{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.screen .scenes .scn:nth-child(odd){transform:rotate(-1deg)}.screen .scenes .scn:nth-child(even){transform:rotate(1deg)}
+.screen .scenes .scn[aria-checked="true"]{transform:translate(-3px,-3px) rotate(0)}
+@media (max-width:760px){
+  .screen{align-items:flex-end;padding:0;background:linear-gradient(0deg,rgba(38,18,66,.35),transparent 40%)}
+  .screen .card,#createCard{width:100%;min-height:0;max-height:100%;overflow-y:auto;justify-content:flex-start;padding:26px 20px 30px;
+    box-shadow:0 -6px 0 #000,0 -20px 0 var(--c-lime),0 -26px 0 #000,0 -40px 0 var(--c-pink),0 -46px 0 #000}
+  .screen .card>.brand:first-child,.screen #scrAuth .brand{font-size:60px}
+}
 </style>
 
 <div class="app" id="frame">
