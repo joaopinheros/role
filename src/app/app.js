@@ -139,7 +139,7 @@ const inviteLink=eid=>SRV||ownOrigin()?location.origin+'/r/'+eid:ARTIFACT_URL+'#
 async function copyText(text,btn){const done=()=>{if(btn){const o=btn.innerHTML;setBtn(btn,'check','Copiado');setTimeout(()=>btn.innerHTML=o,1500);}toast('Link copiado. Agora é só colar no grupo.');};
   try{await navigator.clipboard.writeText(text);done();}catch(e){const i=document.createElement('textarea');i.value=text;document.body.append(i);i.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}i.remove();ok?done():toast('Não deu pra copiar sozinho. Seleciona o link e copia.');}}
 /* a paleta dos cartuchos: as cores chapadas dos cartazes de MF DOOM e Kanye (lima, rosa, índigo, laranja, roxo, vermelho) */
-const CART={churrasco:'#fdc014',festa:'#c4147a',pijama:'#1a85d8',parque:'#f7a8b0',boate:'#3a1470',boteco:'#e3101e',piscina:'#1a85d8',vulcao:'#e3101e',templo:'#c4147a',praia:'#fdc014',rooftop:'#3a1470'};
+const CART={churrasco:'#fdf06b',festa:'#f0268f',pijama:'#86d3c9',parque:'#12b567',boate:'#5a2d91',boteco:'#f58a2e',piscina:'#86d3c9',vulcao:'#f58a2e',templo:'#f9b8d0',praia:'#fdf06b',rooftop:'#5a2d91'};
 const cartColor=id=>CART[id]||'#6c3ce0';
 function setTime(n){document.body.dataset.time=n?'night':'day';}
 function chipsFor(el,r){el.innerHTML='';const sc=sceneById(r.cena);
