@@ -635,9 +635,18 @@ window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loa
   lookStage:()=>{const sp=SCN&&SCN.sc.stageSpot;if(sp){const[wx,wy]=S(sp.x+1.5,-.6);centerOn(wx,wy-30);}},
   /* para os testes: escolhe direto (vôlei: posição do meu jogador; pesca: fisga já) */
   act:(type,cmd,arg)=>{const d=G.defs[type];return d&&d.test?d.test(cmd,arg):null;}};
+/* o cubo é preto com as letras vazadas (o cenário aparece por dentro delas): a textura de cada face sai de um canvas */
+const CUBE_TX={l:['O','OTHER'],r:['P','PLACE'],t:['T','THE'],k:['P','PLACE'],e:['T','THE'],u:['O','OTHER']};
+function cubeSkin(root){
+  const mk=(L,W)=>{const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');g.fillStyle='#000';g.fillRect(0,0,512,512);g.globalCompositeOperation='destination-out';
+    g.font="900 330px Anybody,'Arial Black',Impact,sans-serif";g.textAlign='center';g.textBaseline='alphabetic';g.fillText(L,256,360);
+    g.font="900 74px Anybody,'Arial Black',Impact,sans-serif";g.textAlign='left';g.fillText(W,52,466);return c.toDataURL();};
+  const cache={};(root||document).querySelectorAll('.cube .f').forEach(f=>{const k=[...f.classList].find(c=>CUBE_TX[c]);if(!k)return;const [L,W]=CUBE_TX[k];f.style.backgroundImage='url('+(cache[L]||(cache[L]=mk(L,W)))+')';});
+}
+cubeSkin();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>cubeSkin());
 /* carregando: o cubo pequeno girando (o mesmo overlay da abertura, em versão enxuta) */
 const BOOT0=performance.now();
-function spin(on){const l=$('#loading');if(on){if(!l.querySelector('.cube.spin')){const c=$('#cubeTpl').content.cloneNode(true);l.replaceChildren(c);}l.classList.add('wait');show(l);}else{show(l,false);l.classList.remove('wait');}}
+function spin(on){const l=$('#loading');if(on){if(!l.querySelector('.cube.spin')){const c=$('#cubeTpl').content.cloneNode(true);l.replaceChildren(c);cubeSkin(l);}l.classList.add('wait');show(l);}else{show(l,false);l.classList.remove('wait');}}
 (async function boot(){
   const sv=LS.get('role-avatar-y2k',null);if(sv&&sv.code){const f=parse(sv.code);if(f)fig=f;}
   hydrateIcons();renderTabs();

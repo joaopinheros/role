@@ -349,13 +349,11 @@ p{margin:0}
   .fmon.instage .chat-dock{width:calc(100% - 76px - 290px)}
 }
 /* ===== logo: cubo (abertura e carregando) e versão plana (telas de entrada) ===== */
-.loading{background:#fff}
+.loading{background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.92) 0 120px,rgba(255,255,255,.45) 190px,transparent 330px)}
 .loading.wait{background:rgba(2,10,40,.72)}
 .cubewrap{--s:168px;width:var(--s);height:var(--s);perspective:900px;display:block;flex:none}
 .cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;transform:rotateX(-35.26deg) rotateY(-45deg)}
-.cube .f{position:absolute;inset:0;display:grid;place-items:center;background:#000;color:#fff;transform:var(--tf);backface-visibility:hidden;overflow:hidden}
-.cube .f b{font:900 calc(var(--s)*.56)/1 'Anybody','Arial Black',sans-serif;font-stretch:100%;transform:translateY(-6%)}
-.cube .f i{position:absolute;left:12%;bottom:9%;font:900 calc(var(--s)*.13)/1 'Anybody','Arial Black',sans-serif;font-style:normal;letter-spacing:.01em}
+.cube .f{position:absolute;inset:0;background:center/100% 100% no-repeat;outline:3px solid #fff;outline-offset:-3px;transform:var(--tf);backface-visibility:hidden;overflow:hidden}
 .cube .f.l{--tf:translateZ(calc(var(--s)/2 - 2px));--tfo:translateZ(calc(var(--s)*2.2)) rotateX(40deg)}
 .cube .f.r{--tf:rotateY(90deg) translateZ(calc(var(--s)/2 - 2px));--tfo:rotateY(90deg) translateZ(calc(var(--s)*2.2)) rotateX(-40deg)}
 .cube .f.t{--tf:rotateX(90deg) translateZ(calc(var(--s)/2 - 2px)) rotate(180deg);--tfo:rotateX(90deg) translateZ(calc(var(--s)*2.2)) rotate(180deg)}
@@ -370,14 +368,13 @@ p{margin:0}
 .cube.spin{animation:cubeSpin 2.4s linear infinite}
 @keyframes cubeSpin{from{transform:rotateX(-35.26deg) rotateY(-45deg)}to{transform:rotateX(-35.26deg) rotateY(-405deg)}}
 .loading.wait .cubewrap{--s:64px}
-.loading.wait .cube .f{outline:2px solid #fff}
+
 .logo-flat{display:block;width:min(430px,100%);height:auto;aspect-ratio:1110/790;max-height:190px;filter:drop-shadow(5px 5px 0 rgba(0,0,0,.35))}
 @media (prefers-reduced-motion:reduce){.cube.in,.cube.in .f,.cube.spin{animation:none}}
 /* ===== telas de entrada: paleta do retrato em pixel (marinho, magenta, amarelo, vermelho, roxo, azul-céu, rosa); formato do app ===== */
 .screen{--c-navy:#021a4f;--c-lime:#fdc014;--c-red:#e3101e;--c-pur:#3a1470;--c-ind:#1a85d8;--c-pink:#f7a8b0;--c-mag:#c4147a;--c-ora:#f7a8b0;
   --shell:#fff4e2;--shell-2:#f6dcae;--text:#02040c;--muted:#4a3a66;--ink:#02040c;color:#02040c;--berry:var(--c-mag);--sun:var(--c-lime);--kiwi:var(--c-lime);--grape:var(--c-pur);
-  background:radial-gradient(circle at 12% 18%,rgba(242,122,216,.35) 0 14%,transparent 14.2%),radial-gradient(circle at 88% 82%,rgba(217,226,74,.28) 0 18%,transparent 18.2%),
-    linear-gradient(135deg,#2a1466,#4b3fd1 55%,#6b2fa5)}
+}
 .screen .card{margin-top:210px}
 .screen .card>.logo-flat,.screen .bar>.logo-flat{position:absolute;left:0;bottom:calc(100% + 18px);width:250px;max-height:none}
 .screen h1{color:var(--c-navy)}
@@ -391,6 +388,9 @@ p{margin:0}
 .screen .steps i.on{background:var(--c-mag)}
 .screen .me-row canvas{background:var(--c-pink)}
 .screen .field input:focus,.screen .linkbox input:focus{box-shadow:0 0 0 3px var(--c-lime)}
+.screen .logo-flat{transform-origin:50% 50%;animation:logoSpin 7s cubic-bezier(.5,0,.2,1) infinite}
+@keyframes logoSpin{0%,62%{transform:perspective(700px) rotateY(0)}100%{transform:perspective(700px) rotateY(360deg)}}
+@media (prefers-reduced-motion:reduce){.screen .logo-flat{animation:none}}
 .hud-top .logo-flat{width:104px;aspect-ratio:1110/790;filter:none}
 @media (max-width:760px){.screen .card{margin-top:160px}.screen .card>.logo-flat,.screen .bar>.logo-flat{width:190px}}
 </style>
@@ -405,8 +405,8 @@ p{margin:0}
 <g transform="matrix(1 .085 0 1 697 304)"><ellipse cx="150" cy="188" rx="134" ry="102" transform="rotate(14 150 188)"/><ellipse cx="160" cy="190" rx="66" ry="50" fill="#000" transform="rotate(18 160 190)"/><text x="15" y="345" font-size="78" textLength="268" lengthAdjust="spacingAndGlyphs">OTHER</text></g>
 <g transform="matrix(1 .475 0 1 1024 412)"><text x="61" y="279" font-size="335" textLength="225" lengthAdjust="spacingAndGlyphs">P</text><text x="61" y="307" font-size="74" textLength="236" lengthAdjust="spacingAndGlyphs">PLACE</text></g>
 </g></symbol></svg>
-<template id="cubeTpl"><div class="cubewrap"><div class="cube spin"><div class="f l"><b>O</b><i>OTHER</i></div><div class="f r"><b>P</b><i>PLACE</i></div><div class="f t"><b>T</b><i>THE</i></div><div class="f k"><b>P</b><i>PLACE</i></div><div class="f e"><b>T</b><i>THE</i></div><div class="f u"><b>O</b><i>OTHER</i></div></div></div></template>
-<div class="loading" id="loading" role="status" aria-label="Carregando The Other Place"><div class="cubewrap"><div class="cube in"><div class="f l"><b>O</b><i>OTHER</i></div><div class="f r"><b>P</b><i>PLACE</i></div><div class="f t"><b>T</b><i>THE</i></div><div class="f k"><b>P</b><i>PLACE</i></div><div class="f e"><b>T</b><i>THE</i></div><div class="f u"><b>O</b><i>OTHER</i></div></div></div></div>
+<template id="cubeTpl"><div class="cubewrap"><div class="cube spin"><div class="f l"></div><div class="f r"></div><div class="f t"></div><div class="f k"></div><div class="f e"></div><div class="f u"></div></div></div></template>
+<div class="loading" id="loading" role="status" aria-label="Carregando The Other Place"><div class="cubewrap"><div class="cube in"><div class="f l"></div><div class="f r"></div><div class="f t"></div><div class="f k"></div><div class="f e"></div><div class="f u"></div></div></div></div>
 
   <!-- convite -->
   <section class="screen" id="scrInvite" hidden aria-label="Convite">
