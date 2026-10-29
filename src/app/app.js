@@ -139,7 +139,7 @@ const inviteLink=eid=>SRV||ownOrigin()?location.origin+'/r/'+eid:ARTIFACT_URL+'#
 async function copyText(text,btn){const done=()=>{if(btn){const o=btn.innerHTML;setBtn(btn,'check','Copiado');setTimeout(()=>btn.innerHTML=o,1500);}toast('Link copiado. Agora é só colar no grupo.');};
   try{await navigator.clipboard.writeText(text);done();}catch(e){const i=document.createElement('textarea');i.value=text;document.body.append(i);i.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}i.remove();ok?done():toast('Não deu pra copiar sozinho. Seleciona o link e copia.');}}
 /* a paleta dos cartuchos: as cores chapadas dos cartazes de MF DOOM e Kanye (lima, rosa, índigo, laranja, roxo, vermelho) */
-const CART={churrasco:'#d9e24a',festa:'#f27ad8',pijama:'#4b3fd1',parque:'#e9772b',boate:'#6b2fa5',boteco:'#e8503a',piscina:'#4b3fd1',vulcao:'#e8503a',templo:'#f27ad8',praia:'#d9e24a',rooftop:'#6b2fa5'};
+const CART={churrasco:'#fdc014',festa:'#c4147a',pijama:'#1a85d8',parque:'#f7a8b0',boate:'#3a1470',boteco:'#e3101e',piscina:'#1a85d8',vulcao:'#e3101e',templo:'#c4147a',praia:'#fdc014',rooftop:'#3a1470'};
 const cartColor=id=>CART[id]||'#6c3ce0';
 function setTime(n){document.body.dataset.time=n?'night':'day';}
 function chipsFor(el,r){el.innerHTML='';const sc=sceneById(r.cena);
@@ -191,7 +191,7 @@ $('#suTel').addEventListener('input',e=>{e.target.value=fmtTel(e.target.value);}
 function openAuth(){const inv=PENDING_INVITE;show($('#authBanner'),!!inv);if(inv)$('#authBannerName').textContent=inv.nome||'';authTab(false);go('#scrAuth');vitrine(inv?inv.cena:'churrasco',inv?inv.noite:true);}
 function sendCode(dev){PEND.code=SRV?null:String(1000+ri(9000));PEND.tries=0;$('#vTel').textContent=fmtTel(PEND.tel);$('#vCode').value='';errOn('#vErr');
   const shown=SRV?dev:PEND.code;if(!shown){show($('#sms'),false);go('#scrVerify');return;}
-  $('#smsText').textContent='Seu código do Rolê é '+shown;show($('#sms'));clearTimeout(sendCode.h);sendCode.h=setTimeout(()=>show($('#sms'),false),15000);go('#scrVerify');}
+  $('#smsText').textContent='Seu código do The Other Place é '+shown;show($('#sms'));clearTimeout(sendCode.h);sendCode.h=setTimeout(()=>show($('#sms'),false),15000);go('#scrVerify');}
 $('#fSignup').addEventListener('submit',async e=>{e.preventDefault();
   const nome=$('#suNome').value.trim(),usuario=$('#suUser').value.trim(),email=$('#suEmail').value.trim().toLowerCase(),tel=onlyDigits($('#suTel').value);
   if(nome.length<2)return errOn('#suErr','Coloca seu nome.');
@@ -308,7 +308,7 @@ const peerAvs=new Map();
 function playInsert(r){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const o=document.createElement('div');o.className='insert';o.style.setProperty('--cc',cartColor(r.cena));
   o.innerHTML='<div class="flash"></div><div class="slot"></div><div class="ct"><i></i></div>';o.querySelector('i').textContent=r.nome;frame.append(o);setTimeout(()=>o.remove(),900);}
 async function enterRoom(eid,fresh){
-  let r=null;try{r=await DB.get('roles/'+eid);}catch(e){}
+  spin(true);let r=null;try{r=await DB.get('roles/'+eid);}catch(e){}spin(false);
   if(!r){toast('Rolê não encontrado.');return openHome();}
   if(roomLeft(r)<=0){toast('Esse rolê já encerrou: as salas duram 8 horas.',4200);return openHome();}
   playInsert(r);CUR={eid,...r};mode='sala';go('room');setTime(r.noite);setWard(false);zoom=frame.clientWidth<700?.5:1;resize();updZoomBtns();
@@ -635,6 +635,9 @@ window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loa
   lookStage:()=>{const sp=SCN&&SCN.sc.stageSpot;if(sp){const[wx,wy]=S(sp.x+1.5,-.6);centerOn(wx,wy-30);}},
   /* para os testes: escolhe direto (vôlei: posição do meu jogador; pesca: fisga já) */
   act:(type,cmd,arg)=>{const d=G.defs[type];return d&&d.test?d.test(cmd,arg):null;}};
+/* carregando: o cubo pequeno girando (o mesmo overlay da abertura, em versão enxuta) */
+const BOOT0=performance.now();
+function spin(on){const l=$('#loading');if(on){if(!l.querySelector('.cube.spin')){const c=$('#cubeTpl').content.cloneNode(true);l.replaceChildren(c);}l.classList.add('wait');show(l);}else{show(l,false);l.classList.remove('wait');}}
 (async function boot(){
   const sv=LS.get('role-avatar-y2k',null);if(sv&&sv.code){const f=parse(sv.code);if(f)fig=f;}
   hydrateIcons();renderTabs();
@@ -643,6 +646,7 @@ window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loa
   const m=/^#r-([a-z0-9]{6,16})$/.exec(location.hash||'')||/^\/r\/([a-z0-9]{6,16})\/?$/.exec(location.pathname||'');
   ME=await loadSession();if(ME){const f=parse(ME.fig||'');if(f)fig=f;}
   onAtlas(()=>{applyFig(false);});applyFig(false);
+  {const w=1900-(performance.now()-BOOT0);if(w>0&&(!navigator.webdriver||/intro/.test(location.search)))await new Promise(r=>setTimeout(r,w));}   // deixa a abertura do cubo terminar
   show($('#loading'),false);
   if(m){const eid=m[1];
     if(ME){const mine=await DB.get(`data/users/${UID}/r_${eid}`).catch(()=>null);if(mine){clearHash();return enterRoom(eid);}}

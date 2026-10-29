@@ -1,4 +1,4 @@
-<title>Rolê</title>
+<title>The Other Place</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <!--FONTS-->
 <style>
@@ -348,36 +348,70 @@ p{margin:0}
   .instage .chat-dock{left:76px;bottom:16px;width:calc(100% - 76px - 20px)}
   .fmon.instage .chat-dock{width:calc(100% - 76px - 290px)}
 }
-/* ===== telas de entrada: só a paleta (roxo, índigo, rosa, lima, laranja, vermelho, creme); o formato é o do app ===== */
-.screen{--c-cream:#f6dfbd;--c-lime:#d9e24a;--c-red:#e8503a;--c-pur:#6b2fa5;--c-ind:#4b3fd1;--c-pink:#f27ad8;--c-ora:#e9772b;
-  --shell:#fbf0dc;--shell-2:#f1d9b0;--text:#1d1240;--muted:#5a4a78;--ink:#1d1240;color:#1d1240;--berry:var(--c-red);--sun:var(--c-lime);--kiwi:var(--c-lime);--grape:var(--c-pur);
+/* ===== logo: cubo (abertura e carregando) e versão plana (telas de entrada) ===== */
+.loading{background:#fff}
+.loading.wait{background:rgba(2,10,40,.72)}
+.cubewrap{--s:168px;width:var(--s);height:var(--s);perspective:900px;display:block;flex:none}
+.cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;transform:rotateX(-35.26deg) rotateY(-45deg)}
+.cube .f{position:absolute;inset:0;display:grid;place-items:center;background:#000;color:#fff;transform:var(--tf);backface-visibility:hidden;overflow:hidden}
+.cube .f b{font:900 calc(var(--s)*.56)/1 'Anybody','Arial Black',sans-serif;font-stretch:100%;transform:translateY(-6%)}
+.cube .f i{position:absolute;left:12%;bottom:9%;font:900 calc(var(--s)*.13)/1 'Anybody','Arial Black',sans-serif;font-style:normal;letter-spacing:.01em}
+.cube .f.l{--tf:translateZ(calc(var(--s)/2 - 2px));--tfo:translateZ(calc(var(--s)*2.2)) rotateX(40deg)}
+.cube .f.r{--tf:rotateY(90deg) translateZ(calc(var(--s)/2 - 2px));--tfo:rotateY(90deg) translateZ(calc(var(--s)*2.2)) rotateX(-40deg)}
+.cube .f.t{--tf:rotateX(90deg) translateZ(calc(var(--s)/2 - 2px)) rotate(180deg);--tfo:rotateX(90deg) translateZ(calc(var(--s)*2.2)) rotate(180deg)}
+.cube .f.k{--tf:rotateY(180deg) translateZ(calc(var(--s)/2 - 2px))}
+.cube .f.e{--tf:rotateY(-90deg) translateZ(calc(var(--s)/2 - 2px))}
+.cube .f.u{--tf:rotateX(-90deg) translateZ(calc(var(--s)/2 - 2px))}
+.cube.in{animation:cubeIn 1.7s cubic-bezier(.22,.8,.25,1) both}
+.cube.in .f.l,.cube.in .f.r,.cube.in .f.t{animation:assemble 1.5s cubic-bezier(.22,.8,.25,1) both}
+.cube.in .f.r{animation-delay:.12s}.cube.in .f.t{animation-delay:.24s}
+@keyframes cubeIn{from{transform:rotateX(-35.26deg) rotateY(-765deg) scale(.35)}to{transform:rotateX(-35.26deg) rotateY(-45deg) scale(1)}}
+@keyframes assemble{from{transform:var(--tfo);opacity:0}35%{opacity:1}to{transform:var(--tf);opacity:1}}
+.cube.spin{animation:cubeSpin 2.4s linear infinite}
+@keyframes cubeSpin{from{transform:rotateX(-35.26deg) rotateY(-45deg)}to{transform:rotateX(-35.26deg) rotateY(-405deg)}}
+.loading.wait .cubewrap{--s:64px}
+.loading.wait .cube .f{outline:2px solid #fff}
+.logo-flat{display:block;width:min(430px,100%);height:auto;aspect-ratio:1110/790;max-height:190px;filter:drop-shadow(5px 5px 0 rgba(0,0,0,.35))}
+@media (prefers-reduced-motion:reduce){.cube.in,.cube.in .f,.cube.spin{animation:none}}
+/* ===== telas de entrada: paleta do retrato em pixel (marinho, magenta, amarelo, vermelho, roxo, azul-céu, rosa); formato do app ===== */
+.screen{--c-navy:#021a4f;--c-lime:#fdc014;--c-red:#e3101e;--c-pur:#3a1470;--c-ind:#1a85d8;--c-pink:#f7a8b0;--c-mag:#c4147a;--c-ora:#f7a8b0;
+  --shell:#fff4e2;--shell-2:#f6dcae;--text:#02040c;--muted:#4a3a66;--ink:#02040c;color:#02040c;--berry:var(--c-mag);--sun:var(--c-lime);--kiwi:var(--c-lime);--grape:var(--c-pur);
   background:radial-gradient(circle at 12% 18%,rgba(242,122,216,.35) 0 14%,transparent 14.2%),radial-gradient(circle at 88% 82%,rgba(217,226,74,.28) 0 18%,transparent 18.2%),
     linear-gradient(135deg,#2a1466,#4b3fd1 55%,#6b2fa5)}
-.screen .card{margin-top:96px}
-.screen .card>.brand,.screen .bar>.brand{position:absolute;left:0;bottom:calc(100% + 14px);font-size:64px;line-height:1;color:var(--c-pink);text-shadow:3px 3px 0 #1d1240,6px 6px 0 var(--c-lime)}
-.screen .bar>.brand.sm{font-size:64px}
-.screen .px{background:var(--c-ind);color:#fff}
-.screen .px.hot{background:var(--c-red);color:#fff}
-.screen .px.alt{background:var(--c-lime);color:#000}
-.screen .px.icon{background:var(--c-pink);color:#000}
-.screen .px.link{background:none;color:var(--c-pur)}
-.screen .chip{background:var(--c-pink)}.screen .chip.live{background:var(--c-lime)}.screen .chip.moon{background:var(--c-ind);color:#fff}.screen .chip.name{background:var(--c-ora)}
+.screen .card{margin-top:210px}
+.screen .card>.logo-flat,.screen .bar>.logo-flat{position:absolute;left:0;bottom:calc(100% + 18px);width:250px;max-height:none}
+.screen h1{color:var(--c-navy)}
+.screen .px{background:var(--c-navy);color:#fff}
+.screen .px.hot{background:var(--c-mag);color:#fff}
+.screen .px.alt{background:var(--c-lime);color:#02040c}
+.screen .px.icon{background:var(--c-pink);color:#02040c}
+.screen .px.link{background:none;color:var(--c-mag)}
+.screen .chip{background:var(--c-pink)}.screen .chip.live{background:var(--c-lime)}.screen .chip.moon{background:var(--c-navy);color:#fff}.screen .chip.name{background:var(--c-ind);color:#fff}
 .screen .segb[aria-checked="true"],.screen .segb[aria-selected="true"]{background:var(--c-lime)}
-.screen .steps i.on{background:var(--c-ind)}
+.screen .steps i.on{background:var(--c-mag)}
 .screen .me-row canvas{background:var(--c-pink)}
 .screen .field input:focus,.screen .linkbox input:focus{box-shadow:0 0 0 3px var(--c-lime)}
-@media (max-width:760px){.screen .card{margin-top:84px}.screen .card>.brand,.screen .bar>.brand.sm{font-size:52px}}
+.hud-top .logo-flat{width:104px;aspect-ratio:1110/790;filter:none}
+@media (max-width:760px){.screen .card{margin-top:160px}.screen .card>.logo-flat,.screen .bar>.logo-flat{width:190px}}
 </style>
 
 <div class="app" id="frame">
   <canvas id="room" aria-label="Cenário do rolê"></canvas>
 
-  <div class="loading" id="loading"><div class="brand">Rolê</div></div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="logoFlat" viewBox="260 120 1110 790">
+<g font-family="Anybody,'Arial Black',Impact,sans-serif" font-weight="900" fill="#fff">
+<polygon fill="#000" points="278,132 680,296 670,718 272,522"/><polygon fill="#000" points="697,304 1010,409 1018,692 686,747"/><polygon fill="#000" points="1024,412 1350,564 1352,892 1034,738"/>
+<g transform="matrix(1 .41 0 1 278 132)"><text x="55" y="300" font-size="335" textLength="297" lengthAdjust="spacingAndGlyphs">T</text><text x="95" y="372" font-size="74" textLength="200" lengthAdjust="spacingAndGlyphs">THE</text></g>
+<g transform="matrix(1 .085 0 1 697 304)"><ellipse cx="150" cy="188" rx="134" ry="102" transform="rotate(14 150 188)"/><ellipse cx="160" cy="190" rx="66" ry="50" fill="#000" transform="rotate(18 160 190)"/><text x="15" y="345" font-size="78" textLength="268" lengthAdjust="spacingAndGlyphs">OTHER</text></g>
+<g transform="matrix(1 .475 0 1 1024 412)"><text x="61" y="279" font-size="335" textLength="225" lengthAdjust="spacingAndGlyphs">P</text><text x="61" y="307" font-size="74" textLength="236" lengthAdjust="spacingAndGlyphs">PLACE</text></g>
+</g></symbol></svg>
+<template id="cubeTpl"><div class="cubewrap"><div class="cube spin"><div class="f l"><b>O</b><i>OTHER</i></div><div class="f r"><b>P</b><i>PLACE</i></div><div class="f t"><b>T</b><i>THE</i></div><div class="f k"><b>P</b><i>PLACE</i></div><div class="f e"><b>T</b><i>THE</i></div><div class="f u"><b>O</b><i>OTHER</i></div></div></div></template>
+<div class="loading" id="loading" role="status" aria-label="Carregando The Other Place"><div class="cubewrap"><div class="cube in"><div class="f l"><b>O</b><i>OTHER</i></div><div class="f r"><b>P</b><i>PLACE</i></div><div class="f t"><b>T</b><i>THE</i></div><div class="f k"><b>P</b><i>PLACE</i></div><div class="f e"><b>T</b><i>THE</i></div><div class="f u"><b>O</b><i>OTHER</i></div></div></div></div>
 
   <!-- convite -->
   <section class="screen" id="scrInvite" hidden aria-label="Convite">
     <div class="card">
-      <div class="brand sm">Rolê</div>
+      <svg class="logo-flat" role="img" aria-label="The Other Place"><use href="#logoFlat"/></svg>
       <h1>Bora pro rolê?</h1>
       <p class="muted" id="invBy"></p>
       <div class="cart" id="invCart">
@@ -395,7 +429,7 @@ p{margin:0}
   <!-- conta -->
   <section class="screen" id="scrAuth" hidden aria-label="Entrar ou criar conta">
     <div class="card">
-      <div class="brand">Rolê</div>
+      <svg class="logo-flat" role="img" aria-label="The Other Place"><use href="#logoFlat"/></svg>
       <p class="muted" style="font-size:18px;font-weight:600;color:var(--text)">Cada rolê vira um lugar pra galera chegar antes da hora.</p>
       <p class="banner" id="authBanner" hidden>Entre ou crie sua conta pra entrar no rolê <b id="authBannerName"></b>. O convite fica guardado.</p>
       <div class="seg" role="tablist" aria-label="Conta">
@@ -421,7 +455,7 @@ p{margin:0}
   <!-- confirmar número -->
   <section class="screen" id="scrVerify" hidden aria-label="Confirmar número">
     <div class="card">
-      <div class="brand sm">Rolê</div>
+      <svg class="logo-flat" role="img" aria-label="The Other Place"><use href="#logoFlat"/></svg>
       <h1>Confirma teu número</h1>
       <p class="muted">Mandamos um código de 4 dígitos pro <b id="vTel"></b>.</p>
       <form id="fVerify" style="display:flex;flex-direction:column;gap:14px" novalidate>
@@ -436,7 +470,7 @@ p{margin:0}
   <!-- início -->
   <section class="screen" id="scrHome" hidden aria-label="Início">
     <div class="card">
-      <div class="bar" style="justify-content:space-between"><div class="brand sm">Rolê</div><button class="px link" id="logout">Sair</button></div>
+      <div class="bar" style="justify-content:space-between"><svg class="logo-flat" role="img" aria-label="The Other Place"><use href="#logoFlat"/></svg><button class="px link" id="logout">Sair</button></div>
       <div class="me-row">
         <canvas id="homeAv" width="112" height="236"></canvas>
         <div class="who"><strong id="homeName"></strong><span class="muted" id="homeUser"></span><button class="px" id="homeWard" data-i="shirt" style="align-self:flex-start"><span>Editar visual</span></button></div>
@@ -478,7 +512,7 @@ p{margin:0}
   <div id="roomUI" hidden>
     <div class="rban" id="rban" aria-live="polite"></div>
     <header class="hud-top">
-      <div class="brand sm">Rolê</div>
+      <svg class="logo-flat" role="img" aria-label="The Other Place"><use href="#logoFlat"/></svg>
       <div class="event">
         <span class="chip live">Ao vivo</span>
         <span class="chip name" id="rName"></span>
@@ -540,7 +574,7 @@ p{margin:0}
     </div>
   </aside>
 
-  <div class="sms" id="sms" hidden role="status"><div class="ic" data-i="mail"></div><div><small id="smsFrom">SMS de teste do Rolê</small><b id="smsText"></b></div></div>
+  <div class="sms" id="sms" hidden role="status"><div class="ic" data-i="mail"></div><div><small id="smsFrom">SMS de teste do The Other Place</small><b id="smsText"></b></div></div>
   <div class="toast" id="toast" hidden role="status"></div>
 </div>
 

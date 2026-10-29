@@ -39,7 +39,7 @@ const CENAS = {
   templo: 'Templo e lago de carpas', praia: 'Luau na praia', rooftop: 'Rooftop na cidade',
 };
 const DEFAULT_SEO = {
-  title: 'Rolê: o convite vira uma sala em pixel art',
+  title: 'The Other Place: o convite vira uma sala em pixel art',
   desc: 'Crie o rolê, escolha o lugar e mande o link no grupo. Cada convite vira uma sala em pixel art com avatar estilo Y2K, chat, pets e house tocando.',
 };
 
@@ -52,7 +52,7 @@ function origin(req) {
 }
 
 function seoTags({ title, desc, url, image, noindex }) {
-  const ld = { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Rolê', url, description: desc,
+  const ld = { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'The Other Place', url, description: desc,
     applicationCategory: 'SocialNetworkingApplication', operatingSystem: 'Web', inLanguage: 'pt-BR',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'BRL' } };
   return [
@@ -61,7 +61,7 @@ function seoTags({ title, desc, url, image, noindex }) {
     `<link rel="canonical" href="${esc(url)}">`,
     noindex ? '<meta name="robots" content="noindex">' : '<meta name="robots" content="index,follow">',
     '<meta property="og:type" content="website">',
-    '<meta property="og:site_name" content="Rolê">',
+    '<meta property="og:site_name" content="The Other Place">',
     '<meta property="og:locale" content="pt_BR">',
     `<meta property="og:title" content="${esc(title)}">`,
     `<meta property="og:description" content="${esc(desc)}">`,
@@ -104,7 +104,7 @@ function renderPage(req, eid) {
     if (r) {
       const quem = r.donoNome || '@' + r.dono;
       seo = {
-        title: `${r.nome}: ${quem} te chamou | Rolê`,
+        title: `${r.nome}: ${quem} te chamou | The Other Place`,
         desc: `${fmtWhen(r.data, r.hora)} · ${CENAS[r.cena] || 'Rolê'}${r.noite ? ' à noite' : ''}. Aceita o convite e entra na sala.`,
         url: base + '/r/' + eid, image: base + '/og.png', noindex: true,
       };
@@ -285,7 +285,7 @@ async function authStart(c, a) {
   pend.exp = Date.now() + 10 * 60e3;
   pend.tries = 0;
   c.pend = pend;
-  await sendSms(pend.tel, `Seu código do Rolê é ${pend.code}`);
+  await sendSms(pend.tel, `Seu código do The Other Place é ${pend.code}`);
   const masked = pend.tel.slice(0, 2) + '•••••' + pend.tel.slice(-4);
   return { tel: a.tipo === 'login' ? masked : pend.tel, dev: SMS_DEV ? pend.code : undefined };
 }
