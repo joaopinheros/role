@@ -350,15 +350,22 @@ p{margin:0}
 }
 /* ===== telas de entrada: paleta do retrato em pixel (marinho, magenta, amarelo, vermelho, roxo, azul-céu, rosa); formato do app ===== */
 .screen{--c-navy:#021a4f;--c-lime:#fdc014;--c-red:#e3101e;--c-pur:#3a1470;--c-ind:#1a85d8;--c-pink:#f7a8b0;--c-mag:#c4147a;--c-ora:#f7a8b0;
-  --shell:#f6f4fb;--shell-2:#e4dff1;--text:#02040c;--muted:#4a3a66;--ink:#02040c;color:#02040c;--berry:var(--c-mag);--sun:var(--c-lime);--kiwi:var(--c-lime);--grape:var(--c-pur);
+  --shell:#1b2a6b;--shell-2:#2a3b8f;--text:#fff;--muted:#cfd6ff;--ink:#02040c;color:#fff;--berry:var(--c-mag);--sun:var(--c-lime);--kiwi:var(--c-lime);--grape:var(--c-pur);
 }
 
-.screen h1{color:var(--c-navy)}
-.screen .px{background:var(--c-navy);color:#fff}
+.auth-wrap{width:min(440px,100%);margin:auto 0;display:flex;flex-direction:column;gap:20px}
+.auth-wrap .card{width:100%;margin:0}
+.hero h1,.hero p{font-family:'Pixelify Sans','Atkinson Hyperlegible Next',system-ui,sans-serif;color:#fff;text-shadow:3px 3px 0 #000;-webkit-text-stroke:0;margin:0}
+.hero h1{font-size:clamp(42px,6vw,60px);font-weight:700;line-height:.95;letter-spacing:0;color:var(--c-lime,#fdc014);text-shadow:4px 4px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000}
+.hero h1::after{display:none}
+.hero p{margin-top:12px;font-size:17px;font-weight:500;line-height:1.35;text-shadow:2px 2px 0 #000}
+@media (max-width:760px){.auth-wrap{margin:0;max-height:100%}.hero h1{font-size:40px}.hero p{font-size:15px}}
+.screen .card h1{color:#fff}
+.screen .px{background:var(--c-ind);color:#fff}
 .screen .px.hot{background:var(--c-mag);color:#fff}
 .screen .px.alt{background:var(--c-lime);color:#02040c}
 .screen .px.icon{background:var(--c-pink);color:#02040c}
-.screen .px.link{background:none;color:var(--c-mag)}
+.screen .px.link{background:none;color:var(--c-pink)}
 .screen .chip{background:var(--c-pink)}.screen .chip.live{background:var(--c-lime)}.screen .chip.moon{background:var(--c-navy);color:#fff}.screen .chip.name{background:var(--c-ind);color:#fff}
 .screen .segb[aria-checked="true"],.screen .segb[aria-selected="true"]{background:var(--c-lime)}
 .screen .steps i.on{background:var(--c-mag)}
@@ -391,10 +398,10 @@ p{margin:0}
 
   <!-- conta -->
   <section class="screen" id="scrAuth" hidden aria-label="Entrar ou criar conta">
+    <div class="auth-wrap">
+    <header class="hero"><h1>The Other Place</h1><p>Um cantinho em pixel art pra você e seus amigos. Bata papo por texto ou voz, ouça música juntos e jogue sinuca, truco, pesca e mais. É só criar uma sala, mandar o link e se divertir.</p></header>
     <div class="card">
       
-      <h1>The Other Place</h1>
-      <p class="muted" style="font-size:17px;line-height:1.5;color:var(--text)">Um cantinho em pixel art pra você e seus amigos. Bata papo por texto ou voz, ouça música juntos e jogue sinuca, truco, pesca e mais. É só criar uma sala, mandar o link e se divertir.</p>
       <p class="banner" id="authBanner" hidden>Entre ou crie sua conta pra entrar no rolê <b id="authBannerName"></b>. O convite fica guardado.</p>
       <div class="seg" role="tablist" aria-label="Conta">
         <button class="segb" role="tab" id="tabSignup" aria-selected="true">Criar conta</button>
@@ -413,6 +420,7 @@ p{margin:0}
         <p class="err" id="liErr" hidden></p>
         <button class="px hot big" type="submit">Receber código por SMS</button>
       </form>
+    </div>
     </div>
   </section>
 
