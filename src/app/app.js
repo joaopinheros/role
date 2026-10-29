@@ -308,7 +308,7 @@ const peerAvs=new Map();
 function playInsert(r){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const o=document.createElement('div');o.className='insert';o.style.setProperty('--cc',cartColor(r.cena));
   o.innerHTML='<div class="flash"></div><div class="slot"></div><div class="ct"><i></i></div>';o.querySelector('i').textContent=r.nome;frame.append(o);setTimeout(()=>o.remove(),900);}
 async function enterRoom(eid,fresh){
-  spin(true);let r=null;try{r=await DB.get('roles/'+eid);}catch(e){}spin(false);
+  let r=null;try{r=await DB.get('roles/'+eid);}catch(e){}
   if(!r){toast('Rolê não encontrado.');return openHome();}
   if(roomLeft(r)<=0){toast('Esse rolê já encerrou: as salas duram 8 horas.',4200);return openHome();}
   playInsert(r);CUR={eid,...r};mode='sala';go('room');setTime(r.noite);setWard(false);zoom=frame.clientWidth<700?.5:1;resize();updZoomBtns();
@@ -635,18 +635,6 @@ window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loa
   lookStage:()=>{const sp=SCN&&SCN.sc.stageSpot;if(sp){const[wx,wy]=S(sp.x+1.5,-.6);centerOn(wx,wy-30);}},
   /* para os testes: escolhe direto (vôlei: posição do meu jogador; pesca: fisga já) */
   act:(type,cmd,arg)=>{const d=G.defs[type];return d&&d.test?d.test(cmd,arg):null;}};
-/* o cubo é preto com as letras vazadas (o cenário aparece por dentro delas): a textura de cada face sai de um canvas */
-const CUBE_TX={l:['O','OTHER'],r:['P','PLACE'],t:['T','THE'],k:['P','PLACE'],e:['T','THE'],u:['O','OTHER']};
-function cubeSkin(root){
-  const mk=(L,W)=>{const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');g.fillStyle='#000';g.fillRect(0,0,512,512);g.globalCompositeOperation='destination-out';
-    g.font="900 330px Anybody,'Arial Black',Impact,sans-serif";g.textAlign='center';g.textBaseline='alphabetic';g.fillText(L,256,360);
-    g.font="900 74px Anybody,'Arial Black',Impact,sans-serif";g.textAlign='left';g.fillText(W,52,466);return c.toDataURL();};
-  const cache={};(root||document).querySelectorAll('.cube .f').forEach(f=>{const k=[...f.classList].find(c=>CUBE_TX[c]);if(!k)return;const [L,W]=CUBE_TX[k];f.style.backgroundImage='url('+(cache[L]||(cache[L]=mk(L,W)))+')';});
-}
-cubeSkin();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>cubeSkin());
-/* carregando: o cubo pequeno girando (o mesmo overlay da abertura, em versão enxuta) */
-const BOOT0=performance.now();
-function spin(on){const l=$('#loading');if(on){if(!l.querySelector('.cube.spin')){const c=$('#cubeTpl').content.cloneNode(true);l.replaceChildren(c);cubeSkin(l);}l.classList.add('wait');show(l);}else{show(l,false);l.classList.remove('wait');}}
 (async function boot(){
   const sv=LS.get('role-avatar-y2k',null);if(sv&&sv.code){const f=parse(sv.code);if(f)fig=f;}
   hydrateIcons();renderTabs();
@@ -655,7 +643,6 @@ function spin(on){const l=$('#loading');if(on){if(!l.querySelector('.cube.spin')
   const m=/^#r-([a-z0-9]{6,16})$/.exec(location.hash||'')||/^\/r\/([a-z0-9]{6,16})\/?$/.exec(location.pathname||'');
   ME=await loadSession();if(ME){const f=parse(ME.fig||'');if(f)fig=f;}
   onAtlas(()=>{applyFig(false);});applyFig(false);
-  {const w=1900-(performance.now()-BOOT0);if(w>0&&(!navigator.webdriver||/intro/.test(location.search)))await new Promise(r=>setTimeout(r,w));}   // deixa a abertura do cubo terminar
   show($('#loading'),false);
   if(m){const eid=m[1];
     if(ME){const mine=await DB.get(`data/users/${UID}/r_${eid}`).catch(()=>null);if(mine){clearHash();return enterRoom(eid);}}
