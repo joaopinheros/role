@@ -418,6 +418,14 @@ p{margin:0}
 .rrow .ra .px{min-height:40px;font-size:14px}
 .rrow .ra .px.hot{flex:1}
 @media (prefers-reduced-motion:reduce){.rrow .rm .chip.live::before{animation:none}}
+.land{width:min(520px,100%);margin:auto 0;display:flex;flex-direction:column;align-items:flex-start;gap:22px;color:#fff}
+.logo-slot{display:inline-flex;align-items:center;justify-content:center;min-height:86px;padding:8px 0}
+.logo-slot span{font:800 clamp(40px,6vw,64px)/.95 'Anybody','Atkinson Hyperlegible Next',system-ui,sans-serif;font-stretch:125%;letter-spacing:-.01em;color:#fff;text-shadow:4px 4px 0 var(--c-red)}
+.logo-slot img{display:block;max-width:100%;height:auto}
+.land .lead{margin:0;max-width:30em;font-size:clamp(17px,1.5vw,20px);line-height:1.5;color:#fff;text-shadow:0 2px 12px rgba(0,0,12,.7),0 0 2px rgba(0,0,12,.9)}
+.land .px.big{width:auto;padding:0 40px;min-width:220px;min-height:58px;font-size:18px}
+#scrLanding{background:linear-gradient(90deg,rgba(4,6,26,.62) 0,rgba(4,6,26,.3) 45%,transparent 70%)}
+@media (max-width:760px){#scrLanding{background:linear-gradient(0deg,rgba(4,6,26,.7) 0,rgba(4,6,26,.35) 60%,transparent);align-items:flex-end}.land{margin:0 0 8px;align-items:stretch}.land .px.big{width:100%}}
 </style>
 
 <div class="app" id="frame">
@@ -447,10 +455,18 @@ p{margin:0}
     </div>
   </section>
 
+  <!-- apresentação (antes do login) -->
+  <section class="screen" id="scrLanding" hidden aria-label="Apresentação">
+    <div class="land">
+      <div class="logo-slot" id="logoSlot"><span>QUE BADERNA!</span></div>
+      <p class="lead">Um cantinho em pixel art pra você e seus amigos. Converse por texto ou voz, ouça música junto e jogue sinuca, truco, pesca e mais.</p>
+      <button class="px hot big" id="landEnter" type="button">Entrar</button>
+    </div>
+  </section>
+
   <!-- conta -->
   <section class="screen" id="scrAuth" hidden aria-label="Entrar ou criar conta">
     <div class="auth-wrap">
-    <header class="hero"><h1>The Other Place</h1><p>Um cantinho em pixel art pra você e seus amigos. Bata papo por texto ou voz, ouça música juntos e jogue sinuca, truco, pesca e mais. É só criar uma sala, mandar o link e se divertir.</p></header>
     <div class="card">
       
       <p class="banner" id="authBanner" hidden>Entre ou crie sua conta pra entrar no rolê <b id="authBannerName"></b>. O convite fica guardado.</p>

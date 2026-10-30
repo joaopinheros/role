@@ -18,7 +18,7 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'role-'));
 const ok = (c, msg) => { if (!c) throw new Error('falhou: ' + msg); console.log('  ✓ ' + msg); };
 
 async function signup(page, nome, user, tel) {
-  await page.fill('#suNome', nome);
+  await page.waitForSelector('#scrLanding:not([hidden]), #scrAuth:not([hidden])'); if (await page.isVisible('#landEnter')) await page.click('#landEnter'); await page.fill('#suNome', nome);
   await page.fill('#suUser', user);
   await page.fill('#suEmail', user + '@exemplo.com');
   await page.fill('#suTel', tel);

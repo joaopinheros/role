@@ -177,7 +177,7 @@ async function loadSession(){const s=sessao.get();if(!s)return null;
   if(!REMOTE&&s.uid)UID=s.uid;
   try{const c=await DB.get(contaPath());if(c&&c.verificado&&c.usuario===s.usuario)return c;}catch(e){}return null;}
 
-const SCREENS=['#scrInvite','#scrAuth','#scrVerify','#scrHome','#scrCreate'];
+const SCREENS=['#scrInvite','#scrLanding','#scrAuth','#scrVerify','#scrHome','#scrCreate'];
 function go(scr){SCREENS.forEach(s=>show($(s),s===scr));show($('#roomUI'),scr==='room');frame.classList.toggle('inroom',scr==='room');
   if(scr!=='room'&&mode==='sala')leaveRoom();
   const f=scr&&scr!=='room'&&document.querySelector(scr+' input:not([readonly]), '+scr+' button.hot');if(f&&matchMedia('(min-width:761px)').matches)setTimeout(()=>f.focus(),30);}
@@ -188,6 +188,8 @@ $('#tabSignup').addEventListener('click',()=>authTab(false));
 $('#tabLogin').addEventListener('click',()=>authTab(true));
 $('#suUser').addEventListener('input',e=>{const v=e.target.value.toLowerCase().replace(/[^a-z0-9._]/g,'');if(v!==e.target.value)e.target.value=v;});
 $('#suTel').addEventListener('input',e=>{e.target.value=fmtTel(e.target.value);});
+function openLanding(){go('#scrLanding');vitrine('churrasco',true);}
+$('#landEnter').addEventListener('click',()=>openAuth());
 function openAuth(){const inv=PENDING_INVITE;show($('#authBanner'),!!inv);if(inv)$('#authBannerName').textContent=inv.nome||'';authTab(false);go('#scrAuth');vitrine(inv?inv.cena:'churrasco',inv?inv.noite:true);}
 function sendCode(dev){PEND.code=SRV?null:String(1000+ri(9000));PEND.tries=0;$('#vTel').textContent=fmtTel(PEND.tel);$('#vCode').value='';errOn('#vErr');
   const shown=SRV?dev:PEND.code;if(!shown){show($('#sms'),false);go('#scrVerify');return;}
@@ -235,7 +237,7 @@ $('#fVerify').addEventListener('submit',async e=>{e.preventDefault();if(!PEND)re
     ME=c;const f=parse(c.fig||'');if(f)fig=f;sessao.set(c);PEND=null;show($('#sms'),false);afterAuth();
   }catch(err){errOn('#vErr','Não deu pra salvar sua conta. Tenta de novo.');console.warn(err);}
 });
-$('#logout').addEventListener('click',()=>{sessao.clear();if(SRV){LS.del('role-auth');NET.forget().catch(()=>{});UID='anon';}ME=null;toast('Você saiu.');openAuth();});
+$('#logout').addEventListener('click',()=>{sessao.clear();if(SRV){LS.del('role-auth');NET.forget().catch(()=>{});UID='anon';}ME=null;toast('Você saiu.');openLanding();});
 async function afterAuth(){applyFig(false);
   if(PENDING_INVITE){const eid=PENDING_INVITE.eid;try{await acceptInvite(eid);}catch(e){console.warn(e);toast('Não deu pra aceitar o convite: '+(e.msg||'tenta de novo'),4200);openHome();}}
   else openHome();}
@@ -447,8 +449,6 @@ let shoot=null;
 function sky(){
   const W=cv.width,H=cv.height,day=SCN&&!SCN.night,out=SCN&&SCN.sc.outdoor,skc=SCN&&SCN.sc.sky&&(day?SCN.sc.sky.day:SCN.sc.sky.night);
   const px=Math.max(1,Math.round(dpr)),pxX=-camX*scale,pxY=-camY*scale;
-  if(mode!=='sala'){   // telas de entrada: a casa continua igual, mas o céu vira um fundo claro
-    const gr=sc.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#ffffff');gr.addColorStop(.6,'#f7f4ec');gr.addColorStop(1,'#ebe5d6');sc.fillStyle=gr;sc.fillRect(0,0,W,H);fmSky();return;}
   sc.drawImage(skyBase(W,H,day,out,skc,0),0,0);
   if(out&&day){const sx=W*.8+pxX*.03,sy=H*.13+pxY*.03,R=Math.min(W,H)*.32,h=sc.createRadialGradient(sx,sy,0,sx,sy,R);
     h.addColorStop(0,'rgba(255,250,225,.75)');h.addColorStop(.18,'rgba(255,240,200,.35)');h.addColorStop(1,'rgba(255,240,200,0)');sc.fillStyle=h;sc.fillRect(sx-R,sy-R,R*2,R*2);pixDisc(sx,sy,7,2*px,'#fffbea');}
@@ -673,5 +673,5 @@ window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loa
     return openInvite(eid);}
   if(PENDING_INVITE&&!ME)return openInvite(PENDING_INVITE.eid);
   if(ME){if(PENDING_INVITE)return openInvite(PENDING_INVITE.eid);return openHome();}
-  openAuth();
+  openLanding();
 })();

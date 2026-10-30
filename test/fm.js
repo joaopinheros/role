@@ -61,7 +61,7 @@ async function newPage(browser, name, view) {
   return p;
 }
 async function signup(page, nome, user) {
-  await page.fill('#suNome', nome); await page.fill('#suUser', user);
+  await page.waitForSelector('#scrLanding:not([hidden]), #scrAuth:not([hidden])'); if (await page.isVisible('#landEnter')) await page.click('#landEnter'); await page.fill('#suNome', nome); await page.fill('#suUser', user);
   await page.fill('#suEmail', user + '@exemplo.com'); await page.fill('#suTel', '119' + rnd(8));
   await sleep(120);   // dá tempo de os campos formatarem o que foi preenchido antes de enviar
   await page.click('#fSignup button[type=submit]');

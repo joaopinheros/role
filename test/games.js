@@ -28,7 +28,7 @@ const VIEW = (process.env.VIEW || '1100x760').split('x').map(Number).reduce((w, 
 
 async function signup(page, nome, user) {
   await sleep(250);   // a tela de entrada tira o foco para o 1º campo 30 ms depois de abrir: espera isso passar antes de preencher
-  await page.fill('#suNome', nome); await page.fill('#suUser', user);
+  await page.waitForSelector('#scrLanding:not([hidden]), #scrAuth:not([hidden])'); if (await page.isVisible('#landEnter')) await page.click('#landEnter'); await page.fill('#suNome', nome); await page.fill('#suUser', user);
   await page.fill('#suEmail', user + '@exemplo.com'); await page.fill('#suTel', '11' + (user.charCodeAt(0) % 2 ? '9' : '9') + rnd(8));
   await sleep(120);   // dá tempo de os campos formatarem o que foi preenchido antes de enviar
   await page.click('#fSignup button[type=submit]');
