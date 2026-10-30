@@ -139,7 +139,7 @@ const inviteLink=eid=>SRV||ownOrigin()?location.origin+'/r/'+eid:ARTIFACT_URL+'#
 async function copyText(text,btn){const done=()=>{if(btn){const o=btn.innerHTML;setBtn(btn,'check','Copiado');setTimeout(()=>btn.innerHTML=o,1500);}toast('Link copiado. Agora é só colar no grupo.');};
   try{await navigator.clipboard.writeText(text);done();}catch(e){const i=document.createElement('textarea');i.value=text;document.body.append(i);i.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}i.remove();ok?done():toast('Não deu pra copiar sozinho. Seleciona o link e copia.');}}
 /* a paleta dos cartuchos: as cores chapadas dos cartazes de MF DOOM e Kanye (lima, rosa, índigo, laranja, roxo, vermelho) */
-const CART={churrasco:'#fdf06b',festa:'#f0268f',pijama:'#86d3c9',parque:'#12b567',boate:'#5a2d91',boteco:'#f58a2e',piscina:'#86d3c9',vulcao:'#f58a2e',templo:'#f9b8d0',praia:'#fdf06b',rooftop:'#5a2d91'};
+const CART={churrasco:'#f7e817',festa:'#e8302a',pijama:'#2f7fd0',parque:'#b8b9c4',boate:'#0b0b0b',boteco:'#e8302a',piscina:'#2f7fd0',vulcao:'#f7e817',templo:'#b8b9c4',praia:'#f7e817',rooftop:'#1560b0'};
 const cartColor=id=>CART[id]||'#6c3ce0';
 function setTime(n){document.body.dataset.time=n?'night':'day';}
 function chipsFor(el,r){el.innerHTML='';const sc=sceneById(r.cena);
@@ -392,10 +392,10 @@ let zoom=1,dpr=1,scale=2,bs=1,camX=0,camY=0;
 const vw=()=>cv.width/scale,vh=()=>cv.height/scale;
 function clampCam(){const w=vw(),h=vh();camX=Math.max(-w*.5,Math.min(WW-w*.5,camX));camY=Math.max(-h*.5,Math.min(WHt-h*.5,camY));}
 function centerOn(x,y){camX=x-vw()/2;camY=y-vh()/2;clampCam();}
-function vitrineCam(){const wide=frame.clientWidth>760,shift=wide?Math.min(260,vw()*.22):0;centerOn(WW/2-shift,WHt/2+(wide?-20:150));}
+function vitrineCam(){const wide=frame.clientWidth>760,shift=wide?Math.min(260,vw()*.22):0;centerOn(WW/2-shift,WHt/2+(wide?50:150));}
 function resize(){const cx=camX+vw()/2,cy=camY+vh()/2,firstTime=!resize.done;dpr=Math.min(2,window.devicePixelRatio||1);
   cv.width=Math.max(1,Math.round(frame.clientWidth*dpr));cv.height=Math.max(1,Math.round(frame.clientHeight*dpr));
-  bs=zoom<1?.5*Math.max(1,Math.round(dpr)):Math.max(1,Math.round(dpr*zoom));scale=WS*bs;resize.done=true;
+  bs=zoom<1?(mode==='sala'?.5:.42)*Math.max(1,Math.round(dpr)):Math.max(1,Math.round(dpr*zoom));scale=WS*bs;resize.done=true;
   if(firstTime||mode!=='sala')vitrineCam();else centerOn(cx,cy);}
 new ResizeObserver(resize).observe(frame);
 $('#zIn').addEventListener('click',()=>zoomAt(1));
@@ -447,6 +447,8 @@ let shoot=null;
 function sky(){
   const W=cv.width,H=cv.height,day=SCN&&!SCN.night,out=SCN&&SCN.sc.outdoor,skc=SCN&&SCN.sc.sky&&(day?SCN.sc.sky.day:SCN.sc.sky.night);
   const px=Math.max(1,Math.round(dpr)),pxX=-camX*scale,pxY=-camY*scale;
+  if(mode!=='sala'){   // telas de entrada: a casa continua igual, mas o céu vira um fundo claro
+    const gr=sc.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#ffffff');gr.addColorStop(.6,'#f7f4ec');gr.addColorStop(1,'#ebe5d6');sc.fillStyle=gr;sc.fillRect(0,0,W,H);fmSky();return;}
   sc.drawImage(skyBase(W,H,day,out,skc,0),0,0);
   if(out&&day){const sx=W*.8+pxX*.03,sy=H*.13+pxY*.03,R=Math.min(W,H)*.32,h=sc.createRadialGradient(sx,sy,0,sx,sy,R);
     h.addColorStop(0,'rgba(255,250,225,.75)');h.addColorStop(.18,'rgba(255,240,200,.35)');h.addColorStop(1,'rgba(255,240,200,0)');sc.fillStyle=h;sc.fillRect(sx-R,sy-R,R*2,R*2);pixDisc(sx,sy,7,2*px,'#fffbea');}
