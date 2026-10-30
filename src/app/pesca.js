@@ -34,7 +34,7 @@ G.defs.pesca={
   tag(a,st){const m=st.m;if(m&&m.s==='catch'&&now-m.t<3500&&KOI[m.k])return{t:KOI[m.k].junk?'um chinelo!':`${KOI[m.k].n} · ${m.cm} cm`,c:'#ffd23f'};return false;},
   stageOpen:peStageOpen,stageClose:peStageClose,
   dbg:m=>({s:m.s,k:m.k,cm:m.cm,got:m.got,local:PE?PE.s:null}),
-  test(cmd){if(!PE)return null;if(cmd==='cast'){peCast(.5,.45);return PE.s;}if(cmd==='bite'){PE.s='bite';PE.t=now;PE.biteT=now;peSend('bite');return PE.s;}if(cmd==='strike'){peAction();return PE.s;}if(cmd==='win'){PE.prog=1.2;return PE.s;}return PE.s;},
+  test(cmd){if(!PE)return null;PE.tut=0;if(cmd==='cast'){peCast(.5,.45);return PE.s;}if(cmd==='bite'){PE.s='bite';PE.t=now;PE.biteT=now;peSend('bite');return PE.s;}if(cmd==='strike'){peAction();return PE.s;}if(cmd==='win'){PE.prog=1.2;return PE.s;}return PE.s;},
 };
 function peLogCatch(nome,k,cm){const f=KOI[k];if(!f)return;addLog(null,f.junk?`${gFirst(nome)} fisgou... um chinelo velho. Devolveu pro lago.`:`${gFirst(nome)} pescou uma carpa ${f.n} de ${cm} cm!`);}
 
@@ -80,12 +80,12 @@ function peStageOpen(a,st,idx,cv){
   peStageClose();cv.width=SW;cv.height=SH;
   const fish=[];for(let i=0;i<7;i++)fish.push(peFish());
   PE={a,st,cv,g:cv.getContext('2d'),raf:0,s:'idle',t:now,fx:SW/2,fy:SH/2,fish,target:null,nib:0,nextNib:0,biteT:0,
-    hold:false,bar:.5,barV:0,zone:.5,zoneV:0,prog:.3,catch:null,msg:'',msgT:0,last:now,bg:peBg(),petals:[],rec:LS.get('role-pesca',{n:0,best:null})};
-  cv.onpointerdown=e=>{if(!PE)return;const r=cv.getBoundingClientRect();peAction((e.clientX-r.left)/r.width*SW,(e.clientY-r.top)/r.height*SH);};
+    hold:false,bar:.5,barV:0,zone:.5,zoneV:0,prog:.3,catch:null,msg:'',msgT:0,last:now,bg:peBg(),petals:[],rec:LS.get('role-pesca',{n:0,best:null}),tut:LS.get('role-pesca-tut',0)?0:1};
+  cv.onpointerdown=e=>{if(!PE)return;const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*SW,y=(e.clientY-r.top)/r.height*SH;if(peTutClick(x,y))return;peAction(x,y);};
   cv.onpointerup=cv.onpointercancel=()=>{if(PE)PE.hold=false;};
-  PE.key=e=>{if(!PE||e.code!=='Space'||document.activeElement&&document.activeElement.tagName==='INPUT')return;e.preventDefault();if(e.type==='keydown'){if(!e.repeat)peAction();}else PE.hold=false;};
+  PE.key=e=>{if(!PE||e.code!=='Space'||document.activeElement&&document.activeElement.tagName==='INPUT')return;e.preventDefault();if(e.type==='keydown'){if(!e.repeat){if(PE.tut)peTutNext();else peAction();}}else PE.hold=false;};
   addEventListener('keydown',PE.key);addEventListener('keyup',PE.key);
-  gInfo('Clique na água para lançar');
+  gInfo(PE.tut?'Veja como jogar':'Clique na água para lançar');
   const loop=()=>{if(!PE)return;peStep();peDraw();PE.raf=requestAnimationFrame(loop);};
   PE.raf=requestAnimationFrame(loop);
 }
@@ -108,7 +108,7 @@ function peFish(k){
 
 /* clique, toque ou espaço: lança, fisga ou puxa, dependendo do momento */
 function peAction(x,y){
-  const P=PE;if(!P||P.st.status!=='playing')return;
+  const P=PE;if(!P||P.st.status!=='playing'||P.tut)return;
   if(P.s==='catch'){if(now-P.t>900){P.s='idle';P.t=now;peSend('idle');}return;}
   if(P.s==='reel'){P.hold=true;return;}
   if(P.s==='bite'){P.s='reel';P.t=now;P.prog=.3;P.bar=.5;P.barV=0;P.zone=.5;P.zoneV=0;P.hold=true;peSay('Fisgou! Segure para puxar');peSend('reel');return;}
@@ -284,7 +284,69 @@ function peDraw(){
     g.restore();g.textAlign='left';
   }
   if(P.msg&&now-P.msgT<2200){g.font='800 13px Anybody, sans-serif';g.textAlign='center';g.fillStyle='#000';g.fillText(P.msg,SW/2+1,SH-38+1);g.fillStyle='#fff';g.fillText(P.msg,SW/2,SH-38);g.textAlign='left';}
-  else if(P.s==='idle'){gInfo('Clique na água para lançar');}
+  else if(P.s==='idle'&&!P.tut){gInfo('Clique na água para lançar');}
+  if(!P.tut&&P.s==='idle'){g.fillStyle='#000';g.fillRect(SW-38,10,28,28);g.fillStyle='#ffd23f';g.fillRect(SW-36,12,24,24);g.fillStyle='#000';g.font='900 17px Anybody, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('?',SW-24,25);g.textAlign='left';}
+  if(P.tut)peTutDraw(g);
   // recorde no canto
   if(P.rec.best){g.font='700 9px Anybody, sans-serif';g.fillStyle='#fff';g.textAlign='right';g.fillText(`Recorde: ${KOI[P.rec.best.k].n} ${P.rec.best.cm} cm · ${P.rec.n} pescados`,SW-22,SH-10);g.textAlign='left';}
+}
+
+/* ---------- tutorial: 3 passos animados (lançar, fisgar, puxar), com as palavras certas para toque ou mouse ---------- */
+const PE_TUT=3;
+function peTouch(){return matchMedia('(pointer:coarse)').matches;}
+function peTutNext(){const P=PE;if(!P||!P.tut)return;if(P.tut>=PE_TUT){P.tut=0;LS.set('role-pesca-tut',1);gInfo('Clique na água para lançar');}else P.tut++;P.tutT=now;}
+function peTutClick(x,y){const P=PE;
+  if(!P.tut){if(x>=SW-40&&x<=SW-8&&y>=8&&y<=40&&P.s==='idle'){P.tut=1;P.tutT=now;return true;}return false;}
+  if(x>=SW-92&&x<=SW-34&&y>=44&&y<=64){P.tut=0;LS.set('role-pesca-tut',1);return true;}   // pular
+  if(x>=150&&x<=330&&y>=214&&y<=248)peTutNext();
+  return true;}
+function peTutDraw(g){
+  const P=PE,n=P.tut,touch=peTouch(),e=(now-(P.tutT||P.t))/1000;
+  g.fillStyle='rgba(10,6,24,.72)';g.fillRect(0,0,SW,SH);
+  const x=28,y=26,w=SW-56,h=SH-52;
+  g.fillStyle='#000';g.fillRect(x-4,y-4,w+8,h+8);g.fillStyle='#fbf6e8';g.fillRect(x,y,w,h);g.fillStyle='#ffd23f';g.fillRect(x,y,w,6);
+  // título e texto
+  const T=[['Lance a boia',touch?'Toque na água, onde você quiser.':'Clique na água, onde você quiser.'],
+           ['Espere e fisgue',touch?'Quando a boia afundar, toque na hora!':'Quando a boia afundar, clique na hora!'],
+           ['Segure e puxe',touch?'Segure o dedo e mantenha o quadrado amarelo na carpa.':'Segure o mouse e mantenha o quadrado amarelo na carpa.']][n-1];
+  g.textAlign='left';g.textBaseline='alphabetic';g.fillStyle='#1c1428';g.font='900 20px Anybody, sans-serif';g.fillText(n+'. '+T[0],x+16,y+34);
+  g.font='700 14px Anybody, sans-serif';g.fillStyle='#3b3355';
+  const words=T[1].split(' ');let line='',ly=y+56;const maxW=w-32;
+  for(const wd of words){const tst=line?line+' '+wd:wd;if(g.measureText(tst).width>maxW&&line){g.fillText(line,x+16,ly);line=wd;ly+=18;}else line=tst;}
+  g.fillText(line,x+16,ly);
+  // desenho animado (área de 190x120 à direita? em cima: centralizada abaixo do texto)
+  const ax=SW/2,ay=y+136,ph=(e%3.2);
+  const pond=(cx,cy,pw,ph2)=>{g.fillStyle='#000';g.fillRect(cx-pw/2-3,cy-ph2/2-3,pw+6,ph2+6);g.fillStyle='#2f86b5';g.fillRect(cx-pw/2,cy-ph2/2,pw,ph2);g.fillStyle='rgba(220,245,255,.25)';for(let i=0;i<5;i++)g.fillRect(cx-pw/2+10+i*38,cy-ph2/2+14+(i%2)*30,14,1);};
+  const flo=(fx,fy,dip)=>{g.fillStyle='#000';g.fillRect(fx-4,fy-5+dip,9,10);g.fillStyle='#e83a3a';g.fillRect(fx-3,fy-4+dip,7,4);g.fillStyle='#fff';g.fillRect(fx-3,fy+dip,7,4);};
+  const hand=(hx,hy,press)=>{g.fillStyle='#000';if(touch){g.fillRect(hx-5,hy-2,11,16);g.fillRect(hx-5,hy-14,11,14);g.fillStyle=press?'#ffd23f':'#ffe0c8';g.fillRect(hx-3,hy-1,7,12);g.fillRect(hx-3,hy-12,7,12);}else{g.fillRect(hx,hy,3,18);g.fillRect(hx,hy,14,3);g.fillRect(hx+3,hy+3,3,12);g.fillStyle=press?'#ffd23f':'#fff';g.fillRect(hx+1,hy+3,2,13);g.fillRect(hx+3,hy+1,10,2);g.fillRect(hx+3,hy+4,2,9);}if(press){g.strokeStyle='#fff';g.lineWidth=2;g.beginPath();g.arc(hx+(touch?0:2),hy+(touch?-6:2),9+((now/90)%8),0,7);g.stroke();}};
+  if(n===1){
+    pond(ax,ay,220,88);const k=Math.min(1,ph/1.3),tx=ax+30,ty=ay-6;
+    const hx=ax-80+(tx-(ax-80))*Math.min(1,ph/1),hy=ay+30+(ty-(ay+30))*Math.min(1,ph/1);
+    if(ph>1.1){const r=((ph-1.1)*22)%26;g.strokeStyle='rgba(255,255,255,.65)';g.lineWidth=1;g.beginPath();g.ellipse(tx,ty+2,r,r/2,0,0,7);g.stroke();flo(tx,ty,Math.sin(now/380)*.7);}
+    hand(Math.round(hx),Math.round(hy),ph>.95&&ph<1.5);
+  }else if(n===2){
+    pond(ax,ay,220,88);const fx=ax,fy=ay,c=e%2.6,dip=c>1.5?5:Math.sin(now/380)*.7;
+    if(c>1.5){const r=3+((now/40)%12);g.strokeStyle='rgba(255,255,255,.7)';g.lineWidth=1;g.beginPath();g.arc(fx,fy,r,0,7);g.stroke();}
+    flo(fx,fy,dip);
+    if(c>1.5){g.fillStyle='#000';g.fillRect(fx+26,fy-48,78,26);g.fillStyle=Math.floor(now/160)%2?'#ffd23f':'#ff3d8b';g.fillRect(fx+28,fy-46,74,22);g.fillStyle='#000';g.font='900 16px Anybody, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('AGORA!',fx+65,fy-35);g.textAlign='left';g.textBaseline='alphabetic';hand(fx+30,fy+14,c>1.9&&c<2.3);}
+    else{g.fillStyle='#fff';g.font='700 12px Anybody, sans-serif';g.textAlign='center';g.fillText('esperando…',fx,fy+34);g.textAlign='left';}
+  }else{
+    const bx=ax-70,by=ay-42,bh=84,bw=26;
+    g.fillStyle='#000';g.fillRect(bx-3,by-3,bw+6,bh+6);g.fillStyle='#1c2a3a';g.fillRect(bx,by,bw,bh);
+    const z=.5+Math.sin(now/700)*.32,pos=Math.max(.1,Math.min(.9,z+Math.sin(now/260)*.04-(e%6<3?0:.0)));
+    const hold=e%6<4.6,yb=Math.max(.09,Math.min(.91,hold?z+Math.sin(now/310)*.05:z-(e%6-4.6)*.35));
+    g.fillStyle='rgba(143,212,42,.6)';g.fillRect(bx,Math.round(by+(1-z)*bh-12),bw,24);
+    peKoi(g,{k:0,seed:1},bx+bw/2,by+(1-z)*bh,-Math.PI/2,16,now/80,1);
+    const inside=Math.abs(yb-z)<.12;g.fillStyle='#000';g.fillRect(bx-2,Math.round(by+(1-yb)*bh-9)-1,bw+4,20);g.fillStyle=inside?'#ffd23f':'#c9a03a';g.fillRect(bx,Math.round(by+(1-yb)*bh-9),bw,18);
+    // medidor de progresso
+    const px=bx+bw+10;g.fillStyle='#000';g.fillRect(px-2,by-2,10,bh+4);g.fillStyle='#2a2033';g.fillRect(px,by,6,bh);const pr=hold?Math.min(1,(e%6)/4.6):0;g.fillStyle='#8fd42a';g.fillRect(px,Math.round(by+bh*(1-pr)),6,Math.round(bh*pr));
+    hand(bx+bw+36,by+bh-28,hold);
+    g.fillStyle='#1c1428';g.font='700 12px Anybody, sans-serif';g.textAlign='left';
+    g.fillText(hold?'segurando: sobe a barra':'soltou: a carpa escapa',px+60,by+bh/2-6);g.fillText(hold?'verde cheio = pescou!':'',px+60,by+bh/2+10);
+  }
+  // pontinhos, pular e botão
+  for(let i=1;i<=PE_TUT;i++){g.fillStyle='#000';g.fillRect(x+16+(i-1)*16,y+h-16,12,8);g.fillStyle=i<=n?'#ff3d8b':'#ddd';g.fillRect(x+17+(i-1)*16,y+h-15,10,6);}
+  g.font='800 12px Anybody, sans-serif';g.fillStyle='#6a4fd0';g.textAlign='right';g.fillText('Pular',SW-38,y+28);g.textAlign='left';
+  const bgc=Math.floor(now/500)%2?'#4ee07a':'#6af093';g.fillStyle='#000';g.fillRect(146,210,188,42);g.fillStyle=bgc;g.fillRect(150,214,180,34);
+  g.fillStyle='#111';g.font='900 15px Anybody, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(n<PE_TUT?'Próximo':'Bora pescar!',240,232);g.textAlign='left';g.textBaseline='alphabetic';
 }
