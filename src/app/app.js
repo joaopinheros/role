@@ -267,7 +267,7 @@ $('#fSignup').addEventListener('submit',async e=>{e.preventDefault();
 {const gn=$('#gNome');try{const l=localStorage.getItem('role-ultimo-nome');if(l)gn.value=l;}catch(e){}
 $('#fGuest').addEventListener('submit',async e=>{e.preventDefault();
   const nome=gn.value.trim().slice(0,20);
-  if(nome.length<2)return errOn('#gErr','Coloca o nome do seu personagem (pelo menos 2 letras).');
+  if(nome.length<2)return errOn('#gErr','Coloca seu nome (pelo menos 2 letras).');
   const btn=e.target.querySelector('button[type=submit]');btn.disabled=true;errOn('#gErr');
   try{
     if(SRV){const r=await NET.call('authGuest',{nome,fig:encode(fig)});UID=r.uid;LS.set('role-auth',{uid:r.uid,token:r.token});await NET.hello(r.token);ME=r.conta;}
