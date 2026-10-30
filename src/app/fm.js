@@ -297,7 +297,7 @@ function fmUi(){
   const b=$('#rFm');if(!b)return;
   const np=fmNp(),avail=FM.on&&FM.ok;
   show(b,avail);
-  if(avail){b.setAttribute('aria-pressed',String(FM.listen));setBtn(b,'radio',FM.listen?'Rolê FM':'Ouvir junto');b.setAttribute('aria-label',FM.listen?'Parar de ouvir o Rolê FM':'Ouvir junto o Rolê FM');}
+  if(avail){b.setAttribute('aria-pressed',String(FM.listen));setBtn(b,'note',FM.listen?'Rádio ligada':'Ligar a rádio');b.setAttribute('aria-label',FM.listen?'Desligar a rádio da sala':'Ligar a rádio da sala');}
   frame.classList.toggle('fmon',FM.listen&&np.status!=='parado');
   const box=$('#fmBox');if(!box)return;
   box.classList.toggle('min',FM.min);

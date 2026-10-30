@@ -101,7 +101,7 @@ async function principal(browser) {
   console.log('\nRolê FM (festa em casa)');
   const { a, b, join, ub } = await room(browser, 2, 'f');
   ok((await fm(a)).papel === 'dono' && (await fm(b)).papel === 'membro', 'A é a dona, B é convidado');
-  ok(await a.isVisible('#rFm'), 'o botão "Ouvir junto" aparece');
+  ok(await a.isVisible('#rFm'), 'o botão "Ligar a rádio" aparece');
 
   // o convidado põe música: toca na hora, e os dois veem o bot
   await say(b, '/music ' + link(1));

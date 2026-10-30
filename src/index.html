@@ -650,6 +650,10 @@ p{margin:0}
 .hud-card .seats i.on{background:#ff3d9a}
 .hud-card .gauge2 i.on{background:#4ee07a}
 .hud-card .sep{width:2px;height:14px;background:#555}
+#rFm{white-space:nowrap}
+.room-logo{height:46px;flex:0 0 auto;filter:drop-shadow(0 3px 0 rgba(0,0,0,.35))}
+.hud-top{align-items:flex-start}
+@media (max-width:760px){.room-logo{height:30px}.hud-card .rbar{font-size:12px;gap:6px;padding:8px 8px 5px}.hud-card .gauge2,.hud-card .sep{display:none}}
 </style>
 
 <div class="app" id="frame">
@@ -835,7 +839,7 @@ p{margin:0}
   <div id="roomUI" hidden>
     <div class="rban" id="rban" aria-live="polite"></div>
     <header class="hud-top">
-      
+      <div class="qb-logo pb room-logo" role="img" aria-label="O Outro Lugar"></div>
       <div class="event hud-card">
         <span class="rname" id="rName"></span>
         <div class="rbar">
@@ -851,7 +855,7 @@ p{margin:0}
       <button class="px" id="rHome" aria-label="Sair da sala" data-i="back"><span>Sair</span></button>
       <button class="px hot" id="wardBtn" aria-expanded="false" aria-controls="wardrobe" data-i="shirt"><span>Visual</span></button>
       <button class="px" id="rInvite" data-i="link"><span>Convidar</span></button>
-      <button class="px stg" id="rFm" hidden aria-pressed="false" data-i="radio"><span>Ouvir junto</span></button>
+      <button class="px stg" id="rFm" hidden aria-pressed="false" data-i="note"><span>Ligar a rádio</span></button>
       <button class="px hot" id="rAct" hidden data-i="dice"><span>Jogar</span></button>
       <button class="px stg" id="rVoz" hidden aria-pressed="false" aria-label="Entrar no chat de voz" data-i="mic"><span>Voz</span></button>
       <button class="px stg" id="rMute" hidden aria-pressed="false" aria-label="Silenciar meu microfone" data-i="mic"><span>Mudo</span></button>
