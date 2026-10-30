@@ -189,10 +189,7 @@ $('#tabLogin').addEventListener('click',()=>authTab(true));
 $('#suUser').addEventListener('input',e=>{const v=e.target.value.toLowerCase().replace(/[^a-z0-9._]/g,'');if(v!==e.target.value)e.target.value=v;});
 $('#suTel').addEventListener('input',e=>{e.target.value=fmtTel(e.target.value);});
 /* LP: a sala de verdade (cenário do jogo com bonecos do jogo) e os bonecos dos 8 lugares */
-/* LP: a janela mostra a sala ao vivo (o mesmo mundo da vitrine, com os bonecos andando e dançando) */
 let lpLive=false;
-function lpPaint(){const c=$('#lpRoom');if(!c)return;const g=c.getContext('2d'),sw=820*WS,sh=sw*c.height/c.width;
-  paintSkyTo(g,c.width,c.height,SCN);g.imageSmoothingEnabled=true;g.drawImage(wb,110*WS,(170+(683-sh/WS)/2+10)*WS,sw,sh,0,0,c.width,c.height);}
 function spriteBox(sp){if(sp._bb)return sp._bb;const c=document.createElement('canvas');c.width=sp.width;c.height=sp.height;const g=c.getContext('2d');g.drawImage(sp,0,0);const d=g.getImageData(0,0,c.width,c.height).data;
   let x0=c.width,x1=0,y0=c.height,y1=0;for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(d[(y*c.width+x)*4+3]>20){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
   return sp._bb={x:x0,y:y0,w:Math.max(1,x1-x0+1),h:Math.max(1,y1-y0+1)};}
@@ -203,14 +200,15 @@ const LP_NOMES=['Luiza','Dudu','Mari','Diel','Nanda','Teté'],LP_CORES=['#ff3d9a
 let lpInit=false;
 function landInit(){
   const draw=()=>{
+    document.querySelectorAll('#scrLanding .lp-av').forEach(c=>{c._fig=c._fig||randomFig();avTile(c,c._fig,1);});
     const slots=$('#lpSlots');if(!slots.children.length){LP_NOMES.forEach((nm,i)=>{const d=document.createElement('div');d.className='lp-slot';d.style.setProperty('--c',LP_CORES[i]);d.innerHTML='<canvas width="84" height="78"></canvas><b>'+nm+'</b>';slots.append(d);});
       for(let i=0;i<2;i++){const d=document.createElement('div');d.className='lp-slot vago';d.innerHTML='<i>+</i>tá vago';slots.append(d);}}
-    slots.querySelectorAll('.lp-slot:not(.vago) canvas').forEach((c,i)=>{c._fig=c._fig||randomFig();avTile(c,c._fig);});
+    slots.querySelectorAll('.lp-slot:not(.vago) canvas').forEach(c=>{c._fig=c._fig||randomFig();avTile(c,c._fig);});
     ['#lpAvL','#lpAvR'].forEach(q=>{const c=$(q);c._fig=c._fig||randomFig();avTile(c,c._fig,1);});
   };
   draw();if(!lpInit){lpInit=true;setTimeout(draw,700);setTimeout(draw,1800);hydrateIcons($('#scrLanding'));}
 }
-function openLanding(){go('#scrLanding');vitrine('festa',true);lpLive=true;$('#scrLanding').scrollTop=0;landInit();}
+function openLanding(){go('#scrLanding');vitrine('churrasco',true);$('#scrLanding').scrollTop=0;landInit();}
 $('#landCta').addEventListener('click',()=>openAuth());
 $('#landCta2').addEventListener('click',()=>openAuth());
 $('#landEnter').addEventListener('click',()=>openAuth());
@@ -632,8 +630,7 @@ function frameLoop(t){
     warmStep(mode==='sala'?6:10);
     if(me&&mode==='sala'){const was=me._moving;me._moving=me.path.length>0;if(was&&!me._moving)pushPres();
       if(!me.path.length&&now>(me._chk||0)){me._chk=now+700;const o=avatars.find(a=>a!==me&&!a.path.length&&a.gx===me.gx&&a.gy===me.gy);if(o&&String(o.user)<String(me.user)){const[x,y]=freeNear(me.gx,me.gy,me);if(walkTo(me,x,y))pushPres();}}}
-    const V=lpLive?[100*WS,160*WS,840*WS,703*WS]:viewRect();drawWorld(SCN,avatars.concat(pets),{view:V,ground:()=>{if(mode==='sala')lavaGround();if(mode==='sala'&&hover&&walkable(hover[0],hover[1],hover[0],hover[1])&&!drag){const[x,y]=hover;poly([S(x,y),S(x+1,y),S(x+1,y+1),S(x,y+1)],'rgba(255,179,71,.16)','#ffb347',1.5);}}});
-    if(lpLive&&((now/66)|0)!==lpPaint.k){lpPaint.k=(now/66)|0;lpPaint();}
+    const V=viewRect();drawWorld(SCN,avatars.concat(pets),{view:V,ground:()=>{if(mode==='sala')lavaGround();if(mode==='sala'&&hover&&walkable(hover[0],hover[1],hover[0],hover[1])&&!drag){const[x,y]=hover;poly([S(x,y),S(x+1,y),S(x+1,y+1),S(x,y+1)],'rgba(255,179,71,.16)','#ffb347',1.5);}}});
     sc.setTransform(1,0,0,1,0,0);sky();
     sc.imageSmoothingEnabled=zoom<1;sc.setTransform(bs,0,0,bs,-Math.round(camX*scale),-Math.round(camY*scale));sc.drawImage(wb,V[0],V[1],V[2],V[3],V[0],V[1],V[2],V[3]);
     sc.setTransform(dpr,0,0,dpr,0,0);
