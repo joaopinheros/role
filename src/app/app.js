@@ -619,7 +619,7 @@ function frameLoop(t){
 }
 
 /* ================= início ================= */
-window.__role={mesaXY:()=>{if(!SCN||!SCN.mixer)return null;const[wx,wy]=S(SCN.mixer[0]+.5,SCN.mixer[1]+.5),[sx,sy]=toScreen(wx,wy-12),r=cv.getBoundingClientRect();return[r.left+sx,r.top+sy];},show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loading'),false);vitrine.k=null;vitrine(id,n);zoom=z||.5;resize();centerOn(WW/2,WHt/2-40);},avs:()=>avatars.map(a=>({n:a.name,u:a.user,x:a.gx,y:a.gy,p:a.path.length,peer:a.peer})),
+window.__role={mesaXY:()=>{if(!SCN||!SCN.mixer)return null;const[wx,wy]=S(SCN.mixer[0]+.5,SCN.mixer[1]+.5);centerOn(wx,wy);const[sx,sy]=toScreen(wx,wy),r=cv.getBoundingClientRect();return[r.left+sx,r.top+sy];},show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loading'),false);vitrine.k=null;vitrine(id,n);zoom=z||.5;resize();centerOn(WW/2,WHt/2-40);},avs:()=>avatars.map(a=>({n:a.name,u:a.user,x:a.gx,y:a.gy,p:a.path.length,peer:a.peer})),
   gon:()=>({on:G.on,live:!!live,send:!!(live&&live.send),me:live&&live.me,acts:SCN&&SCN.acts&&SCN.acts.length}),
   scene:id=>{const c=getScene(id,false);return{gw:GW,gh:GH,blocked:[...c.blocked],seats:[...c.seats.keys()],soft:[...c.seats].filter(([,v])=>v.soft).map(([k])=>k),spawn:c.sc.spawn,acts:(c.acts||[]).map(v=>[v.id,v.x,v.y,v.w,v.d]),npcs:(c.npcs||[]).map(v=>[v.name,v.gx,v.gy,!!v.wander])};},
   cards:()=>{const c=cardsSheet(),k=3,o=document.createElement('canvas');o.width=c.width*k;o.height=c.height*k;const g=o.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(c,0,0,o.width,o.height);return o.toDataURL();},
