@@ -391,7 +391,7 @@ async function enterRoom(eid,fresh){
   const[sx,sy]=spawnTile();me=makeAv(ME.nome,{...fig},sx,sy,{user:ME.usuario});npcSpawn();
   $('#rName').textContent=r.nome;roomClock();updDayBtn();
   $('#log').innerHTML='';chatSeen=new Set();joinedAt=Date.now();centerOn(...S(sx+.5,sy+.5).map((v,i)=>i?v-50:v));
-  addLog(null,fresh?`Você entrou em ${r.nome}. Bem-vindo!`:`Você está em ${r.nome}.`);spawnPets(eid);if(SCN.mixer)addLog(null,`Toca na mesa de som pra ligar a rádio. Tem ${pets.map(p=>p.name).join(' e ')} passeando por aí.`);updSom();
+  addLog(null,fresh?`Você entrou em ${r.nome}. Bem-vindo!`:`Você está em ${r.nome}.`);setTimeout(()=>{if(mode==='sala'&&CUR&&CUR.eid===eid&&FM.on)addLog(null,'Pra tocar música pra sala toda: digite /music e o nome da música (ou um link do YouTube). Também tem /skip, /pause, /play, /fila e /tocando.');},1100);spawnPets(eid);if(SCN.mixer)addLog(null,`Toca na mesa de som pra ligar a rádio. Tem ${pets.map(p=>p.name).join(' e ')} passeando por aí.`);updSom();
   unsubRole=DB.watchDoc('roles/'+eid,d=>{if(!d||mode!=='sala')return;const ch=d.cena!==CUR.cena||!!d.noite!==!!CUR.noite;CUR={eid,...d};if(ch){SCN=getScene(d.cena,d.noite);setTime(d.noite);updDayBtn();avatars.forEach(a=>{if(!walkable(a.gx,a.gy,a.gx,a.gy)){const[x,y]=freeNear(a.gx,a.gy,a);a.gx=a.fx=x;a.gy=a.fy=y;a.path=[];}});}});
   unsubChat=DB.watchColl(`roles/${eid}/chat`,list=>{list.forEach(({id,data:m})=>{if(chatSeen.has(id))return;chatSeen.add(id);
       if(m.k==='bot'){fmBotFromChat(id,m,m.at>=joinedAt-2000);return;}   // Rolê FM
@@ -440,7 +440,7 @@ $('#rHome').addEventListener('click',()=>openHome());
 const log=$('#log');
 function addLog(name,text,color){const d=document.createElement('div');
   if(name){const b=document.createElement('b');b.textContent=name+': ';b.style.color=color;d.append(b,document.createTextNode(text));}else{d.className='sys';d.textContent=text;}
-  log.append(d);while(log.children.length>(innerWidth<760?3:4))log.firstChild.remove();log.scrollTop=log.scrollHeight;}
+  log.append(d);while(log.children.length>(innerWidth<760?3:10))log.firstChild.remove();log.scrollTop=log.scrollHeight;}
 const logColor=a=>{const c=topColor(a.fig);return lum(c)<.32?'#5a2fc4':lum(c)>.55?mul(c,.45):mul(c,.7)};
 function doAct(act){if(!me)return;
   if(act==='dance'){me.path=[];me.action='dance';}

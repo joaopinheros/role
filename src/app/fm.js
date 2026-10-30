@@ -167,7 +167,7 @@ $('#msg').addEventListener('blur',()=>setTimeout(()=>fmHint(''),150));
 function addBotLine(text,mine){
   const d=document.createElement('div');d.className='bot'+(mine?' mine':'');
   d.innerHTML=pix('note');const s=document.createElement('span');s.textContent=text;d.append(s);
-  log.append(d);while(log.children.length>(innerWidth<760?3:4))log.firstChild.remove();log.scrollTop=log.scrollHeight;
+  log.append(d);while(log.children.length>(innerWidth<760?3:10))log.firstChild.remove();log.scrollTop=log.scrollHeight;
 }
 function fmBotFromChat(id,m,fresh){
   addBotLine(m.t,false);

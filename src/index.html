@@ -612,6 +612,24 @@ p{margin:0}
 .ainda{display:inline-block;background:#fff;color:#111;padding:0 8px;margin-left:4px;font:800 .8em 'Atkinson Hyperlegible Next',system-ui,sans-serif;text-transform:none;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:3px;vertical-align:.08em;animation:lpainda 1.6s steps(1) infinite}
 @keyframes lpainda{0%,62%{opacity:1}63%,100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.ainda{animation:none}}
+.lp-gchat{display:flex;flex-direction:column;align-items:flex-start;gap:8px;max-width:520px}
+.lp-gchat .gl{background:#fff;color:#000;border:2px solid #111;border-radius:12px 12px 12px 4px;padding:6px 12px;font:500 17px/1.35 'Atkinson Hyperlegible Next',system-ui,sans-serif;box-shadow:2px 2px 0 #111;max-width:100%}
+.lp-gchat .gl b{font-weight:800}
+.lp-gchat .gl.bot{display:flex;gap:8px;align-items:flex-start;background:#ffe14d;border-radius:10px;font-weight:600}
+.lp-gchat .gl.bot .ic{flex:0 0 auto;width:18px;height:18px;margin-top:3px}
+.lp-gchat .gl.bot .pi{width:18px;height:18px}
+.lp-gchat .gform{display:flex;gap:10px;width:100%;margin-top:6px}
+.lp-gchat .gin{flex:1;min-width:0;display:flex;align-items:center;height:52px;padding:0 14px;background:#fff;border:3px solid #111;border-radius:12px;box-shadow:4px 4px 0 #111;font:500 17px 'Atkinson Hyperlegible Next',system-ui,sans-serif;color:#111;white-space:pre;overflow:hidden}
+.lp-gchat .gin .typed{font-weight:800;color:#2b7a3d}
+.lp-gchat .gin i{width:2px;height:1.2em;background:#111;margin-left:1px;animation:icaret 1s steps(2) infinite}
+.lp-gchat .gbtn{display:grid;place-items:center;padding:0 18px;background:#4ee07a;border:3px solid #111;border-radius:999px;box-shadow:3px 3px 0 #111;font:400 14px 'Bowlby One',Impact,sans-serif;text-transform:uppercase}
+@media (min-width:761px){
+  .chat-dock{width:min(640px,calc(100% - 32px))}
+  .log{max-height:min(48vh,420px);pointer-events:none;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 26%);mask-image:linear-gradient(to bottom,transparent 0,#000 26%);padding-top:18px}
+  .log > div{font-size:16px;padding:6px 12px}
+  .fmon .log{max-height:min(40vh,340px)}
+  .instage .log{max-height:none;-webkit-mask-image:none;mask-image:none}
+}
 </style>
 
 <div class="app" id="frame">
@@ -676,12 +694,13 @@ p{margin:0}
         <div class="lp-chat" aria-label="Exemplo do chat da sala">
           <h2>Peça o som no chat.</h2>
           <p>Digite <b>/music</b> e o nome da música ou um link do YouTube. Toda a sala ouve ao mesmo tempo.</p>
-          <ol class="lp-log">
-            <li><b class="u1">Mari</b>chega mais!</li>
-            <li><b class="u2">Diel</b><code>/music</code> lofi pra estudar</li>
-            <li class="bot"><b>rádio</b>Tocando lofi pra estudar. Pedido do Diel.</li>
-            <li><b class="u3">Nanda</b>bota de novo!</li>
-          </ol>
+          <div class="lp-gchat" role="img" aria-label="Exemplo do chat da sala: Mari diz chega mais, Diel pede uma música com /music e a rádio responde">
+            <div class="gl"><b style="color:#b3366b">Mari: </b>chega mais!</div>
+            <div class="gl"><b style="color:#2b7a3d">Diel: </b>/music lofi pra estudar</div>
+            <div class="gl bot"><span class="ic" data-i="note"></span><span><b>Rádio:</b> Diel pôs <b>lofi pra estudar</b> na fila. Tocando agora!</span></div>
+            <div class="gl"><b style="color:#5a2fc4">Nanda: </b>bota de novo!</div>
+            <div class="gform"><div class="gin"><span class="typed">/music </span><i></i></div><span class="gbtn">Enviar</span></div>
+          </div>
         </div>
         <div class="lp-crew" aria-label="A galera numa sala do jogo">
           <div class="lp-row"><div class="pp a1"><canvas class="lp-av" width="150" height="230"></canvas><em>Mari</em></div><div class="pp a2"><canvas class="lp-av" width="150" height="230"></canvas><em>Diel</em></div><div class="pp a3"><canvas class="lp-av" width="150" height="230"></canvas><em>Nanda</em></div><div class="pp a4"><canvas class="lp-av" width="150" height="230"></canvas><em>Luiza</em></div></div>
