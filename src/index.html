@@ -1,4 +1,4 @@
-<title>The Other Place</title>
+<title>O Outro Lugar</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <!--FONTS-->
 <style>
@@ -365,7 +365,7 @@ p{margin:0}
 .lp{--pur:#7048ff;--pur2:#8460ff;--grn:#4ee07a;--yel:#ffe14d;--pnk:#ff3d9a;--org:#ff6a1a;--ink:#111;--cream:#fdf3df;color:var(--ink);font-family:'Atkinson Hyperlegible Next',system-ui,sans-serif}
 .lp h1,.lp h2,.lp h3{font-family:'Bowlby One','Anybody',Impact,sans-serif;font-weight:400;text-transform:uppercase;margin:0;line-height:1}
 .lp-top{position:fixed;left:0;right:0;top:0;z-index:5;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 max(20px,4vw);background:#111;border-bottom:4px solid #111}
-.lp-hlogo{height:48px;filter:invert(1)}
+.lp-hlogo{height:50px}
 .lp-enter,.lp-cta{font:400 15px 'Bowlby One',Impact,sans-serif;text-transform:uppercase;letter-spacing:.02em;color:#111;background:var(--yel);border:3px solid #111;border-radius:999px;padding:11px 20px;box-shadow:3px 3px 0 #111;cursor:pointer;transition:transform .08s,box-shadow .08s}
 .lp-cta{background:var(--grn);font-size:17px;padding:16px 28px;box-shadow:5px 5px 0 #111}
 .lp-cta.pink{background:var(--pnk);color:#111}
@@ -457,7 +457,7 @@ p{margin:0}
 /* ===== telas do app (login, código, início, criar sala, convite): mesma linguagem da home: raios roxos, papel creme, contorno preto, sombra dura, botões em pílula ===== */
 .s-head{position:absolute;left:0;right:0;top:0;z-index:6;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 max(20px,4vw);background:#111}
 .s-logo{border:0;background:none;padding:0;cursor:pointer;display:block}
-.s-logo .qb-logo{display:block;height:48px;filter:invert(1);transition:transform .12s}
+.s-logo .qb-logo{display:block;height:50px;transition:transform .12s}
 .s-logo:hover .qb-logo{transform:rotate(-4deg) scale(1.06)}
 .s-user{background:#ffe14d;color:#111;border:3px solid #111;border-radius:999px;padding:5px 14px;font:800 15px 'Atkinson Hyperlegible Next',system-ui,sans-serif;box-shadow:3px 3px 0 #fff}
 .as{--shell:#fdf3df;--shell-2:#f1e3c4;--text:#111;--muted:#4a3f5e;--ink:#111;--berry:#ff3d9a;--sun:#ffe14d;--kiwi:#4ee07a;--grape:#7048ff;--sh:4px 4px 0 #111;--sh-lg:9px 9px 0 #111;--r:12px;--r-lg:0;color:#111;
@@ -655,15 +655,15 @@ p{margin:0}
 <div class="app" id="frame">
   <canvas id="room" aria-label="Cenário do rolê"></canvas>
 
-  <div class="intro" id="intro" role="status" aria-label="Que baderna!">
+  <div class="intro" id="intro" role="status" aria-label="O Outro Lugar">
     <canvas id="introMouth" aria-hidden="true"></canvas>
-    <div class="qb-logo pxl intro-logo" id="introLogo" role="img" aria-label="Que baderna!"></div>
+    <div class="qb-logo pxl intro-logo" id="introLogo" role="img" aria-label="O Outro Lugar"></div>
     <p class="skip">toque para pular</p>
   </div>
-  <div class="loading" id="loading" role="status" aria-label="Carregando"><div class="brand sm">The Other Place</div></div>
+  <div class="loading" id="loading" role="status" aria-label="Carregando"><div class="brand sm">O Outro Lugar</div></div>
 
   <header class="s-head" id="sHead" hidden>
-    <button class="s-logo" id="sHeadLogo" type="button" aria-label="Que baderna! (início)"><span class="qb-logo pb"></span></button>
+    <button class="s-logo" id="sHeadLogo" type="button" aria-label="O Outro Lugar (início)"><span class="qb-logo pb"></span></button>
     <button class="s-user" id="sUser" type="button" aria-haspopup="menu" aria-expanded="false" hidden></button>
     <div class="s-menu" id="sMenu" role="menu" hidden><button class="px" id="logout" role="menuitem" type="button">Sair da conta</button></div>
   </header>
@@ -689,11 +689,11 @@ p{margin:0}
   <!-- apresentação (LP antes do login) -->
   <section class="screen" id="scrLanding" hidden aria-label="Apresentação">
     <div class="lp">
-      <header class="lp-top"><div class="qb-logo pb lp-hlogo" role="img" aria-label="Que baderna!"></div><button class="lp-enter" id="landEnter" type="button">Entrar</button></header>
+      <header class="lp-top"><div class="qb-logo pb lp-hlogo" role="img" aria-label="O Outro Lugar"></div><button class="lp-enter" id="landEnter" type="button">Entrar</button></header>
       <section class="lp-hero">
         <div class="lp-copy">
           <div class="lp-shout" aria-hidden="true"><i></i><i></i><i></i></div>
-          <div class="lp-logowrap"><div class="qb-logo lp-logo" id="lpLogo" role="img" aria-label="Que baderna!"></div></div>
+          <div class="lp-logowrap"><div class="qb-logo lp-logo" id="lpLogo" role="img" aria-label="O Outro Lugar"></div></div>
           <div class="lp-shout r" aria-hidden="true"><i></i><i></i><i></i></div>
           <h1>A bagunça que a gente gosta.</h1>
           <p>Crie uma sala, mande o link e pronto: até <mark>8 pessoas</mark> pra ouvir música junto, jogar e bater papo com os amigos.</p>
@@ -734,11 +734,11 @@ p{margin:0}
           </section>
       <section class="lp-secbora"><div class="lp-bora">
             <canvas class="fa l" id="lpAvL" width="110" height="150" aria-hidden="true"></canvas>
-            <h2>Bora fazer<br><span class="bd">Baderna?</span></h2>
+            <h2>Bora pro<br><span class="bd">Outro Lugar?</span></h2>
             <button class="lp-cta pink" id="landCta2" type="button">Criar minha sala</button>
             <canvas class="fa r" id="lpAvR" width="110" height="150" aria-hidden="true"></canvas>
           </div></section>
-      <footer class="lp-foot"><span>© 2026 QUE BADERNA!</span><span>Salas de até 8 pessoas, abertas por 8 horas</span></footer>
+      <footer class="lp-foot"><span>© 2026 O OUTRO LUGAR</span><span>Salas de até 8 pessoas, abertas por 8 horas</span></footer>
     </div>
   </section>
 
@@ -746,7 +746,7 @@ p{margin:0}
   <section class="screen as" id="scrAuth" hidden aria-label="Entrar ou criar conta">
     <div class="auth-wrap">
     <div class="card">
-      <h1>Bora pra baderna?</h1>
+      <h1>Bora pro Outro Lugar?</h1>
       <p class="muted">Crie sua conta ou entre pra montar a sua sala e chamar a galera.</p>
       <p class="banner" id="authBanner" hidden>Entre ou crie sua conta pra entrar no rolê <b id="authBannerName"></b>. O convite fica guardado.</p>
       <div class="seg" role="tablist" aria-label="Conta">
@@ -898,7 +898,7 @@ p{margin:0}
     </div>
   </aside>
 
-  <div class="sms" id="sms" hidden role="status"><div class="ic" data-i="mail"></div><div><small id="smsFrom">SMS de teste do The Other Place</small><b id="smsText"></b></div></div>
+  <div class="sms" id="sms" hidden role="status"><div class="ic" data-i="mail"></div><div><small id="smsFrom">SMS de teste do O Outro Lugar</small><b id="smsText"></b></div></div>
   <div class="toast" id="toast" hidden role="status"></div>
 </div>
 

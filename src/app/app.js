@@ -212,7 +212,7 @@ function landInit(){
 let lpFx=false;
 function landFx(){
   if(lpFx)return;lpFx=true;const L=$('#scrLanding'),hero=L.querySelector('.lp-hero'),logo=$('#lpLogo'),fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
-  const FALAS=['oi!','bora!','chega mais!','toca aí!','que baderna!','tô dentro!','me convida!'];
+  const FALAS=['oi!','bora!','chega mais!','toca aí!','outro lugar!','tô dentro!','me convida!'];
   const shout=()=>{hero.classList.remove('shout');void hero.offsetWidth;hero.classList.add('shout');};
   logo.addEventListener('click',shout);
   hero.addEventListener('animationend',e=>{if(e.animationName==='lpjolt2')hero.classList.remove('shout');});
@@ -246,7 +246,7 @@ $('#landEnter').addEventListener('click',()=>openAuth());
 function openAuth(){lpLive=false;const inv=PENDING_INVITE;show($('#authBanner'),!!inv);if(inv)$('#authBannerName').textContent=inv.nome||'';authTab(false);go('#scrAuth');vitrine(inv?inv.cena:'churrasco',inv?inv.noite:true);}
 function sendCode(dev){PEND.code=SRV?null:String(1000+ri(9000));PEND.tries=0;$('#vTel').textContent=fmtTel(PEND.tel);$('#vCode').value='';errOn('#vErr');
   const shown=SRV?dev:PEND.code;if(!shown){show($('#sms'),false);go('#scrVerify');return;}
-  $('#smsText').textContent='Seu código do The Other Place é '+shown;show($('#sms'));clearTimeout(sendCode.h);sendCode.h=setTimeout(()=>show($('#sms'),false),15000);go('#scrVerify');}
+  $('#smsText').textContent='Seu código do O Outro Lugar é '+shown;show($('#sms'));clearTimeout(sendCode.h);sendCode.h=setTimeout(()=>show($('#sms'),false),15000);go('#scrVerify');}
 $('#fSignup').addEventListener('submit',async e=>{e.preventDefault();
   const nome=$('#suNome').value.trim(),usuario=$('#suUser').value.trim(),email=$('#suEmail').value.trim().toLowerCase(),tel=onlyDigits($('#suTel').value);
   if(nome.length<2)return errOn('#suErr','Coloca seu nome.');
@@ -718,7 +718,7 @@ window.__role={vitrine:on=>{vitrineLive=!!on;},mesaXY:()=>{if(!SCN||!SCN.mixer)r
   lookStage:()=>{const sp=SCN&&SCN.sc.stageSpot;if(sp){const[wx,wy]=S(sp.x+1.5,-.6);centerOn(wx,wy-30);}},
   /* para os testes: escolhe direto (vôlei: posição do meu jogador; pesca: fisga já) */
   act:(type,cmd,arg)=>{const d=G.defs[type];return d&&d.test?d.test(cmd,arg):null;}};
-/* abertura: a boca pixelada (p&b) pisca, grita "que baderna!" (4 sílabas), o logo aparece dentro dela, a boca some e a página abre; clicar ou apertar uma tecla pula */
+/* abertura: a boca pixelada (p&b) pisca, grita "o outro lugar" (4 sílabas), o logo aparece dentro dela, a boca some e a página abre; clicar ou apertar uma tecla pula */
 (function intro(){
   const el=$('#intro');if(!el)return;
   if(RM||(navigator.webdriver&&!/intro/.test(location.search))){el.remove();return;}

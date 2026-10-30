@@ -77,7 +77,7 @@ function minify(js) {
   return esbuild.transformSync(js, { minify: true, target: 'es2020', legalComments: 'none' }).code;
 }
 
-const NOSCRIPT = '<noscript><div style="padding:24px;font:16px system-ui;color:#fff"><h1>The Other Place</h1>' +
+const NOSCRIPT = '<noscript><div style="padding:24px;font:16px system-ui;color:#fff"><h1>O Outro Lugar</h1>' +
   '<p>Crie o rolê, escolha o lugar e mande o link. Cada convite vira uma sala em pixel art com avatar, chat, pets e som.</p>' +
   '<p>Ative o JavaScript para entrar.</p></div></noscript>';
 
@@ -110,7 +110,7 @@ function build() {
     '<meta name="color-scheme" content="light dark">',
     '<meta name="mobile-web-app-capable" content="yes">',
     '<meta name="apple-mobile-web-app-capable" content="yes">',
-    '<meta name="apple-mobile-web-app-title" content="TOP">',
+    '<meta name="apple-mobile-web-app-title" content="O Outro Lugar">',
     '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">',
     '<meta name="format-detection" content="telephone=no">',
     '<link rel="manifest" href="/manifest.webmanifest">',
