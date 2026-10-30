@@ -643,22 +643,20 @@ window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loa
   lookStage:()=>{const sp=SCN&&SCN.sc.stageSpot;if(sp){const[wx,wy]=S(sp.x+1.5,-.6);centerOn(wx,wy-30);}},
   /* para os testes: escolhe direto (vôlei: posição do meu jogador; pesca: fisga já) */
   act:(type,cmd,arg)=>{const d=G.defs[type];return d&&d.test?d.test(cmd,arg):null;}};
-/* abertura "que baderna!": as letras caem embaralhadas, levam um choque e se ajeitam; clicar ou apertar uma tecla pula */
+/* abertura "que baderna!": alguém digita a frase errado, apaga, acerta e a frase ganha ênfase; clicar ou apertar uma tecla pula */
 (function intro(){
   const el=$('#intro');if(!el)return;
   if(RM||(navigator.webdriver&&!/intro/.test(location.search))){el.remove();return;}
-  const word=$('#introWord'),sub=$('#introSub'),rnd=(a,b)=>a+Math.random()*(b-a),T=[];let done=false;
-  [...'que baderna!'].forEach(ch=>{const s=document.createElement('span');s.className='lt';s.textContent=ch===' '?'\u00a0':ch;
-    s.style.setProperty('--x',rnd(-1.6,1.6).toFixed(2)+'em');s.style.setProperty('--y',rnd(.1,1.5).toFixed(2)+'em');
-    s.style.setProperty('--r',(rnd(30,85)*(Math.random()<.5?-1:1)).toFixed(0)+'deg');s.style.setProperty('--d',rnd(0,.75).toFixed(2)+'s');word.append(s);});
-  const at=(ms,fn)=>T.push(setTimeout(fn,ms)),cls=(...c)=>el.classList.add(...c);
-  function end(){if(done)return;done=true;T.forEach(clearTimeout);cls('out');setTimeout(()=>el.remove(),600);removeEventListener('keydown',end);}
-  function type(txt){let i=0;const h=setInterval(()=>{sub.textContent=txt.slice(0,++i);if(i>=txt.length)clearInterval(h);},55);T.push(h);}
-  requestAnimationFrame(()=>requestAnimationFrame(()=>cls('fall')));
-  at(1800,()=>{el.classList.remove('fall');cls('shock');});
-  at(2500,()=>{el.classList.remove('shock');cls('snap');});
-  at(3150,()=>{cls('sub');type('the other place');});
-  at(4900,end);
+  const word=$('#introWord'),OK='que baderna!',ERRADO='qeu badenra',T=[];let done=false,t=500;
+  const at=(ms,fn)=>T.push(setTimeout(fn,ms)),jit=(a,b)=>a+Math.random()*(b-a);
+  function end(){if(done)return;done=true;T.forEach(clearTimeout);el.classList.add('out');setTimeout(()=>el.remove(),600);removeEventListener('keydown',end);}
+  function type(txt){[...txt].forEach(ch=>{t+=jit(65,125);at(t,()=>{word.textContent+=ch;});});}
+  function back(n){for(let i=0;i<n;i++){t+=jit(35,55);at(t,()=>{word.textContent=word.textContent.slice(0,-1);});}}
+  el.classList.add('typing');
+  type(ERRADO);t+=500;back(ERRADO.length);t+=300;type(OK);
+  t+=250;at(t,()=>{el.classList.remove('typing');el.classList.add('enfase');});
+  t+=700;at(t,()=>el.classList.add('sub'));
+  t+=1300;at(t,end);
   el.addEventListener('click',end);addEventListener('keydown',end);
 })();
 (async function boot(){
