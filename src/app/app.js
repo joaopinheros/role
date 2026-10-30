@@ -411,10 +411,11 @@ async function enterRoom(eid,fresh){
 }
 function salaCheia(){if(live){try{live.leave()}catch(e){}live=null;}toast('Essa sala tá cheia agora. Tenta de novo daqui a pouco.',4200);openHome();}
 function spawnTile(){const[x0,y0]=SCN.sc.spawn;for(let i=0;i<60;i++){const x=x0+ri(5)-2,y=y0+ri(5)-2;if(walkable(x,y,-1,-1)&&!occupied(x,y,null))return[x,y];}return freeNear(x0,y0,null);}
+function hudDots(el,total,on){if(!el)return;if(el.children.length!==total){el.textContent='';for(let i=0;i<total;i++)el.append(document.createElement('i'));}[...el.children].forEach((c,i)=>c.classList.toggle('on',i<on));}
 let roomTimer=0,roomWarn=0;
 /* o relógio da sala: mostra quanto falta e, no fim das 8 h, manda todo mundo para o início */
 function roomClock(){clearInterval(roomTimer);roomWarn=0;const tick=()=>{if(mode!=='sala'||!CUR){clearInterval(roomTimer);return;}
-    const ms=roomLeft(CUR);$('#rWhen').textContent=leftTxt(CUR);
+    const ms=roomLeft(CUR);$('#rWhen').textContent=leftTxt(CUR);hudDots($('#rGauge'),8,Math.max(1,Math.ceil(ms/(SALA_MS/8))));
     if(ms<=0){clearInterval(roomTimer);toast('O rolê acabou: as salas duram 8 horas. Cria outro quando quiser!',5200);leaveRoom();return openHome();}
     if(ms<=5*60e3&&roomWarn<2){roomWarn=2;addLog(null,'Faltam 5 minutos pro rolê acabar.');}else if(ms<=15*60e3&&roomWarn<1){roomWarn=1;addLog(null,'Faltam 15 minutos pro rolê acabar.');}};
   tick();roomTimer=setInterval(tick,10000);}
@@ -435,7 +436,7 @@ function syncPeers(peers){if(mode!=='sala')return;const seen=new Set();
     if(dest[0]!==tx||dest[1]!==ty){if(!walkTo(a,tx,ty)){a.gx=a.fx=tx;a.gy=a.fy=ty;a.path=[];}if(pr.a)a.onArrive=()=>applyPeerAct(a,pr);}
     else if(!a.path.length)applyPeerAct(a,pr);}
   for(const[peer,a]of[...peerAvs]){if(!seen.has(peer)){peerAvs.delete(peer);avatars=avatars.filter(v=>v!==a);addLog(null,a.name+' saiu.');}}
-  $('#count').textContent=avatars.filter(a=>!a.bot).length+' na sala';}
+  {const n=avatars.filter(a=>!a.bot).length;$('#count').textContent=n+' na sala';hudDots($('#seats'),MAX_SALA,n);}}
 function applyPeerAct(a,pr){if(pr.a==='sit'){sit(a);a.back=!!pr.b;a.mirror=!!pr.m;}else if(pr.a==='dance')a.action='dance';else if(pr.a==='wave'){a.action='wave';a.actionUntil=now+2500;}else{if(a.action==='sit'||a.action==='dance')a.action=null;a.back=!!pr.b;a.mirror=!!pr.m;}}
 function updDayBtn(){const b=$('#rDay');const own=CUR&&ME&&CUR.dono===ME.usuario;show(b,!!own);setBtn(b,CUR&&CUR.noite?'sun':'moon',CUR&&CUR.noite?'Dia':'Noite');b.setAttribute('aria-label',CUR&&CUR.noite?'Mudar pra dia':'Mudar pra noite');}
 $('#rDay').addEventListener('click',async()=>{if(!CUR)return;try{await DB.update('roles/'+CUR.eid,{noite:!CUR.noite});}catch(e){toast('Não deu pra mudar agora.');}});
