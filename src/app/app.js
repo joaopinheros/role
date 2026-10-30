@@ -139,7 +139,7 @@ const inviteLink=eid=>SRV||ownOrigin()?location.origin+'/r/'+eid:ARTIFACT_URL+'#
 async function copyText(text,btn){const done=()=>{if(btn){const o=btn.innerHTML;setBtn(btn,'check','Copiado');setTimeout(()=>btn.innerHTML=o,1500);}toast('Link copiado. Agora é só colar no grupo.');};
   try{await navigator.clipboard.writeText(text);done();}catch(e){const i=document.createElement('textarea');i.value=text;document.body.append(i);i.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}i.remove();ok?done():toast('Não deu pra copiar sozinho. Seleciona o link e copia.');}}
 /* a paleta dos cartuchos: as cores chapadas dos cartazes de MF DOOM e Kanye (lima, rosa, índigo, laranja, roxo, vermelho) */
-const CART={churrasco:'#f7e817',festa:'#e8302a',pijama:'#2f7fd0',parque:'#b8b9c4',boate:'#0b0b0b',boteco:'#e8302a',piscina:'#2f7fd0',vulcao:'#f7e817',templo:'#b8b9c4',praia:'#f7e817',rooftop:'#1560b0'};
+const CART={churrasco:'#ffe14d',festa:'#ff3d9a',pijama:'#7048ff',parque:'#4ee07a',boate:'#111111',boteco:'#ff6a1a',piscina:'#4ee07a',vulcao:'#ff6a1a',templo:'#ff3d9a',praia:'#ffe14d',rooftop:'#7048ff'};
 const cartColor=id=>CART[id]||'#6c3ce0';
 function setTime(n){document.body.dataset.time=n?'night':'day';}
 function chipsFor(el,r){el.innerHTML='';const sc=sceneById(r.cena);
@@ -178,7 +178,7 @@ async function loadSession(){const s=sessao.get();if(!s)return null;
   try{const c=await DB.get(contaPath());if(c&&c.verificado&&c.usuario===s.usuario)return c;}catch(e){}return null;}
 
 const SCREENS=['#scrInvite','#scrLanding','#scrAuth','#scrVerify','#scrHome','#scrCreate'];
-function go(scr){if(scr!=='#scrLanding')lpLive=false;SCREENS.forEach(s=>show($(s),s===scr));show($('#roomUI'),scr==='room');frame.classList.toggle('inroom',scr==='room');
+function go(scr){if(scr!=='#scrLanding')lpLive=false;{const h=$('#sHead');if(h){const on=scr!=='#scrLanding'&&scr!=='room';show(h,on);const u=$('#sUser');if(u){u.textContent=ME?ME.nome:'';show(u,!!(ME&&on));}}}SCREENS.forEach(s=>show($(s),s===scr));show($('#roomUI'),scr==='room');frame.classList.toggle('inroom',scr==='room');
   if(scr!=='room'&&mode==='sala')leaveRoom();
   const f=scr&&scr!=='room'&&document.querySelector(scr+' input:not([readonly]), '+scr+' button.hot');if(f&&matchMedia('(min-width:761px)').matches)setTimeout(()=>f.focus(),30);}
 
@@ -235,6 +235,7 @@ function landFx(){
 function openLanding(){landFx();go('#scrLanding');vitrine('churrasco',true);$('#scrLanding').scrollTop=0;landInit();}
 $('#landCta').addEventListener('click',()=>openAuth());
 $('#landCta2').addEventListener('click',()=>openAuth());
+$('#sHeadLogo').addEventListener('click',()=>{ME?openHome():openLanding();});
 $('#landEnter').addEventListener('click',()=>openAuth());
 function openAuth(){lpLive=false;const inv=PENDING_INVITE;show($('#authBanner'),!!inv);if(inv)$('#authBannerName').textContent=inv.nome||'';authTab(false);go('#scrAuth');vitrine(inv?inv.cena:'churrasco',inv?inv.noite:true);}
 function sendCode(dev){PEND.code=SRV?null:String(1000+ri(9000));PEND.tries=0;$('#vTel').textContent=fmtTel(PEND.tel);$('#vCode').value='';errOn('#vErr');
