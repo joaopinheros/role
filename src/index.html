@@ -349,27 +349,27 @@ p{margin:0}
   .fmon.instage .chat-dock{width:calc(100% - 76px - 290px)}
 }
 /* ===== abertura "que baderna!": tela de prompt; as letras caem embaralhadas, levam um choque e se ajeitam ===== */
-.intro{position:absolute;inset:0;z-index:30;background:#f4f5f7;color:#0b0b0b;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:0 max(24px,8vw);font-family:'Pixelify Sans','Atkinson Hyperlegible Next',system-ui,sans-serif;overflow:hidden;cursor:pointer;transition:opacity .5s ease-out}
+.intro{position:absolute;inset:0;z-index:30;background:#000;color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:0 24px;font-family:'Atkinson Hyperlegible Next',system-ui,sans-serif;overflow:hidden;cursor:pointer;transition:opacity .5s ease-out}
 .intro.out{opacity:0;pointer-events:none}
-.intro .ln{display:flex;align-items:baseline;font-size:min(11.5vw,150px);font-weight:700;line-height:1;white-space:nowrap}
-.intro .pr{color:#e8302a;margin-right:.22em}
+.intro .ln{display:flex;align-items:baseline;font-size:clamp(20px,2.3vw,28px);font-weight:600;line-height:1.2;white-space:nowrap}
+.intro .pr{color:#e8302a;margin-right:.5em;font-weight:700}
 .intro .word{display:inline-flex}
 .intro .lt{display:inline-block;transform:translate(var(--x),var(--y)) rotate(var(--r));opacity:0;will-change:transform}
 .intro.fall .lt{opacity:1;animation:ifall .95s var(--d) cubic-bezier(.4,0,.6,1) both}
 .intro.shock .lt{opacity:1;animation:izap .62s linear both}
 .intro.snap .lt,.intro.sub .lt{opacity:1;transform:none;transition:transform .55s cubic-bezier(.2,1.8,.3,1)}
-.intro .caret{display:inline-block;align-self:flex-end;width:.42em;height:.12em;margin-left:.12em;background:#f7e817;box-shadow:0 0 0 .04em #0b0b0b;animation:icaret 1s steps(2) infinite}
-.intro .isub{margin:0;min-height:1.4em;font-size:min(4.6vw,34px);font-weight:500;color:#1560b0;padding-left:.2em}
-.intro .skip{position:absolute;left:max(24px,8vw);bottom:max(20px,calc(env(safe-area-inset-bottom,0px) + 14px));margin:0;font-size:14px;color:#6b7280}
+.intro .caret{display:inline-block;align-self:flex-end;width:.55em;height:.14em;margin-left:.2em;background:#f7e817;animation:icaret 1s steps(2) infinite}
+.intro .isub{margin:0;min-height:1.4em;font-size:clamp(13px,1.4vw,16px);font-weight:400;letter-spacing:.04em;color:#8fb8ff}
+.intro .skip{position:absolute;left:0;right:0;text-align:center;bottom:max(20px,calc(env(safe-area-inset-bottom,0px) + 14px));margin:0;font-size:13px;color:#6f7480}
 .intro .flash{position:absolute;inset:0;background:#f7e817;opacity:0;pointer-events:none}
 .intro .bolt{position:absolute;left:0;top:0;width:100%;height:50%;opacity:0;pointer-events:none;overflow:visible}
-.intro .bolt polyline{fill:none;stroke:#0b0b0b;stroke-width:5;stroke-linejoin:miter;vector-effect:non-scaling-stroke}
-.intro .bolt .b2{stroke:#f7e817;stroke-width:2}
+.intro .bolt polyline{fill:none;stroke:#f7e817;stroke-width:5;stroke-linejoin:miter;vector-effect:non-scaling-stroke}
+.intro .bolt .b2{stroke:#fff;stroke-width:2}
 .intro.shock .bolt{animation:ibolt .62s steps(1) both}
 .intro.shock .flash{animation:iflash .62s steps(1) both}
 .intro.shock .ln{animation:ishake .62s linear both}
-@keyframes ifall{from{transform:translate(var(--x),-120vh) rotate(calc(var(--r)*5))}58%{transform:translate(var(--x),var(--y)) rotate(var(--r))}74%{transform:translate(var(--x),calc(var(--y) - .22em)) rotate(var(--r))}100%{transform:translate(var(--x),var(--y)) rotate(var(--r))}}
-@keyframes izap{0%,100%{color:#0b0b0b}10%{color:#e8302a;transform:translate(calc(var(--x) + .05em),calc(var(--y) - .04em)) rotate(calc(var(--r) + 7deg))}22%{color:#1560b0;transform:translate(calc(var(--x) - .06em),calc(var(--y) + .03em)) rotate(calc(var(--r) - 8deg))}34%{color:#f7e817;transform:translate(calc(var(--x) + .04em),calc(var(--y) - .06em)) rotate(calc(var(--r) + 5deg))}46%{color:#e8302a;transform:translate(calc(var(--x) - .05em),calc(var(--y) + .05em)) rotate(calc(var(--r) - 6deg))}60%{color:#1560b0}74%{color:#0b0b0b;transform:translate(calc(var(--x) + .03em),var(--y)) rotate(calc(var(--r) + 3deg))}}
+@keyframes ifall{from{transform:translate(var(--x),-60vh) rotate(calc(var(--r)*5))}58%{transform:translate(var(--x),var(--y)) rotate(var(--r))}74%{transform:translate(var(--x),calc(var(--y) - .9em)) rotate(var(--r))}100%{transform:translate(var(--x),var(--y)) rotate(var(--r))}}
+@keyframes izap{0%,100%{color:#fff}10%{color:#e8302a;transform:translate(calc(var(--x) + .3em),calc(var(--y) - .2em)) rotate(calc(var(--r) + 7deg))}22%{color:#4a9dff;transform:translate(calc(var(--x) - .35em),calc(var(--y) + .15em)) rotate(calc(var(--r) - 8deg))}34%{color:#f7e817;transform:translate(calc(var(--x) + .25em),calc(var(--y) - .3em)) rotate(calc(var(--r) + 5deg))}46%{color:#e8302a;transform:translate(calc(var(--x) - .3em),calc(var(--y) + .25em)) rotate(calc(var(--r) - 6deg))}60%{color:#4a9dff}74%{color:#fff;transform:translate(calc(var(--x) + .15em),var(--y)) rotate(calc(var(--r) + 3deg))}}
 @keyframes ibolt{0%{opacity:1}14%{opacity:0}26%{opacity:1}40%{opacity:0}52%{opacity:1}70%,100%{opacity:0}}
 @keyframes iflash{0%{opacity:.9}10%{opacity:0}24%{opacity:.7}36%{opacity:0}50%{opacity:.5}62%,100%{opacity:0}}
 @keyframes ishake{0%,100%{transform:none}12%{transform:translate(-9px,4px)}28%{transform:translate(8px,-5px)}44%{transform:translate(-6px,-3px)}60%{transform:translate(5px,4px)}78%{transform:translate(-2px,1px)}}

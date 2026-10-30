@@ -649,7 +649,7 @@ window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loa
   if(RM||(navigator.webdriver&&!/intro/.test(location.search))){el.remove();return;}
   const word=$('#introWord'),sub=$('#introSub'),rnd=(a,b)=>a+Math.random()*(b-a),T=[];let done=false;
   [...'que baderna!'].forEach(ch=>{const s=document.createElement('span');s.className='lt';s.textContent=ch===' '?'\u00a0':ch;
-    s.style.setProperty('--x',rnd(-.5,.5).toFixed(2)+'em');s.style.setProperty('--y',rnd(.05,.55).toFixed(2)+'em');
+    s.style.setProperty('--x',rnd(-1.6,1.6).toFixed(2)+'em');s.style.setProperty('--y',rnd(.1,1.5).toFixed(2)+'em');
     s.style.setProperty('--r',(rnd(30,85)*(Math.random()<.5?-1:1)).toFixed(0)+'deg');s.style.setProperty('--d',rnd(0,.75).toFixed(2)+'s');word.append(s);});
   const at=(ms,fn)=>T.push(setTimeout(fn,ms)),cls=(...c)=>el.classList.add(...c);
   function end(){if(done)return;done=true;T.forEach(clearTimeout);cls('out');setTimeout(()=>el.remove(),600);removeEventListener('keydown',end);}
