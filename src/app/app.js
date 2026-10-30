@@ -309,12 +309,17 @@ async function openHome(){go('#scrHome');$('#homeName').textContent=ME.nome;$('#
     const roles=(await Promise.all(mine.map(async m=>{const r=await DB.get('roles/'+m.data.eid);return r&&{...r,eid:m.data.eid,papel:m.data.papel};}))).filter(Boolean).sort((a,b)=>(b.criado||0)-(a.criado||0));
     const vivos=roles.filter(r=>roomLeft(r)>0);   // sala encerrada some da lista
     roles.filter(r=>roomLeft(r)<=0).forEach(r=>{try{DB.del(`data/users/${UID}/r_${r.eid}`).catch(()=>{});}catch(e){}});   // e o vínculo é apagado (no servidor/Supabase o apagar não é permitido: aí só some da tela)
-    const cnt=$('#roomsCount');cnt.hidden=!vivos.length;cnt.textContent=vivos.length+(vivos.length===1?' no ar':' no ar');
+    const cnt=$('#roomsCount');cnt.hidden=!vivos.length;cnt.textContent=vivos.length;cnt.title=vivos.length+(vivos.length===1?' sala ativa':' salas ativas');cnt.setAttribute('aria-label',cnt.title);
     box.innerHTML='';if(!vivos.length){box.innerHTML='<div class="empty">Nenhuma sala ativa agora. Cria uma e chama a galera.</div>';return;}
     vivos.forEach(r=>{const row=document.createElement('div');row.className='rrow';row.style.setProperty('--cc',cartColor(r.cena));
       const c=document.createElement('canvas');c.width=192;c.height=160;sceneThumb(r.cena,r.noite,c);
       const t=document.createElement('div');t.className='rt';const b=document.createElement('b');b.textContent=r.nome;
-      const m=document.createElement('div');m.className='rm';const c1=document.createElement('span');c1.className='chip live';c1.textContent=leftTxt(r);const c2=document.createElement('span');c2.className='chip';c2.textContent=r.papel==='dono'?'Você criou':'Você foi chamado';m.append(c1,c2);t.append(b,m);
+      const tg=document.createElement('span');tg.className='rtag'+(r.papel==='dono'?'':' guest');tg.textContent=r.papel==='dono'?'Sua sala':'Convite';
+      const left=roomLeft(r),segs=8,full=Math.max(1,Math.min(segs,Math.ceil(left/(SALA_MS/segs))));
+      const tm=document.createElement('div');tm.className='rtime';tm.setAttribute('aria-label',leftTxt(r));
+      const gauge=document.createElement('span');gauge.className='gauge';gauge.setAttribute('aria-hidden','true');for(let i=0;i<segs;i++){const s=document.createElement('i');if(i<full)s.className='on';gauge.append(s);}
+      const tx=document.createElement('span');tx.textContent=leftTxt(r).replace('Restam ','')+' restantes';tm.append(gauge,tx);
+      t.append(b,tm);row.append(tg);
       const bar=document.createElement('div');bar.className='ra';const lk=document.createElement('button');lk.className='px icon';lk.setAttribute('aria-label','Copiar link do convite');setBtn(lk,'link');lk.addEventListener('click',()=>copyText(inviteLink(r.eid),lk));
       const en=document.createElement('button');en.className='px hot';en.textContent='Entrar';en.addEventListener('click',()=>enterRoom(r.eid));bar.append(en,lk);
       row.append(c,t,bar);box.append(row);});

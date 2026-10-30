@@ -630,6 +630,17 @@ p{margin:0}
   .fmon .log{max-height:min(40vh,340px)}
   .instage .log{max-height:none;-webkit-mask-image:none;mask-image:none}
 }
+/* salas ativas: etiqueta colada na imagem e medidor das 8 horas, no lugar das pílulas */
+#roomsCount{background:#111;color:#ffe14d;border:0;border-radius:8px;padding:2px 12px;font:400 20px/1.4 'Bowlby One',Impact,sans-serif;box-shadow:3px 3px 0 #ff3d9a}
+#roomsCount::before{display:none}
+.rrow{position:relative}
+.rtag{position:absolute;z-index:2;left:8px;top:6px;background:#ffe14d;color:#111;border:3px solid #111;padding:3px 10px;font:800 13px 'Atkinson Hyperlegible Next',system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;transform:rotate(-4deg);box-shadow:3px 3px 0 #111}
+.rtag.guest{background:#ff3d9a}
+.rtime{display:flex;flex-direction:column;gap:6px;font:700 14px 'Atkinson Hyperlegible Next',system-ui,sans-serif;color:#111}
+.gauge{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;height:12px;padding:2px;border:3px solid #111;background:#fff;box-sizing:content-box}
+.gauge i{background:#e6e0f0}
+.gauge i.on{background:#4ee07a}
+.gauge i.on:last-child,.gauge i.on:nth-last-child(1){background:#4ee07a}
 </style>
 
 <div class="app" id="frame">
