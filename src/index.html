@@ -364,9 +364,8 @@ p{margin:0}
 #scrLanding{display:block;padding:0;overflow-x:hidden;overflow-y:auto;background:#fdf3df;pointer-events:auto}
 .lp{--pur:#7048ff;--pur2:#8460ff;--grn:#4ee07a;--yel:#ffe14d;--pnk:#ff3d9a;--org:#ff6a1a;--ink:#111;--cream:#fdf3df;color:var(--ink);font-family:'Atkinson Hyperlegible Next',system-ui,sans-serif}
 .lp h1,.lp h2,.lp h3{font-family:'Bowlby One','Anybody',Impact,sans-serif;font-weight:400;text-transform:uppercase;margin:0;line-height:1}
-.lp-top{position:absolute;left:0;right:0;top:0;z-index:3;display:flex;justify-content:space-between;align-items:center;padding:18px max(20px,4vw)}
-.lp-pill{display:inline-flex;align-items:center;gap:8px;background:#111;color:#fff;padding:8px 12px;font:700 12px 'Pixelify Sans',monospace;letter-spacing:.08em;text-transform:uppercase}
-.lp-pill i{width:8px;height:8px;background:var(--grn)}
+.lp-top{position:fixed;left:0;right:0;top:0;z-index:5;height:64px;display:flex;justify-content:space-between;align-items:center;padding:0 max(20px,4vw);background:#111;border-bottom:4px solid #111}
+.lp-hlogo{height:48px;filter:invert(1)}
 .lp-enter,.lp-cta{font:400 15px 'Bowlby One',Impact,sans-serif;text-transform:uppercase;letter-spacing:.02em;color:#111;background:var(--yel);border:3px solid #111;border-radius:999px;padding:11px 20px;box-shadow:3px 3px 0 #111;cursor:pointer;transition:transform .08s,box-shadow .08s}
 .lp-cta{background:var(--grn);font-size:17px;padding:16px 28px;box-shadow:5px 5px 0 #111}
 .lp-cta.pink{background:var(--pnk);color:#111}
@@ -424,26 +423,24 @@ p{margin:0}
 .lp-card .ib{display:grid;place-items:center;width:46px;height:46px;background:#fff;border:3px solid #111;color:#111}
 .lp-card .ib .pi{width:24px;height:24px}
 .lp-card.c1{background:var(--pur);color:#fff}.lp-card.c2{background:var(--pnk)}.lp-card.c3{background:var(--grn)}.lp-card.c4{background:var(--yel)}
-.lp-eight{background:var(--org);padding:clamp(40px,6vw,80px) max(16px,4vw)}
-.lp-eight .ring{background:var(--yel);border:4px solid #111;border-radius:clamp(44px,8vw,96px);padding:clamp(10px,1.6vw,18px);max-width:1080px;margin:0 auto}
-.lp-eight .ring2{background:var(--pur);border:4px solid #111;border-radius:clamp(36px,7vw,82px);padding:clamp(10px,1.6vw,18px)}
-.lp-eight .ring3{background:var(--cream);border:4px solid #111;border-radius:clamp(26px,6vw,66px);padding:clamp(28px,4vw,56px) clamp(16px,3vw,40px);text-align:center}
-.lp-eight h2{font-size:clamp(34px,6vw,72px);line-height:1.02}
-.lp-eight .n8{display:inline-block;background:var(--grn);border:4px solid #111;padding:2px 14px;margin-bottom:8px;transform:rotate(-2deg);box-shadow:4px 4px 0 #111}
-.lp-eight p{margin:16px auto 28px;max-width:30em;font-size:16px;line-height:1.5}
 .lp-slots{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
 .lp-slot{width:84px;border:3px solid #111;box-shadow:3px 3px 0 #111;background:var(--c,#fff);display:flex;flex-direction:column;align-items:center;overflow:hidden}
 .lp-slot canvas{display:block;width:100%;height:78px;image-rendering:pixelated}
 .lp-slot b{width:100%;background:#fff;border-top:3px solid #111;padding:3px 0;font:700 11px 'Pixelify Sans',monospace;letter-spacing:.06em;text-transform:uppercase}
 .lp-slot.vago{background:transparent;border:3px dashed #111;box-shadow:none;height:111px;justify-content:center;gap:6px;font:700 11px 'Pixelify Sans',monospace;text-transform:uppercase;color:#111}
 .lp-slot.vago i{font-style:normal;font:400 26px 'Bowlby One',Impact,sans-serif;color:var(--pur)}
-.lp-final{position:relative;display:flex;flex-direction:column;align-items:center;gap:26px;text-align:center;padding:clamp(56px,8vw,104px) max(24px,5vw);background:repeating-conic-gradient(from 0deg at 50% 50%,#ffd93b 0 7.5deg,#ffe766 7.5deg 15deg)}
-.lp-final h2{font-size:clamp(38px,7vw,88px);line-height:1}
-.lp-final .bd{display:inline-block;margin-top:10px;background:var(--pur);color:#fff;border:4px solid #111;padding:4px 22px;transform:rotate(-2deg);box-shadow:5px 5px 0 #111}
-.lp-final .fa{position:absolute;bottom:14%;width:clamp(60px,8vw,110px);height:auto;image-rendering:pixelated}
-.lp-final .fa.l{left:max(16px,6vw)}.lp-final .fa.r{right:max(16px,6vw)}
-.lp-foot{display:flex;justify-content:space-between;align-items:center;background:#111;color:#fff;padding:14px max(20px,4vw);font:700 12px 'Atkinson Hyperlegible Next',system-ui,sans-serif;letter-spacing:.08em}
-.lp-foot .qb-logo{width:46px}
+.lp-sec8{background:var(--org);padding:clamp(40px,6vw,88px) max(20px,5vw)}
+.lp-secbora{background:repeating-conic-gradient(from 0deg at 50% 50%,#ffd93b 0 7.5deg,#ffe766 7.5deg 15deg);padding:clamp(48px,7vw,104px) max(24px,5vw)}
+.lp-eight8{max-width:980px;margin:0 auto;background:var(--cream);border:4px solid #111;box-shadow:9px 9px 0 #111;padding:clamp(24px,3.4vw,48px);text-align:center}
+.lp-eight8 h2{font-size:clamp(34px,5vw,64px);line-height:1.02}
+.lp-eight8 .n8{display:inline-block;background:var(--grn);border:4px solid #111;padding:2px 14px;margin-bottom:8px;transform:rotate(-2deg);box-shadow:4px 4px 0 #111}
+.lp-eight8 p{margin:16px auto 24px;max-width:28em;font-size:18px;line-height:1.5}
+.lp-bora{position:relative;display:flex;flex-direction:column;align-items:center;gap:28px;text-align:center;max-width:980px;margin:0 auto;padding:clamp(8px,2vw,24px) 0}
+.lp-bora h2{font-size:clamp(40px,7vw,92px);line-height:1}
+.lp-bora .bd{display:inline-block;margin-top:10px;background:var(--pur);color:#fff;border:4px solid #111;padding:4px 20px;transform:rotate(-2deg);box-shadow:5px 5px 0 #111}
+.lp-bora .fa{position:absolute;bottom:6px;width:clamp(60px,8vw,110px);height:auto;image-rendering:pixelated}
+.lp-bora .fa.l{left:max(0px,2vw)}.lp-bora .fa.r{right:max(0px,2vw)}
+.lp-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#111;color:#fff;padding:14px max(20px,4vw);font:700 15px 'Atkinson Hyperlegible Next',system-ui,sans-serif}
 @media (max-width:980px){.lp-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:760px){
   .lp-hero{padding:84px 16px 48px}
@@ -514,6 +511,22 @@ p{margin:0}
 .rrow .ra .px{min-height:40px;font-size:14px}
 .rrow .ra .px.hot{flex:1}
 @media (prefers-reduced-motion:reduce){.rrow .rm .chip.live::before{animation:none}}
+.lp-hero{min-height:100svh;box-sizing:border-box}
+.lp-hero{padding-top:84px;padding-bottom:84px}
+.lp-hero .lp-ticker{position:absolute;left:0;right:0;bottom:0}
+.lp-gang{align-content:stretch;grid-template-rows:1fr}
+.lp-chat{align-self:center;padding-bottom:clamp(40px,6vw,80px)}.lp-crew{align-self:end}
+.lp-band{height:clamp(46px,5vw,64px)}
+/* fontes pequenas maiores e legíveis */
+.lp-slot b{font:800 14px 'Atkinson Hyperlegible Next',system-ui,sans-serif;letter-spacing:.04em;padding:5px 0}
+.lp-slot.vago{font:800 14px 'Atkinson Hyperlegible Next',system-ui,sans-serif}
+.lp-slot{width:98px}.lp-slot canvas{height:92px}.lp-slot.vago{height:130px}
+.pp em{font:800 15px 'Atkinson Hyperlegible Next',system-ui,sans-serif;padding:4px 11px}
+.lp-log{font-size:18px;padding:18px 20px}.lp-log code,.lp-chat p b{font:800 16px 'Atkinson Hyperlegible Next',ui-monospace,monospace}
+.lp-card p{font-size:17px}.lp-card h3{font-size:clamp(18px,1.7vw,23px)}
+.lp-copy p{font-size:clamp(18px,1.6vw,22px)}
+.lp-enter{font-size:16px;padding:10px 22px}
+@media (max-width:760px){.lp-gang,.lp-what{min-height:0}.lp-bora .fa{display:none}.lp-hlogo{height:42px}.lp-hero .lp-ticker{position:static;margin-top:28px}.lp-hero{align-content:center}}
 </style>
 
 <div class="app" id="frame">
@@ -547,7 +560,7 @@ p{margin:0}
   <!-- apresentação (LP antes do login) -->
   <section class="screen" id="scrLanding" hidden aria-label="Apresentação">
     <div class="lp">
-      <header class="lp-top"><span class="lp-pill"><i></i>Salas de até 8 pessoas</span><button class="lp-enter" id="landEnter" type="button">Entrar</button></header>
+      <header class="lp-top"><div class="qb-logo pb lp-hlogo" role="img" aria-label="Que baderna!"></div><button class="lp-enter" id="landEnter" type="button">Entrar</button></header>
       <section class="lp-hero">
         <div class="lp-copy">
           <div class="lp-shout" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -557,8 +570,17 @@ p{margin:0}
           <p>Crie uma sala, mande o link e pronto: até <mark>8 pessoas</mark> pra ouvir música junto, jogar e bater papo com os amigos.</p>
           <button class="lp-cta" id="landCta" type="button">Criar minha sala</button>
         </div>
+        <div class="lp-ticker" aria-hidden="true"><div class="track"><span>8 pessoas <u>★</u> música junto <u>★</u> jogos <u>★</u> bate-papo por texto e voz <u>★</u> sala aberta por 8 horas <u>★</u> boneco pixel <u>★</u> </span><span>8 pessoas <u>★</u> música junto <u>★</u> jogos <u>★</u> bate-papo por texto e voz <u>★</u> sala aberta por 8 horas <u>★</u> boneco pixel <u>★</u> </span></div></div>
       </section>
-      <div class="lp-ticker" aria-hidden="true"><div class="track"><span>8 pessoas <u>★</u> música junto <u>★</u> jogos <u>★</u> bate-papo por texto e voz <u>★</u> sala aberta por 8 horas <u>★</u> boneco pixel <u>★</u> </span><span>8 pessoas <u>★</u> música junto <u>★</u> jogos <u>★</u> bate-papo por texto e voz <u>★</u> sala aberta por 8 horas <u>★</u> boneco pixel <u>★</u> </span></div></div>
+      <section class="lp-what">
+        <h2>Junta a galera e faz o que quiser.</h2>
+        <div class="lp-cards">
+          <article class="lp-card c1"><span class="ib" data-i="people"></span><h3>Salas com 8 pessoas</h3><p>Pequena do jeito certo: todo mundo se ouve. Cada sala fica aberta por 8 horas.</p></article>
+          <article class="lp-card c2"><span class="ib" data-i="note"></span><h3>Ouça música junto</h3><p>Uma rádio só pra sala toda. Cola o link do YouTube ou o nome da música e todo mundo ouve ao mesmo tempo.</p></article>
+          <article class="lp-card c3"><span class="ib" data-i="dice"></span><h3>Jogue</h3><p>Sinuca, truco, damas, xadrez, pesca e mais, no meio da conversa.</p></article>
+          <article class="lp-card c4"><span class="ib" data-i="chat"></span><h3>Bata papo</h3><p>Por texto ou por voz, com o seu boneco andando pela sala.</p></article>
+        </div>
+      </section>
       <section class="lp-gang">
         <div class="lp-chat" aria-label="Exemplo do chat da sala">
           <h2>Peça o som no chat.</h2>
@@ -575,29 +597,19 @@ p{margin:0}
           <div class="lp-band"></div>
         </div>
       </section>
-      <section class="lp-what">
-        <h2>Junta a galera e faz o que quiser.</h2>
-        <div class="lp-cards">
-          <article class="lp-card c1"><span class="ib" data-i="people"></span><h3>Salas com 8 pessoas</h3><p>Pequena do jeito certo: todo mundo se ouve. Cada sala fica aberta por 8 horas.</p></article>
-          <article class="lp-card c2"><span class="ib" data-i="note"></span><h3>Ouça música junto</h3><p>Uma rádio só pra sala toda. Cola o link do YouTube ou o nome da música e todo mundo ouve ao mesmo tempo.</p></article>
-          <article class="lp-card c3"><span class="ib" data-i="dice"></span><h3>Jogue</h3><p>Sinuca, truco, damas, xadrez, pesca e mais, no meio da conversa.</p></article>
-          <article class="lp-card c4"><span class="ib" data-i="chat"></span><h3>Bata papo</h3><p>Por texto ou por voz, com o seu boneco andando pela sala.</p></article>
-        </div>
-      </section>
-      <section class="lp-eight">
-        <div class="ring"><div class="ring2"><div class="ring3">
-          <h2><span class="n8">Só 8</span><br>por sala.</h2>
-          <p>Pequeno de propósito: todo mundo se ouve e ninguém fica de fora.</p>
-          <div class="lp-slots" id="lpSlots"></div>
-        </div></div></div>
-      </section>
-      <section class="lp-final">
-        <canvas class="fa l" id="lpAvL" width="110" height="150" aria-hidden="true"></canvas>
-        <h2>Bora fazer<br><span class="bd">Baderna?</span></h2>
-        <button class="lp-cta pink" id="landCta2" type="button">Criar minha sala</button>
-        <canvas class="fa r" id="lpAvR" width="110" height="150" aria-hidden="true"></canvas>
-      </section>
-      <footer class="lp-foot"><div class="qb-logo" role="img" aria-label="Que baderna!"></div><span>© 2026 QUE BADERNA!</span></footer>
+      <section class="lp-sec8"><div class="lp-eight8">
+            <h2><span class="n8">Só 8</span><br>por sala.</h2>
+            <p>Pequeno de propósito: todo mundo se ouve e ninguém fica de fora.</p>
+            <div class="lp-slots" id="lpSlots"></div>
+          </div>
+          </section>
+      <section class="lp-secbora"><div class="lp-bora">
+            <canvas class="fa l" id="lpAvL" width="110" height="150" aria-hidden="true"></canvas>
+            <h2>Bora fazer<br><span class="bd">Baderna?</span></h2>
+            <button class="lp-cta pink" id="landCta2" type="button">Criar minha sala</button>
+            <canvas class="fa r" id="lpAvR" width="110" height="150" aria-hidden="true"></canvas>
+          </div></section>
+      <footer class="lp-foot"><span>© 2026 QUE BADERNA!</span><span>Salas de até 8 pessoas, abertas por 8 horas</span></footer>
     </div>
   </section>
 
