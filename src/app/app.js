@@ -643,20 +643,20 @@ window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loa
   lookStage:()=>{const sp=SCN&&SCN.sc.stageSpot;if(sp){const[wx,wy]=S(sp.x+1.5,-.6);centerOn(wx,wy-30);}},
   /* para os testes: escolhe direto (vôlei: posição do meu jogador; pesca: fisga já) */
   act:(type,cmd,arg)=>{const d=G.defs[type];return d&&d.test?d.test(cmd,arg):null;}};
-/* abertura "que baderna!": alguém digita a frase errado, apaga, acerta e a frase ganha ênfase; clicar ou apertar uma tecla pula */
+/* abertura: alguém digita rápido, erra o "que", acerta, começa a errar "baderna" e desiste, e termina em caixa alta com ênfase; clicar ou apertar uma tecla pula */
 (function intro(){
   const el=$('#intro');if(!el)return;
   if(RM||(navigator.webdriver&&!/intro/.test(location.search))){el.remove();return;}
-  const word=$('#introWord'),OK='que baderna!',ERRADO='qeu badenra',T=[];let done=false,t=500;
+  const word=$('#introWord'),T=[];let done=false,t=350;
   const at=(ms,fn)=>T.push(setTimeout(fn,ms)),jit=(a,b)=>a+Math.random()*(b-a);
-  function end(){if(done)return;done=true;T.forEach(clearTimeout);el.classList.add('out');setTimeout(()=>el.remove(),600);removeEventListener('keydown',end);}
-  function type(txt){[...txt].forEach(ch=>{t+=jit(65,125);at(t,()=>{word.textContent+=ch;});});}
-  function back(n){for(let i=0;i<n;i++){t+=jit(35,55);at(t,()=>{word.textContent=word.textContent.slice(0,-1);});}}
+  function end(){if(done)return;done=true;T.forEach(clearTimeout);el.classList.add('out');setTimeout(()=>el.remove(),500);removeEventListener('keydown',end);}
+  function type(txt){[...txt].forEach(ch=>{t+=jit(45,85);at(t,()=>{word.textContent+=ch;});});}
+  function back(n){for(let i=0;i<n;i++){t+=jit(22,34);at(t,()=>{word.textContent=word.textContent.slice(0,-1);});}}
   el.classList.add('typing');
-  type(ERRADO);t+=500;back(ERRADO.length);t+=300;type(OK);
-  t+=250;at(t,()=>{el.classList.remove('typing');el.classList.add('enfase');});
-  t+=700;at(t,()=>el.classList.add('sub'));
-  t+=1300;at(t,end);
+  type('qeu');t+=140;back(3);type('que ');type('badenr');t+=220;back(10);t+=120;
+  type('QUE BADERNA!');
+  t+=120;at(t,()=>{el.classList.remove('typing');el.classList.add('enfase');});
+  t+=900;at(t,end);
   el.addEventListener('click',end);addEventListener('keydown',end);
 })();
 (async function boot(){

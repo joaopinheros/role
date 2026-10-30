@@ -357,8 +357,6 @@ p{margin:0}
 .intro.typing .caret{animation:none}
 .intro.enfase .caret{display:none}
 .intro.enfase .word{animation:ipop .9s cubic-bezier(.2,1.4,.35,1) both}
-.intro .isub{margin:0;font-size:clamp(13px,1.4vw,16px);letter-spacing:.06em;color:#8fb8ff;opacity:0;transition:opacity .6s ease-out}
-.intro.sub .isub{opacity:1}
 .intro .skip{position:absolute;left:0;right:0;text-align:center;bottom:max(20px,calc(env(safe-area-inset-bottom,0px) + 14px));margin:0;font-size:13px;color:#6f7480}
 @keyframes ipop{0%{transform:scale(1);font-weight:500;text-shadow:none}35%{transform:scale(1.35);font-weight:800;text-shadow:0 0 18px rgba(255,255,255,.55)}100%{transform:scale(1.18);font-weight:800;text-shadow:0 0 10px rgba(255,255,255,.3)}}
 @keyframes icaret{50%{opacity:0}}
@@ -427,7 +425,6 @@ p{margin:0}
 
   <div class="intro" id="intro" role="status" aria-label="que baderna!">
     <div class="ln" aria-hidden="true"><span class="word" id="introWord"></span><i class="caret"></i></div>
-    <p class="isub" id="introSub" aria-hidden="true">the other place</p>
     <p class="skip">toque para pular</p>
   </div>
   <div class="loading" id="loading" role="status" aria-label="Carregando"><div class="brand sm">The Other Place</div></div>
