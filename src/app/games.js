@@ -298,7 +298,7 @@ function gStageOpen(a,st,idx){
   const el=$('#stage');G.stage={a,st,idx};
   el.hidden=false;frame.classList.add('instage','diving');frame.classList.remove('chaton');if(typeof chatUi==='function')chatUi();
   requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('on')));
-  G.quitAt=0;$('#stageExit').textContent='Sair do jogo';
+  G.quitAt=0;$('#stageExit').textContent='Sair';
   gHudBuild(st,idx);
   G.defs[a.type].stageOpen(a,st,idx,$('#stageCv'));
   gUpdateBtn();
