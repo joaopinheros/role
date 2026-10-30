@@ -688,6 +688,20 @@ p{margin:0}
 .quitask>div{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .quitask .px{border:3px solid #111;border-radius:999px;font:400 14px 'Bowlby One',Impact,sans-serif;text-transform:uppercase;min-height:46px;padding:0 18px;box-shadow:3px 3px 0 #111}
 .quitask .px.hot{background:#ff3d9a;color:#111}.quitask .px.alt{background:#4ee07a;color:#111}
+/* dicas da sala: etiquetas soltas apontando para os botões, sem janela e sem travar nada */
+.tips{position:absolute;inset:0;z-index:7;pointer-events:none}
+.tip2{position:absolute;max-width:min(230px,60vw);background:#ffe14d;color:#111;border:3px solid #111;box-shadow:4px 4px 0 #111;padding:6px 11px;font:800 14px/1.25 'Atkinson Hyperlegible Next',system-ui,sans-serif;animation:tipin .35s cubic-bezier(.2,1.5,.4,1) both}
+.tip2 b{font:700 13px 'Atkinson Hyperlegible Next',ui-monospace,monospace;background:#111;color:#4ee07a;padding:0 5px}
+.tip2.r::after,.tip2.t::after{content:"";position:absolute;width:12px;height:12px;background:#ffe14d;border:3px solid #111;transform:rotate(45deg)}
+.tip2.r::after{right:-10px;top:50%;margin-top:-6px;border-left:0;border-bottom:0}
+.tip2.t::after{left:26px;bottom:-10px;border-top:0;border-left:0}
+.tip2.c{left:50%;top:26%;transform:translateX(-50%);text-align:center;font-size:16px}
+.tips.out .tip2{animation:tipout .3s ease-in both}
+@keyframes tipin{from{opacity:0;scale:.7}to{opacity:1;scale:1}}
+@keyframes tipout{to{opacity:0;scale:.8}}
+@media (max-width:760px){.tip2.c{display:none}}
+#rHelp{font-size:20px;font-family:'Bowlby One',Impact,sans-serif}
+@media (prefers-reduced-motion:reduce){.tip2{animation:none}}
 </style>
 
 <div class="app" id="frame">
@@ -889,6 +903,7 @@ p{margin:0}
       <button class="px" id="rHome" aria-label="Sair da sala" data-i="back"><span>Sair</span></button>
       <button class="px hot" id="wardBtn" aria-expanded="false" aria-controls="wardrobe" data-i="shirt"><span>Visual</span></button>
       <button class="px" id="rInvite" data-i="link"><span>Convidar</span></button>
+      <button class="px" id="rHelp" type="button" aria-label="Como usar a sala">?</button>
       <button class="px stg" id="rFm" hidden aria-pressed="false" data-i="note"><span>Ligar a rádio</span></button>
       <button class="px hot" id="rAct" hidden data-i="dice"><span>Jogar</span></button>
       <button class="px stg" id="rVoz" hidden aria-pressed="false" aria-label="Entrar no chat de voz" data-i="mic"><span>Voz</span></button>

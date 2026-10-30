@@ -396,7 +396,7 @@ async function enterRoom(eid,fresh){
   const[sx,sy]=spawnTile();me=makeAv(ME.nome,{...fig},sx,sy,{user:ME.usuario});npcSpawn();
   $('#rName').textContent=r.nome;roomClock();updDayBtn();
   $('#log').innerHTML='';chatSeen=new Set();joinedAt=Date.now();centerOn(...S(sx+.5,sy+.5).map((v,i)=>i?v-50:v));
-  addLog(null,fresh?`Você entrou em ${r.nome}. Bem-vindo!`:`Você está em ${r.nome}.`);setTimeout(()=>{if(mode==='sala'&&CUR&&CUR.eid===eid&&FM.on)addLog(null,'Pra tocar música pra sala toda: digite /music e o nome da música (ou um link do YouTube). Também tem /skip, /pause, /play, /fila e /tocando.');},1100);spawnPets(eid);if(SCN.mixer)addLog(null,`Toca na mesa de som pra ligar a rádio. Tem ${pets.map(p=>p.name).join(' e ')} passeando por aí.`);updSom();
+  addLog(null,fresh?`Você entrou em ${r.nome}. Bem-vindo!`:`Você está em ${r.nome}.`);setTimeout(()=>{if(mode==='sala'&&CUR&&CUR.eid===eid&&!LS.get('role-dicas',0)&&!navigator.webdriver){LS.set('role-dicas',1);roomTips();}},2600);setTimeout(()=>{if(mode==='sala'&&CUR&&CUR.eid===eid&&FM.on)addLog(null,'Pra tocar música pra sala toda: digite /music e o nome da música (ou um link do YouTube). Também tem /skip, /pause, /play, /fila e /tocando.');},1100);spawnPets(eid);if(SCN.mixer)addLog(null,`Toca na mesa de som pra ligar a rádio. Tem ${pets.map(p=>p.name).join(' e ')} passeando por aí.`);updSom();
   unsubRole=DB.watchDoc('roles/'+eid,d=>{if(!d||mode!=='sala')return;const ch=d.cena!==CUR.cena||!!d.noite!==!!CUR.noite;CUR={eid,...d};if(ch){SCN=getScene(d.cena,d.noite);setTime(d.noite);updDayBtn();avatars.forEach(a=>{if(!walkable(a.gx,a.gy,a.gx,a.gy)){const[x,y]=freeNear(a.gx,a.gy,a);a.gx=a.fx=x;a.gy=a.fy=y;a.path=[];}});}});
   unsubChat=DB.watchColl(`roles/${eid}/chat`,list=>{list.forEach(({id,data:m})=>{if(chatSeen.has(id))return;chatSeen.add(id);
       if(m.k==='bot'){fmBotFromChat(id,m,m.at>=joinedAt-2000);return;}   // Rolê FM
@@ -411,6 +411,34 @@ async function enterRoom(eid,fresh){
 }
 function salaCheia(){if(live){try{live.leave()}catch(e){}live=null;}toast('Essa sala tá cheia agora. Tenta de novo daqui a pouco.',4200);openHome();}
 function spawnTile(){const[x0,y0]=SCN.sc.spawn;for(let i=0;i<60;i++){const x=x0+ri(5)-2,y=y0+ri(5)-2;if(walkable(x,y,-1,-1)&&!occupied(x,y,null))return[x,y];}return freeNear(x0,y0,null);}
+/* dicas da sala: aparecem na primeira vez (e no botão "?"), somem sozinhas ou no primeiro toque */
+let tipsT=0;
+function roomTips(force){
+  const root=$('#roomUI');if(!root||mode!=='sala')return;
+  const old=$('#tips');if(old)old.remove();clearTimeout(tipsT);
+  const box=document.createElement('div');box.className='tips';box.id='tips';
+  const touch=matchMedia('(pointer:coarse)').matches;
+  const items=[
+    {c:1,html:touch?'Toque no chão pra <b>andar</b>. Toque num boneco pra ver o nome.':'Clique no chão pra <b>andar</b>. Clique num boneco pra ver o nome.'},
+    {sel:'#msg',side:'t',html:(innerWidth<761?'Toque no chão pra <b>andar</b>. ':'')+'Digite aqui pra falar com a galera. <b>/music</b> pede uma música.'},
+    {sel:'#rInvite',side:'r',html:'Manda o link pra chamar a galera'},
+    {sel:'#wardBtn',side:'r',html:'Troca a roupa e o cabelo do seu boneco'},
+    {sel:'#rFm',side:'r',html:'Liga a rádio e ouve junto com a sala'},
+    {sel:'#rHome',side:'r',html:'Sai da sala'}];
+  for(const it of items){
+    const d=document.createElement('div');d.className='tip2'+(it.c?' c':' '+it.side);d.innerHTML=it.html;
+    if(!it.c){const el=document.querySelector(it.sel);if(!el||el.hidden||!el.getClientRects().length)continue;const r=el.getBoundingClientRect();if(r.width<4)continue;
+      box.append(d);
+      if(it.side==='r'){d.style.right=(innerWidth-r.left+14)+'px';d.style.top=(r.top+r.height/2)+'px';d.style.translate='0 -50%';}
+      else{d.style.left=Math.max(8,r.left)+'px';d.style.bottom=(innerHeight-r.top+14)+'px';}
+    }else box.append(d);
+  }
+  root.append(box);
+  const end=()=>{removeEventListener('pointerdown',end,true);removeEventListener('keydown',end,true);clearTimeout(tipsT);box.classList.add('out');setTimeout(()=>box.remove(),320);};
+  setTimeout(()=>{addEventListener('pointerdown',end,true);addEventListener('keydown',end,true);},force?250:1500);
+  tipsT=setTimeout(end,16000);
+}
+$('#rHelp').addEventListener('click',e=>{e.stopPropagation();roomTips(true);});
 function hudDots(el,total,on){if(!el)return;if(el.children.length!==total){el.textContent='';for(let i=0;i<total;i++)el.append(document.createElement('i'));}[...el.children].forEach((c,i)=>c.classList.toggle('on',i<on));}
 let roomTimer=0,roomWarn=0;
 /* o relógio da sala: mostra quanto falta e, no fim das 8 h, manda todo mundo para o início */
