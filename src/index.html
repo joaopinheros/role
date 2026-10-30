@@ -654,6 +654,35 @@ p{margin:0}
 .room-logo{height:46px;flex:0 0 auto;filter:drop-shadow(0 3px 0 rgba(0,0,0,.35))}
 .hud-top{align-items:flex-start}
 @media (max-width:760px){.room-logo{height:30px}.hud-card .rbar{font-size:12px;gap:6px;padding:8px 8px 5px}.hud-card .gauge2,.hud-card .sep{display:none}}
+/* guarda-roupa ("Seu visual"): mesma linguagem das outras telas, fontes maiores e legíveis */
+.wardrobe{--shell:#fdf3df;--shell-2:#f1e3c4;--text:#111;--ink:#111;--sun:#ffe14d;--berry:#ff3d9a;--kiwi:#4ee07a;--teal:#7048ff;--muted:#4a3f5e;box-shadow:-8px 0 0 #111;border-left-width:4px}
+.w-head{background:#ffe14d;border-bottom:4px solid #111}
+.w-head h2{font:400 24px/1 'Bowlby One',Impact,sans-serif;font-stretch:100%;text-transform:uppercase}
+.w-head .px{border:3px solid #111;border-radius:999px;background:#fff;color:#111;font:400 14px 'Bowlby One',Impact,sans-serif;font-stretch:100%;text-transform:uppercase;box-shadow:3px 3px 0 #111;min-height:44px}
+.w-head .px.hot{background:#4ee07a}
+.w-body{grid-template-columns:76px 1fr}
+.rail{border-right:4px solid #111;gap:10px;background:#f1e3c4}
+.ri{width:52px;height:52px;border-radius:12px;border:3px solid #111;background:#fff;box-shadow:2px 2px 0 #111}
+.ri svg{width:22px;height:22px}
+.ri[aria-selected="true"]{background:#ff3d9a;box-shadow:4px 4px 0 #111}
+.ri .tip{left:64px;font:800 15px 'Atkinson Hyperlegible Next',system-ui,sans-serif;padding:6px 10px;border-radius:0;border:2px solid #fff}
+.stage{border:4px solid #111;border-radius:0;background:repeating-conic-gradient(from 6deg at 50% 100%,#7048ff 0 7.5deg,#8460ff 7.5deg 15deg);box-shadow:6px 6px 0 #111}
+.stage::before{background:#4ee07a;border-top:4px solid #111}
+.sec-title{align-items:center}
+.sec-title b{font:400 24px/1 'Bowlby One',Impact,sans-serif;font-stretch:100%;text-transform:uppercase}
+.sec-title span{font:700 15px 'Atkinson Hyperlegible Next',system-ui,sans-serif;color:#4a3f5e}
+.styles{grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:12px}
+.opt{border:3px solid #111;border-radius:0;padding:8px 4px 10px;box-shadow:3px 3px 0 #111}
+.opt span{font:800 14px/1.2 'Atkinson Hyperlegible Next',system-ui,sans-serif;color:#111;-webkit-line-clamp:2}
+.opt:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 #111}
+.opt[aria-pressed="true"]{background:#ffe14d;border-width:3px;box-shadow:5px 5px 0 #111;outline:3px solid #111;outline-offset:2px}
+.wardrobe .lbl{font:800 16px 'Atkinson Hyperlegible Next',system-ui,sans-serif}
+.sw{width:36px;height:36px;border:3px solid #111;border-radius:0;box-shadow:2px 2px 0 #111}
+.sw[aria-pressed="true"]{outline:3px solid #111;outline-offset:3px}
+.range{font:700 15px 'Atkinson Hyperlegible Next',system-ui,sans-serif}
+.wardrobe .segb{border:3px solid #111;border-radius:999px;background:#fff;color:#111;font:400 14px 'Bowlby One',Impact,sans-serif;font-stretch:100%;text-transform:uppercase;min-height:44px}
+.wardrobe .segb[aria-checked="true"]{background:#ffe14d;box-shadow:3px 3px 0 #111}
+.stage .rot{border:3px solid #111;border-radius:999px;background:#fff;box-shadow:3px 3px 0 #111}
 </style>
 
 <div class="app" id="frame">
