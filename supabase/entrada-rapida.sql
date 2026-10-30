@@ -1,5 +1,16 @@
--- Entrada rápida (visitante): só o nome, sem e-mail, celular nem código. Rode no Supabase > SQL Editor > Run.
--- Pode rodar quantas vezes quiser. Não mexe nos dados que já existem.
+-- ENTRADA RÁPIDA: login só com o nome (visitante) e fim do login por e-mail/SMS.
+-- Rode UMA vez no Supabase > SQL Editor > Run, por cima do que já está lá (schema.sql e fm.sql já aplicados).
+-- Pode rodar de novo sem problema. Roda tudo ou nada: se der erro, nada muda.
+--
+-- O que faz:
+--   1. cria auth_guest(nome): cria o visitante, liga a sessão do navegador a ele e devolve a conta
+--   2. a conta passa a dizer se é de visitante (conta_json)
+--   3. tira o login antigo: apaga as funções auth_start e auth_verify (código por SMS)
+-- O que NÃO mexe: usuários, salas, mensagens, a rádio (fm), os limites de 8 pessoas e 8 horas, nem a tabela
+-- otp_codes (fica vazia e parada, porque o fm.sql ainda a cita na limpeza).
+-- Contas antigas continuam existindo e logadas por até 60 dias; quem sair delas entra de novo como visitante novo.
+
+begin;
 
 -- a conta passa a dizer se é de visitante (sem e-mail e sem celular)
 create or replace function public.conta_json(u public.users) returns jsonb language sql stable as $$
@@ -51,3 +62,9 @@ begin
 end $$;
 
 grant execute on function public.auth_guest(text, text) to authenticated;
+
+-- fim do login antigo (código por SMS)
+drop function if exists public.auth_start(text, jsonb, text);
+drop function if exists public.auth_verify(text, text);
+
+commit;
