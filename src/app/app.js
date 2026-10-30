@@ -280,7 +280,7 @@ $('#fGuest').addEventListener('submit',async e=>{e.preventDefault();
     }
     try{localStorage.setItem('role-ultimo-nome',nome);}catch(x){}
     const f=parse(ME.fig||'');if(f)fig=f;sessao.set(ME);PEND=null;afterAuth();
-  }catch(err){errOn('#gErr',{slow:'Muitas tentativas. Espera um minutinho.'}[err&&err.code]||'Não deu pra entrar agora. Tenta de novo.');console.warn(err);}
+  }catch(err){errOn('#gErr',{slow:'Muitas tentativas. Espera um minutinho.',invalid:'Coloca seu nome (pelo menos 2 letras).',op:'O site está desatualizado. Recarregue a página (Ctrl+Shift+R).',PGRST202:'O banco ainda não tem a entrada rápida (falta rodar supabase/entrada-rapida.sql).',42883:'O banco ainda não tem a entrada rápida (falta rodar supabase/entrada-rapida.sql).'}[err&&err.code]||('Não deu pra entrar agora. Tenta de novo.'+(err&&err.code?' (erro: '+String(err.code).slice(0,30)+')':'')));console.warn(err);}
   btn.disabled=false;});}
 $('#fLogin').addEventListener('submit',async e=>{e.preventDefault();
   const raw=$('#liId').value.trim().toLowerCase(),q=raw.includes('@')?raw:onlyDigits(raw);
