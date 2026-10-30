@@ -702,6 +702,14 @@ p{margin:0}
 @media (max-width:760px){.tip2.c{display:none}}
 #rHelp{font-size:20px;font-family:'Bowlby One',Impact,sans-serif}
 @media (prefers-reduced-motion:reduce){.tip2{animation:none}}
+/* esconder o chat no celular: botãozinho discreto no canto */
+.eye{display:none}
+@media (max-width:760px){
+  .eye{display:grid;place-items:center;align-self:flex-start;width:32px;height:26px;padding:0;background:rgba(17,17,17,.45);color:#fff;border:2px solid rgba(255,255,255,.55);border-radius:999px;opacity:.7;cursor:pointer}
+  .eye .sl{display:none}.eye[aria-pressed="true"] .sl{display:inline}
+  .instage .eye,.fmon .eye{display:none}
+  .chathide:not(.instage):not(.fmon) .log,.chathide:not(.instage):not(.fmon) .chat-dock form{display:none}
+}
 </style>
 
 <div class="app" id="frame">
@@ -912,6 +920,7 @@ p{margin:0}
       <div class="grp"><button class="px icon" id="zOut" aria-label="Afastar" data-i="minus"></button><button class="px icon" id="zIn" aria-label="Aproximar" data-i="plus"></button></div>
     </div>
     <section class="chat-dock" aria-label="Chat do rolê">
+      <button class="eye" id="chatEye" type="button" aria-pressed="false" aria-label="Esconder o chat"><svg viewBox="0 0 16 12" width="16" height="12" aria-hidden="true"><path d="M1 6c2-3.5 4.3-5 7-5s5 1.5 7 5c-2 3.5-4.3 5-7 5S3 9.5 1 6z" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="6" y="3.5" width="4" height="5" fill="currentColor"/><path class="sl" d="M2 11L14 1" stroke="currentColor" stroke-width="1.8"/></svg></button>
       <div class="log" id="log" aria-live="polite"></div>
       <div class="bar acts">
         <button class="px" data-act="dance" data-i="dance" aria-label="Dançar"><span>Dançar</span></button>

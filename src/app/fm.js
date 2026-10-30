@@ -330,6 +330,9 @@ function chatUi(){
 }
 $('#rChat').addEventListener('click',()=>{const on=frame.classList.toggle('chaton');chatUi();if(on)setTimeout(()=>$('#msg').focus(),0);});
 $('#rMore').addEventListener('click',()=>{frame.classList.toggle('more');chatUi();});
+{const eye=$('#chatEye'),set=h=>{frame.classList.toggle('chathide',h);eye.setAttribute('aria-pressed',String(h));eye.setAttribute('aria-label',h?'Mostrar o chat':'Esconder o chat');try{localStorage.setItem('role-chat-oculto',h?'1':'0');}catch(e){}fmLayout();};
+  eye.addEventListener('click',()=>set(!frame.classList.contains('chathide')));
+  try{if(localStorage.getItem('role-chat-oculto')==='1'&&innerWidth<761)setTimeout(()=>set(true),0);}catch(e){}}
 addEventListener('resize',fmLayout);
 $('#rFm').addEventListener('click',()=>fmListen(!FM.listen));
 $('#fmStop').addEventListener('click',()=>fmListen(false));
