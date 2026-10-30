@@ -682,7 +682,8 @@ window.__role={mesaXY:()=>{if(!SCN||!SCN.mixer)return null;const[wx,wy]=S(SCN.mi
     g.clearRect(0,0,cv.width,cv.height);if(!o.show)return;
     const ink=o.inv?'#fff':'#000',paper=o.inv?'#000':'#fff',ox=Math.round(PAD*s*.8),oy=Math.round((MAXX-o.extra)*s/2);
     let y=0;const rowAt=k=>k<=cut?k:k<=cut+o.extra?cut:k-o.extra;
-    for(let k=0;k<BH+o.extra;k++){const r=rows[rowAt(k)];
+    const rem=Math.max(0,-o.extra),st0=cut-(rem>>1),skip=k=>k<st0?k:k+rem;
+    for(let k=0;k<BH+(o.extra>=0?o.extra:-rem);k++){const r=rows[o.extra>=0?rowAt(k):skip(k)];
       for(let x=0;x<BW;x++){const c=r[x];if(c==='.')continue;if(o.p>0&&rnd[k*BW+x]<o.p)continue;g.fillStyle=c==='#'?ink:c==='d'?(((x+k)&1)?paper:ink):paper;g.fillRect(ox+x*s,oy+k*s,s,s);}}
     if(o.snd){g.fillStyle=ink;const mid=oy+(iy0+(iy1-iy0+o.extra)/2)*s,L=7*s,x0=Math.round(ox-5*s-L);
       [[-14,2],[0,0],[14,-2]].forEach(([dy,sl],i)=>{for(let k=0;k<7;k++)g.fillRect(x0+k*s,Math.round(mid+dy*s+(sl*(k-3))*s*.5),s,2*s);});}
@@ -691,7 +692,7 @@ window.__role={mesaXY:()=>{if(!SCN||!SCN.mixer)return null;const[wx,wy]=S(SCN.mi
   const on=(ms,fn)=>T.push(setTimeout(fn,ms));
   function end(){if(done)return;done=true;T.forEach(clearTimeout);cancelAnimationFrame(raf);el.classList.add('out');setTimeout(()=>el.remove(),380);removeEventListener('keydown',end);}
   /* linha do tempo (ms): pisca p&b, grita 4 vezes, logo, boca se desfaz, logo grande, abre a página */
-  const SY=[620,880,1140,1400],EXT=[9,12,10,16],T_LOGO=1750,T_SW=2250,T_CLOSE=380,T_END=3150;
+  const SY=[620,880,1140,1400],EXT=[9,12,10,16],T_LOGO=1750,T_SW=2250,T_CLOSE=420,T_END=3250,RMAX=(iy1-iy0+1)+14;
   function state(t){
     const o={show:false,inv:false,extra:0,p:0,snd:false};
     if(t<600){const f=[[0,90,0,0],[90,260,1,0],[260,330,0,0],[330,500,1,1],[500,560,0,1],[560,600,1,0]].find(([a,b])=>t>=a&&t<b);if(f){o.show=!!f[2];o.inv=!!f[3];}else o.show=true;
@@ -699,9 +700,9 @@ window.__role={mesaXY:()=>{if(!SCN||!SCN.mixer)return null;const[wx,wy]=S(SCN.mi
     el.classList.remove('inv');o.show=true;
     let ex=0;for(let i=0;i<4;i++){const d=t-SY[i];if(d>=0&&d<260){const k=d<90?d/90:1-(d-90)/170*(i===3?.1:.7);ex=Math.max(ex,EXT[i]*Math.max(0,k));if(d<150)o.snd=true;}}
     if(t>=SY[3]+260)ex=EXT[3]*.92;else if(t>=SY[3]&&ex<EXT[3]*.9)ex=Math.max(ex,EXT[3]*.9);
-    if(t>=T_SW){const k=Math.min(1,(t-T_SW)/T_CLOSE);ex=EXT[3]*.92*(1-k*k);o.snd=false;}   // a boca fecha e engole o logo
+    if(t>=T_SW){const k=Math.min(1,(t-T_SW)/T_CLOSE),e=k*k*(3-2*k);ex=EXT[3]*.92+(-RMAX-EXT[3]*.92)*e;o.snd=false;}   // a boca fecha e engole o logo
     o.extra=Math.round(ex);
-    if(t>=T_SW+T_CLOSE+120)o.p=Math.min(1,(t-T_SW-T_CLOSE-120)/380);
+    if(t>=T_SW+T_CLOSE+150)o.p=Math.min(1,(t-T_SW-T_CLOSE-150)/380);
     return o;}
   let t0=performance.now(),raf=0,sh=0;
   function frame(now){const t=now-t0,o=state(t);draw(o);
@@ -712,6 +713,8 @@ window.__role={mesaXY:()=>{if(!SCN||!SCN.mixer)return null;const[wx,wy]=S(SCN.mi
   logo.style.setProperty('--lw',Math.round(iw*.96)+'px');
   const icy=((iy0+iy1+1+EXT[3])/2-(BH+MAXX)/2+(MAXX-EXT[3])/2)*s,icx=((ix0+ix1+1)/2+PAD*.8-(BW+PAD)/2)*s;
   logo.style.marginLeft=Math.round(icx)+'px';logo.style.marginTop=Math.round(icy)+'px';
+  const fz=/introT=(\d+)/.exec(location.search);   // para os testes: congela a abertura num instante (ms)
+  if(fz){const ft=+fz[1];draw(state(ft));if(ft>=T_LOGO)logo.classList.add('in');if(ft>=T_SW){logo.classList.remove('in');logo.style.transition='none';logo.classList.add('gulp');logo.style.transform=`translate(-50%,-50%) scale(${Math.max(0,1-(ft-T_SW)/T_CLOSE)})`;}return;}
   on(T_LOGO,()=>logo.classList.add('in'));
   on(T_SW,()=>{logo.classList.remove('in');logo.classList.add('gulp');});
   on(T_END,end);

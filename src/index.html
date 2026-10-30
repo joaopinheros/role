@@ -355,7 +355,7 @@ p{margin:0}
 .intro canvas{position:absolute;left:50%;top:50%;image-rendering:pixelated;transform:translate(-50%,-50%)}
 .intro-logo{position:absolute;left:50%;top:50%;width:var(--lw,260px);transform:translate(-50%,-50%) scale(0);opacity:0;pointer-events:none}
 .intro-logo.in{opacity:1;animation:ilogo .34s cubic-bezier(.2,1.6,.4,1) both}
-.intro-logo.gulp{opacity:1;transform:translate(-50%,-50%) scale(.04,.9);transition:transform .38s cubic-bezier(.5,0,.9,.4)}
+.intro-logo.gulp{opacity:1;transform:translate(-50%,-50%) scale(0) rotate(-14deg);transition:transform .42s cubic-bezier(.55,0,.85,.45)}
 .intro .skip{position:absolute;left:0;right:0;text-align:center;bottom:max(20px,calc(env(safe-area-inset-bottom,0px) + 14px));margin:0;font:13px 'Atkinson Hyperlegible Next',system-ui,sans-serif;color:#8a8a8a}
 .intro.inv .skip{color:#777}
 @keyframes ilogo{from{transform:translate(-50%,-50%) scale(.2)}to{transform:translate(-50%,-50%) scale(1)}}
