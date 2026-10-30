@@ -40,7 +40,8 @@ if (url && key) {
     bundle: true, minify: true, format: 'iife', globalName: 'RoleSupabase', target: 'es2019', platform: 'browser', legalComments: 'none',
   });
   const cfg = JSON.stringify({ url, key, ice }).replace(/</g, '\u003c');
-  html = html.replace('</head>', `<script>window.ROLE_SUPABASE=${cfg}</script><script src="/role-supabase.js"></script></head>`);
+  const ver = require('crypto').createHash('md5').update(fs.readFileSync(path.join(OUT, 'role-supabase.js'))).digest('hex').slice(0, 10);   // muda a cada versão: o navegador e o Cloudflare não servem o arquivo velho
+  html = html.replace('</head>', `<script>window.ROLE_SUPABASE=${cfg}</script><script src="/role-supabase.js?v=${ver}"></script></head>`);
   console.log('[pages] Supabase ligado em ' + url);
 } else {
   console.log('[pages] sem SUPABASE_URL/SUPABASE_PUBLISHABLE_KEY: modo local (dados só no navegador)');
