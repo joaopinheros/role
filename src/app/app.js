@@ -218,14 +218,14 @@ function landFx(){
   hero.addEventListener('animationend',e=>{if(e.animationName==='lpjolt2')hero.classList.remove('shout');});
   if(fine&&!RM){
     L.addEventListener('pointermove',e=>{
-      for(const sec of [hero,L.querySelector('.lp-secbora')]){const r=sec.getBoundingClientRect();if(e.clientY<r.top||e.clientY>r.bottom)continue;
-        sec.style.setProperty('--mx',((e.clientX-r.left)/r.width*100).toFixed(1)+'%');sec.style.setProperty('--my',((e.clientY-r.top)/r.height*100).toFixed(1)+'%');}
       const lr=logo.getBoundingClientRect(),cx=lr.left+lr.width/2,cy=lr.top+lr.height/2;
       logo.style.setProperty('--tx',Math.max(-1,Math.min(1,(e.clientX-cx)/(innerWidth/2))).toFixed(2));logo.style.setProperty('--ty',Math.max(-1,Math.min(1,(e.clientY-cy)/(innerHeight/2))).toFixed(2));
+      const nx=+logo.style.getPropertyValue('--tx'),ny=+logo.style.getPropertyValue('--ty');logo.style.translate=(nx*14).toFixed(1)+'px '+(ny*10).toFixed(1)+'px';
+      const sb=L.querySelector('.lp-secbora'),br=sb.getBoundingClientRect(),bh=sb.querySelector('h2');if(e.clientY>br.top&&e.clientY<br.bottom)bh.style.translate=(((e.clientX-br.left)/br.width-.5)*26).toFixed(1)+'px '+(((e.clientY-br.top)/br.height-.5)*14).toFixed(1)+'px';else bh.style.translate='';
       L.querySelectorAll('.lp-cta,.lp-enter').forEach(b=>{const r=b.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),d=Math.hypot(dx,dy);
         if(d<110){b.style.transform='translate('+(dx*.18).toFixed(1)+'px,'+(dy*.22).toFixed(1)+'px)';}else if(b.style.transform)b.style.transform='';});
     });
-    L.addEventListener('pointerleave',()=>{logo.style.setProperty('--tx',0);logo.style.setProperty('--ty',0);});
+    L.addEventListener('pointerleave',()=>{logo.style.setProperty('--tx',0);logo.style.setProperty('--ty',0);logo.style.translate='';const h=L.querySelector('.lp-bora h2');if(h)h.style.translate='';});
   }
   L.querySelectorAll('.pp').forEach(pp=>pp.addEventListener('click',()=>{
     pp.classList.remove('hop');void pp.offsetWidth;pp.classList.add('hop');
