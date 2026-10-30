@@ -241,6 +241,26 @@ async function truco(browser) {
   ok(!!await waitFor(async () => (await all()).every(g => g.stake === 12 && g.fase === 'play'), 6000), 'depois de aceitar o doze, a mão vale 12 nos quatro');
   await sameState('no doze');
 
+  // desistir em dupla: o parceiro precisa concordar (e só ele recebe a pergunta)
+  {
+    const g0 = await all(), qi = 0, pi = g0.findIndex(x => x.seat === (g0[qi].seat + 2) % 4);
+    const askVis = i => players[i].isVisible('#quitAsk');
+    await players[qi].click('#stageExit'); await sleep(250); await players[qi].click('#stageExit');
+    ok(!!await waitFor(() => askVis(pi), 5000), 'o parceiro recebe a pergunta "quer desistir, você concorda?"');
+    ok(!(await Promise.all([0, 1, 2, 3].filter(i => i !== pi && i !== qi).map(askVis))).some(Boolean), 'a outra dupla não recebe a pergunta');
+    ok(/Esperando/.test(await players[qi].textContent('#stageExit')), 'quem pediu fica com "Esperando parceiro…": ' + await players[qi].textContent('#stageExit'));
+    if (!process.env.QUIT_YES) {
+      await players[pi].click('#qaNo'); await sleep(900);
+      ok((await all()).every(g => g.status === 'playing'), 'o parceiro recusou: a partida continua para todos');
+      ok((await Promise.all(players.map(stageOn))).every(Boolean), 'e todo mundo segue na mesa');
+    } else {
+      await players[pi].click('#qaYes');
+      ok(!!await waitFor(async () => { const g = await all(); return g.every((x, i) => i === qi || x.status === 'over'); }, 8000), 'o parceiro concordou: a partida acaba para a mesa');
+      ok(!!await waitFor(async () => !(await stageOn(players[qi])), 4000), 'quem desistiu sai da mesa');
+      const f = (await all())[pi]; ok(f.venceu.length === 2 && f.venceu.every(s => s % 2 !== g0[qi].seat % 2), 'vence a outra dupla: ' + JSON.stringify(f.venceu));
+      await Promise.all([...players, spec].map(p => p.context().close())); return;
+    }
+  }
   // joga a mão até o fim: a dupla que vence a mão ganha 12 pontos e a partida
   guard = 0;
   while (guard++ < 14) {

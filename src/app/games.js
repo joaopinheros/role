@@ -78,6 +78,17 @@ function gRecv(d,from){
     case 'snap':
       if(st.status==='idle'||st.status==='waiting'){Object.assign(st,{status:'playing',host:from,players:d.p,m:def.fromWire(d.m),over:-1,winners:[]});gEnter(a,st,true);}
       break;
+    case 'quitreq':{   // jogo em dupla: o parceiro pediu pra desistir e quer a sua confirmação
+      const qi=st.players.findIndex(p=>p.peer===from),me=st.players.findIndex(p=>p.peer===live.me);
+      if(def.team&&st.status==='playing'&&qi>=0&&me>=0&&qi!==me&&def.team(qi)===def.team(me))gQuitAsk(a,st,qi,from);
+      break;}
+    case 'quitans':{   // a resposta do parceiro
+      const qi=st.players.findIndex(p=>p.peer===from);
+      if(!G.quitWait||G.quitWait.a!==a.id||qi<0||st.status!=='playing')break;
+      const w=G.quitWait;G.quitWait=null;
+      if(d.ok&&performance.now()-w.t<45000)gQuitNow(a,st);
+      else addLog(null,`${gFirst(st.players[qi].n)} quer continuar jogando.`);
+      gExitLabel();break;}
     case 'quit':{
       const qi=st.players.findIndex(p=>p.peer===from);
       if(qi>=0&&st.status==='playing'){if(def.solo)gSoloEnd(a,st);else gFinish(a,st,gOpp(def,qi),'desistência',gOppAll(def,qi,st));}
@@ -298,13 +309,15 @@ function gStageOpen(a,st,idx){
   const el=$('#stage');G.stage={a,st,idx};
   el.hidden=false;frame.classList.add('instage','diving');frame.classList.remove('chaton');if(typeof chatUi==='function')chatUi();
   requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('on')));
-  G.quitAt=0;$('#stageExit').textContent='Sair';
+  G.quitAt=0;gExitLabel();clearInterval(G.exitT);G.exitT=setInterval(gExitLabel,300);
   gHudBuild(st,idx);
   G.defs[a.type].stageOpen(a,st,idx,$('#stageCv'));
   gUpdateBtn();
 }
+/* o botão do canto: "Sair" fora de partida; "Desistir" quando tem partida valendo contra alguém */
+function gExitLabel(){const s=G.stage,b=$('#stageExit');if(!s||!b)return;const vs=s.st.status==='playing'&&!G.defs[s.a.type].solo;b.textContent=!vs?'Sair':(G.quitWait&&performance.now()-G.quitWait.t<30000?'Esperando parceiro…':G.quitAt&&performance.now()<G.quitAt?'Desistir? Toque de novo':'Desistir');}
 function gStageClose(instant){
-  const s=G.stage;if(!s)return;
+  const s=G.stage;if(!s)return;clearInterval(G.exitT);{const q=$('#quitAsk');if(q)q.hidden=true;G.quitWait=null;}
   G.stage=null;
   const el=$('#stage');
   if(G.defs[s.a.type].stageClose)G.defs[s.a.type].stageClose();
@@ -318,7 +331,22 @@ $('#stageExit').addEventListener('click',()=>{
   const s=G.stage;if(!s)return;
   if(s.st.status!=='playing'){gStageClose();return;}
   if(G.defs[s.a.type].solo){gSend(s.a,'quit',{});gSoloEnd(s.a,s.st);return;}
-  if(performance.now()>G.quitAt){G.quitAt=performance.now()+3000;$('#stageExit').textContent='Desistir? Toque de novo';return;}
-  gSend(s.a,'quit',{});addLog(null,'Você desistiu da partida.');
-  const st=s.st;gStageClose();gReset(st);
+  if(performance.now()>G.quitAt){G.quitAt=performance.now()+3000;gExitLabel();return;}
+  if(G.defs[s.a.type].team&&s.st.players.length>2){   // em dupla, o parceiro precisa concordar
+    if(G.quitWait&&performance.now()-G.quitWait.t<30000){addLog(null,'Esperando o seu parceiro responder…');return;}
+    const mi=s.st.players.findIndex(p=>p.peer===live.me),pt=s.st.players.findIndex((p,i)=>i!==mi&&G.defs[s.a.type].team(i)===G.defs[s.a.type].team(mi));
+    G.quitWait={a:s.a.id,t:performance.now()};gSend(s.a,'quitreq',{});
+    addLog(null,pt>=0?`Você pediu pra desistir. Esperando ${gFirst(s.st.players[pt].n)} concordar…`:'Você pediu pra desistir.');gExitLabel();return;}
+  gQuitNow(s.a,s.st);
 });
+/* desiste de verdade: avisa a mesa, a outra dupla (ou o adversário) vence */
+function gQuitNow(a,st){gSend(a,'quit',{});addLog(null,'Você desistiu da partida.');if(G.stage&&G.stage.a.id===a.id)gStageClose();gReset(st);}
+/* o parceiro quer desistir: aparece a pergunta em cima da mesa */
+function gQuitAsk(a,st,qi,from){
+  if(!G.stage||G.stage.a.id!==a.id)return;
+  const box=$('#quitAsk');if(!box)return;
+  $('#qaTxt').textContent=`${gFirst(st.players[qi].n)} quer desistir da partida. Você concorda?`;
+  box.hidden=false;clearTimeout(G.qaT);G.qaT=setTimeout(()=>{box.hidden=true;},30000);
+  const ans=ok=>{box.hidden=true;clearTimeout(G.qaT);gSend(a,'quitans',{ok},from);if(ok)addLog(null,'Você concordou em desistir.');};
+  $('#qaYes').onclick=()=>ans(true);$('#qaNo').onclick=()=>ans(false);
+}
