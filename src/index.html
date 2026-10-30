@@ -434,7 +434,7 @@ p{margin:0}
 .lp-eight8{max-width:980px;margin:0 auto;background:var(--cream);border:4px solid #111;box-shadow:9px 9px 0 #111;padding:clamp(24px,3.4vw,48px);text-align:center}
 .lp-eight8 h2{font-size:clamp(34px,5vw,64px);line-height:1.02}
 .lp-eight8 .n8{display:inline-block;background:var(--grn);border:4px solid #111;padding:2px 14px;margin-bottom:8px;transform:rotate(-2deg);box-shadow:4px 4px 0 #111}
-.lp-eight8 p{margin:16px auto 24px;max-width:28em;font-size:18px;line-height:1.5}
+.lp-eight8 h2{margin-bottom:24px}
 .lp-bora{position:relative;display:flex;flex-direction:column;align-items:center;gap:28px;text-align:center;max-width:980px;margin:0 auto;padding:clamp(8px,2vw,24px) 0}
 .lp-bora h2{font-size:clamp(40px,7vw,92px);line-height:1}
 .lp-bora .bd{display:inline-block;margin-top:10px;background:var(--pur);color:#fff;border:4px solid #111;padding:4px 20px;transform:rotate(-2deg);box-shadow:5px 5px 0 #111}
@@ -609,6 +609,9 @@ p{margin:0}
 .lp-bora .fa:hover{transform:translateY(-18px)}
 .lp-cta,.lp-enter{transition:transform .08s,box-shadow .08s}
 .lp-bora h2{transition:translate .2s ease-out}
+.ainda{display:inline-block;background:#fff;color:#111;padding:0 8px;margin-left:4px;font:800 .8em 'Atkinson Hyperlegible Next',system-ui,sans-serif;text-transform:none;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:3px;vertical-align:.08em;animation:lpainda 1.6s steps(1) infinite}
+@keyframes lpainda{0%,62%{opacity:1}63%,100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.ainda{animation:none}}
 </style>
 
 <div class="app" id="frame">
@@ -663,7 +666,7 @@ p{margin:0}
       <section class="lp-what">
         <h2>Junta a galera e faz o que quiser.</h2>
         <div class="lp-cards">
-          <article class="lp-card c1"><span class="ib" data-i="people"></span><h3>Salas com 8 pessoas</h3><p>Pequena do jeito certo: todo mundo se ouve. Cada sala fica aberta por 8 horas.</p></article>
+          <article class="lp-card c1"><span class="ib" data-i="people"></span><h3>Salas de até 8 pessoas <span class="ainda">ainda</span></h3><p>Todo mundo se ouve. Cada sala fica aberta por 8 horas.</p></article>
           <article class="lp-card c2"><span class="ib" data-i="note"></span><h3>Ouça música junto</h3><p>Uma rádio só pra sala toda. Cola o link do YouTube ou o nome da música e todo mundo ouve ao mesmo tempo.</p></article>
           <article class="lp-card c3"><span class="ib" data-i="dice"></span><h3>Jogue</h3><p>Sinuca, truco, damas, xadrez, pesca e mais, no meio da conversa.</p></article>
           <article class="lp-card c4"><span class="ib" data-i="chat"></span><h3>Bata papo</h3><p>Por texto ou por voz, com o seu boneco andando pela sala.</p></article>
@@ -687,7 +690,6 @@ p{margin:0}
       </section>
       <section class="lp-sec8"><div class="lp-eight8">
             <h2><span class="n8">Só 8</span><br>por sala.</h2>
-            <p>Pequeno de propósito: todo mundo se ouve e ninguém fica de fora.</p>
             <div class="lp-slots" id="lpSlots"></div>
           </div>
           </section>
