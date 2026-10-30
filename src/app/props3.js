@@ -97,12 +97,15 @@ function posterSailor(x,y){   // pôster de uma guerreira de marinheiro (cabelo 
   R(x+14,y+38,16,10,'#f6f2ea');R(x+10,y+38,24,5,'#2f5fd0');R(x+19,y+42,6,5,'#ff3d6a');                              // blusa, gola e laço
   R(x+11,y+48,22,9,'#2f5fd0');R(x+13,y+57,5,6,'#ffe0c8');R(x+26,y+57,5,6,'#ffe0c8');R(x+12,y+61,7,3,'#c8283a');R(x+25,y+61,7,3,'#c8283a');
 }
-function posterCruz(x,y){   // quadro preto com uma cruz branca: homenagem à capa de um disco de rap nacional
-  R(x-2,y-2,44,60,'#000');R(x,y,40,56,'#0e0e12');R(x+2,y+2,36,52,'#16161c');
-  R(x+17,y+8,6,34,'#f2efe9');R(x+8,y+17,24,6,'#f2efe9');R(x+18,y+9,2,32,'#cfc9bd');
-  for(let k=0;k<7;k++)R(x+6+k*4,y+48,3,1,'#6a6a74');
-  R(x+4,y+44,32,1,'#4a4a54');
-  for(let k=0;k<3;k++)R(x+10+k*7,y+50,5,1,'#8a8a94');
+function posterCruz(x,y){   // pôster de pijama: lua dorminhoca com gorrinho, estrelas e nuvem num céu lilás
+  R(x-2,y-2,44,60,'#000');R(x,y,40,56,'#8f7ae6');R(x,y,40,22,'#6f5bd0');R(x,y+22,40,12,'#a794f0');
+  [[5,5],[30,4],[33,16],[6,18],[22,9]].forEach(([a,b],i)=>{R(x+a,y+b,2,2,'#fff7c2');if(i%2===0){R(x+a-1,y+b,4,1,'#fff7c2');R(x+a,y+b-1,2,4,'#fff7c2');}});
+  R(x+11,y+10,17,17,'#ffe27a');R(x+12,y+9,15,19,'#ffe27a');R(x+19,y+11,11,14,'#8f7ae6');R(x+21,y+10,9,16,'#8f7ae6');   // lua crescente
+  R(x+14,y+16,3,1,'#6a4a9a');R(x+14,y+19,2,2,'#ff9ccd');                                                              // olho fechado e bochecha
+  R(x+8,y+7,10,3,'#ff6fae');R(x+10,y+5,6,2,'#ff6fae');R(x+15,y+3,3,3,'#fff');                                           // gorrinho de dormir
+  R(x+4,y+36,32,10,'#fdf4ff');R(x+8,y+33,12,5,'#fdf4ff');R(x+18,y+31,12,7,'#fdf4ff');R(x+4,y+43,32,3,'#e4d8f7');       // nuvem
+  R(x+26,y+22,6,1,'#fff');R(x+29,y+22,1,3,'#fff');R(x+26,y+25,6,1,'#fff');                                              // z
+  R(x+4,y+49,32,2,'#ffc2e0');R(x+10,y+52,20,1,'#ffc2e0');
 }
 function desk(gx,gy){   // escrivaninha com luminária, planta e livros
   addF(gx,gy,()=>{
