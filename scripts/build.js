@@ -14,7 +14,7 @@ const SRC = path.join(ROOT, 'src');
 const DIST = process.env.ROLE_DIST ? path.resolve(process.env.ROLE_DIST) : path.join(ROOT, 'dist');   // ROLE_DIST: outra pasta de saída (os testes usam)
 
 const ENGINE = ['core.js', 'body.js', 'hair.js', 'items.js', 'render.js', 'poolsim.js', 'truco.js', 'damas.js', 'domino.js', 'fmcore.js'];
-const APP = ['adapter.js', 'icons.js', 'music.js', 'scenes.js', 'props2.js', 'catalog.js', 'pets.js', 'games.js', 'pool.js', 'chess.js', 'cards.js', 'truco.js', 'damas.js', 'domino.js', 'memoria.js', 'pesca.js', 'volei.js', 'lava.js', 'telescopio.js', 'npcs.js', 'props3.js', 'backdrops.js', 'fm.js', 'fmvisual.js', 'net.js', 'app.js'];
+const APP = ['adapter.js', 'icons.js', 'music.js', 'scenes.js', 'props2.js', 'catalog.js', 'pets.js', 'games.js', 'pool.js', 'chess.js', 'cards.js', 'truco.js', 'damas.js', 'domino.js', 'memoria.js', 'pesca.js', 'volei.js', 'lava.js', 'telescopio.js', 'npcs.js', 'props3.js', 'backdrops.js', 'fm.js', 'fmvisual.js', 'net.js', 'boca.js', 'app.js'];
 
 const args = process.argv.slice(2);
 const WATCH = args.includes('--watch');
@@ -84,7 +84,7 @@ const NOSCRIPT = '<noscript><div style="padding:24px;font:16px system-ui;color:#
 function build() {
   const t0 = Date.now();
   const page = read(SRC, 'index.html');
-  const fonts = '<style>' + read(SRC, 'fonts.css') + '</style>';
+  const fonts = '<style>' + read(SRC, 'fonts.css') + read(SRC, 'assets.css') + '</style>';
   const script = bundleScript();
   fs.mkdirSync(DIST, { recursive: true });
 

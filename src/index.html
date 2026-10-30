@@ -348,19 +348,96 @@ p{margin:0}
   .instage .chat-dock{left:76px;bottom:16px;width:calc(100% - 76px - 20px)}
   .fmon.instage .chat-dock{width:calc(100% - 76px - 290px)}
 }
-/* ===== abertura "que baderna!": alguém digita a frase errado, apaga, acerta e a frase ganha ênfase ===== */
-.intro{position:absolute;inset:0;z-index:30;background:#000;color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:0 24px;font-family:'Atkinson Hyperlegible Next',system-ui,sans-serif;overflow:hidden;cursor:pointer;transition:opacity .5s ease-out}
+/* ===== abertura: a boca pixelada (p&b) pisca, grita "que baderna!", o logo aparece dentro dela e a boca some ===== */
+.intro{position:absolute;inset:0;z-index:30;background:#fff;display:grid;place-items:center;overflow:hidden;cursor:pointer;transition:opacity .28s ease-out,background-color .06s}
+.intro.inv{background:#000}
 .intro.out{opacity:0;pointer-events:none}
-.intro .ln{display:flex;align-items:center;justify-content:center;min-height:1.4em;font-size:clamp(22px,2.6vw,30px);font-weight:500;line-height:1.3;white-space:pre}
-.intro .word{display:inline-block;transform-origin:50% 60%}
-.intro .caret{display:inline-block;width:2px;height:1.1em;margin-left:3px;background:#fff;animation:icaret 1s steps(2) infinite}
-.intro.typing .caret{animation:none}
-.intro.enfase .caret{display:none}
-.intro.enfase .word{animation:ipop .9s cubic-bezier(.2,1.4,.35,1) both}
-.intro .skip{position:absolute;left:0;right:0;text-align:center;bottom:max(20px,calc(env(safe-area-inset-bottom,0px) + 14px));margin:0;font-size:13px;color:#6f7480}
-@keyframes ipop{0%{transform:scale(1);font-weight:500;text-shadow:none}35%{transform:scale(1.35);font-weight:800;text-shadow:0 0 18px rgba(255,255,255,.55)}100%{transform:scale(1.18);font-weight:800;text-shadow:0 0 10px rgba(255,255,255,.3)}}
-@keyframes icaret{50%{opacity:0}}
+.intro canvas{position:absolute;left:50%;top:50%;image-rendering:pixelated;transform:translate(-50%,-50%)}
+.intro-logo{position:absolute;left:50%;top:50%;width:var(--lw,260px);transform:translate(-50%,-50%) scale(0);opacity:0;pointer-events:none}
+.intro-logo.in{opacity:1;animation:ilogo .34s cubic-bezier(.2,1.6,.4,1) both}
+.intro-logo.big{opacity:1;transform:translate(-50%,-50%) scale(var(--bigk,1.5));transition:transform .45s cubic-bezier(.2,1.2,.4,1)}
+.intro .skip{position:absolute;left:0;right:0;text-align:center;bottom:max(20px,calc(env(safe-area-inset-bottom,0px) + 14px));margin:0;font:13px 'Atkinson Hyperlegible Next',system-ui,sans-serif;color:#8a8a8a}
+.intro.inv .skip{color:#777}
+@keyframes ilogo{from{transform:translate(-50%,-50%) scale(.2)}to{transform:translate(-50%,-50%) scale(1)}}
 @media (prefers-reduced-motion:reduce){.intro{display:none}}
+/* ===== LP: página de apresentação antes do login (cores: roxo, verde, amarelo, rosa, laranja; letras grossas, contorno preto, sombra dura) ===== */
+#scrLanding{display:block;padding:0;overflow-x:hidden;overflow-y:auto;background:#fdf3df;pointer-events:auto}
+.lp{--pur:#7048ff;--pur2:#8460ff;--grn:#4ee07a;--yel:#ffe14d;--pnk:#ff3d9a;--org:#ff6a1a;--ink:#111;--cream:#fdf3df;color:var(--ink);font-family:'Atkinson Hyperlegible Next',system-ui,sans-serif}
+.lp h1,.lp h2,.lp h3{font-family:'Bowlby One','Anybody',Impact,sans-serif;font-weight:400;text-transform:uppercase;margin:0;line-height:1}
+.lp-top{position:absolute;left:0;right:0;top:0;z-index:3;display:flex;justify-content:space-between;align-items:center;padding:18px max(20px,4vw)}
+.lp-pill{display:inline-flex;align-items:center;gap:8px;background:#111;color:#fff;padding:8px 12px;font:700 12px 'Pixelify Sans',monospace;letter-spacing:.08em;text-transform:uppercase}
+.lp-pill i{width:8px;height:8px;background:var(--grn)}
+.lp-enter,.lp-cta{font:400 15px 'Bowlby One',Impact,sans-serif;text-transform:uppercase;letter-spacing:.02em;color:#111;background:var(--yel);border:3px solid #111;border-radius:999px;padding:11px 20px;box-shadow:3px 3px 0 #111;cursor:pointer;transition:transform .08s,box-shadow .08s}
+.lp-cta{background:var(--grn);font-size:17px;padding:16px 28px;box-shadow:5px 5px 0 #111}
+.lp-cta.pink{background:var(--pnk);color:#111}
+.lp-enter:hover,.lp-cta:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #111}
+.lp-cta:hover{box-shadow:7px 7px 0 #111}
+.lp-enter:active,.lp-cta:active{transform:translate(3px,3px);box-shadow:0 0 0 #111}
+.lp :focus-visible{outline:3px solid #111;outline-offset:3px}
+.lp-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(24px,4vw,56px);align-items:center;padding:96px max(24px,5vw) 72px;color:#fff;background:repeating-conic-gradient(from 6deg at 26% 44%,var(--pur) 0 7.5deg,var(--pur2) 7.5deg 15deg)}
+.lp-logo{width:min(440px,100%);filter:drop-shadow(0 6px 0 rgba(0,0,0,.28))}
+.lp-copy h1{margin:22px 0 14px;font-size:clamp(26px,3vw,38px);line-height:1.05;color:#fff;-webkit-text-stroke:1.5px #111;paint-order:stroke fill;text-shadow:3px 3px 0 #111}
+.lp-copy p{margin:0 0 24px;max-width:27em;font-size:clamp(16px,1.35vw,19px);line-height:1.5}
+.lp-copy mark{background:var(--yel);color:#111;padding:1px 7px;border-radius:3px;font-weight:700}
+.lp-win{margin:0;border:4px solid #111;background:#fff;box-shadow:9px 9px 0 #111;transform:rotate(1.6deg)}
+.lp-bar{display:flex;align-items:center;gap:12px;background:#111;color:#fff;padding:7px 12px;font:700 12px 'Pixelify Sans',monospace;letter-spacing:.06em}
+.lp-bar span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lp-hearts{display:inline-flex;gap:3px}.lp-hearts i{width:10px;height:10px;background:var(--pnk)}
+.lp-bar em{font-style:normal;color:var(--grn)}
+.lp-view{position:relative;line-height:0;background:#1d1240}
+.lp-view canvas{width:100%;height:auto;display:block;aspect-ratio:720/460;image-rendering:auto}
+.lp-bub{position:absolute;line-height:1.2;background:#fff;color:#111;border:3px solid #111;padding:5px 10px;font:800 13px 'Atkinson Hyperlegible Next',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.03em;box-shadow:3px 3px 0 #111}
+.lp-bub.b1{left:12%;top:22%}.lp-bub.b2{right:10%;top:44%}
+.lp-stick{position:absolute;right:-14px;top:-18px;width:78px;height:78px;display:grid;place-items:center;text-align:center;line-height:1;background:var(--pnk);color:#fff;border:3px solid #111;font:400 12px 'Bowlby One',Impact,sans-serif;text-transform:uppercase;transform:rotate(12deg);clip-path:polygon(50% 0,60% 14%,78% 6%,78% 25%,96% 28%,86% 44%,100% 58%,82% 66%,86% 86%,66% 82%,56% 100%,44% 84%,26% 94%,24% 74%,6% 70%,16% 54%,0 40%,18% 32%,16% 12%,36% 18%)}
+.lp-now{display:flex;align-items:center;gap:12px;background:var(--yel);border-top:4px solid #111;padding:10px 14px;line-height:1.25}
+.lp-now .pi{width:26px;height:26px}
+.lp-now p{margin:0;min-width:0}.lp-now small{display:block;font:700 11px 'Pixelify Sans',monospace;letter-spacing:.08em;text-transform:uppercase}.lp-now b{font-size:14px}
+.lp-ticker{background:#111;color:#fff;overflow:hidden;border-block:4px solid #111}
+.lp-ticker .track{display:flex;width:max-content;animation:lptick 26s linear infinite}
+.lp-ticker span{padding:14px 0;white-space:nowrap;font:400 clamp(17px,1.8vw,22px) 'Bowlby One',Impact,sans-serif;text-transform:uppercase}
+.lp-ticker u{text-decoration:none;color:var(--yel);margin:0 .5em}.lp-ticker u:nth-of-type(even){color:var(--pnk)}.lp-ticker u:nth-of-type(3n){color:var(--grn)}
+@keyframes lptick{to{transform:translateX(-50%)}}
+.lp-what{background:var(--cream);padding:clamp(48px,7vw,88px) max(24px,5vw)}
+.lp-what h2{font-size:clamp(30px,4.6vw,58px);max-width:11em;margin-bottom:clamp(28px,4vw,48px)}
+.lp-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,2vw,26px)}
+.lp-card{border:3px solid #111;box-shadow:7px 7px 0 #111;padding:20px 18px 22px;display:flex;flex-direction:column;gap:12px;min-height:220px}
+.lp-card h3{font-size:clamp(17px,1.5vw,21px);line-height:1.05}
+.lp-card p{margin:0;font-size:15px;line-height:1.45}
+.lp-card .ib{display:grid;place-items:center;width:46px;height:46px;background:#fff;border:3px solid #111;color:#111}
+.lp-card .ib .pi{width:24px;height:24px}
+.lp-card.c1{background:var(--pur);color:#fff}.lp-card.c2{background:var(--pnk)}.lp-card.c3{background:var(--grn)}.lp-card.c4{background:var(--yel)}
+.lp-eight{background:var(--org);padding:clamp(40px,6vw,80px) max(16px,4vw)}
+.lp-eight .ring{background:var(--yel);border:4px solid #111;border-radius:clamp(44px,8vw,96px);padding:clamp(10px,1.6vw,18px);max-width:1080px;margin:0 auto}
+.lp-eight .ring2{background:var(--pur);border:4px solid #111;border-radius:clamp(36px,7vw,82px);padding:clamp(10px,1.6vw,18px)}
+.lp-eight .ring3{background:var(--cream);border:4px solid #111;border-radius:clamp(26px,6vw,66px);padding:clamp(28px,4vw,56px) clamp(16px,3vw,40px);text-align:center}
+.lp-eight h2{font-size:clamp(34px,6vw,72px);line-height:1.02}
+.lp-eight .n8{display:inline-block;background:var(--grn);border:4px solid #111;padding:2px 14px;margin-bottom:8px;transform:rotate(-2deg);box-shadow:4px 4px 0 #111}
+.lp-eight p{margin:16px auto 28px;max-width:30em;font-size:16px;line-height:1.5}
+.lp-slots{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.lp-slot{width:84px;border:3px solid #111;box-shadow:3px 3px 0 #111;background:var(--c,#fff);display:flex;flex-direction:column;align-items:center;overflow:hidden}
+.lp-slot canvas{display:block;width:100%;height:78px;image-rendering:pixelated}
+.lp-slot b{width:100%;background:#fff;border-top:3px solid #111;padding:3px 0;font:700 11px 'Pixelify Sans',monospace;letter-spacing:.06em;text-transform:uppercase}
+.lp-slot.vago{background:transparent;border:3px dashed #111;box-shadow:none;height:111px;justify-content:center;gap:6px;font:700 11px 'Pixelify Sans',monospace;text-transform:uppercase;color:#111}
+.lp-slot.vago i{font-style:normal;font:400 26px 'Bowlby One',Impact,sans-serif;color:var(--pur)}
+.lp-final{position:relative;display:flex;flex-direction:column;align-items:center;gap:26px;text-align:center;padding:clamp(56px,8vw,104px) max(24px,5vw);background:repeating-conic-gradient(from 0deg at 50% 50%,#ffd93b 0 7.5deg,#ffe766 7.5deg 15deg)}
+.lp-final h2{font-size:clamp(38px,7vw,88px);line-height:1}
+.lp-final .bd{display:inline-block;margin-top:10px;background:var(--pur);color:#fff;border:4px solid #111;padding:4px 22px;transform:rotate(-2deg);box-shadow:5px 5px 0 #111}
+.lp-final .fa{position:absolute;bottom:14%;width:clamp(60px,8vw,110px);height:auto;image-rendering:pixelated}
+.lp-final .fa.l{left:max(16px,6vw)}.lp-final .fa.r{right:max(16px,6vw)}
+.lp-foot{display:flex;justify-content:space-between;align-items:center;background:#111;color:#fff;padding:14px max(20px,4vw);font:700 12px 'Atkinson Hyperlegible Next',system-ui,sans-serif;letter-spacing:.08em}
+.lp-foot .qb-logo{width:46px}
+@media (max-width:980px){.lp-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){
+  .lp-hero{grid-template-columns:1fr;padding:84px 20px 56px}
+  .lp-logo{width:min(320px,86%)}
+  .lp-win{transform:none;box-shadow:6px 6px 0 #111}
+  .lp-stick{right:-6px}
+  .lp-cards{grid-template-columns:1fr}
+  .lp-card{min-height:0}
+  .lp-final .fa{display:none}
+  .lp-pill{font-size:10px}
+}
+@media (prefers-reduced-motion:reduce){.lp-ticker .track{animation:none}}
 /* ===== telas de entrada: paleta do cartaz "Yok & Sheryo" (azul, amarelo, vermelho, cinza, branco e preto); formato do app ===== */
 .screen{--c-blue:#1560b0;--c-yel:#f7e817;--c-red:#e8302a;--c-gry:#b8b9c4;--c-lime:#f7e817;--c-pink:#b8b9c4;--c-ora:#e8302a;--c-navy:#0b0b0b;--c-ind:#2f7fd0;--c-pur:#0b0b0b;--c-grn:#b8b9c4;--c-mag:#e8302a;
   --shell:#1560b0;--shell-2:#b8b9c4;--text:#fff;--muted:#d3e4fb;--ink:#0b0b0b;color:#fff;--berry:var(--c-red);--sun:var(--c-yel);--kiwi:var(--c-yel);--grape:var(--c-blue)}
@@ -418,21 +495,14 @@ p{margin:0}
 .rrow .ra .px{min-height:40px;font-size:14px}
 .rrow .ra .px.hot{flex:1}
 @media (prefers-reduced-motion:reduce){.rrow .rm .chip.live::before{animation:none}}
-.land{width:min(520px,100%);margin:auto 0;display:flex;flex-direction:column;align-items:flex-start;gap:22px;color:#fff}
-.logo-slot{display:inline-flex;align-items:center;justify-content:center;min-height:86px;padding:8px 0}
-.logo-slot span{font:800 clamp(40px,6vw,64px)/.95 'Anybody','Atkinson Hyperlegible Next',system-ui,sans-serif;font-stretch:125%;letter-spacing:-.01em;color:#fff;text-shadow:4px 4px 0 var(--c-red)}
-.logo-slot img{display:block;max-width:100%;height:auto}
-.land .lead{margin:0;max-width:30em;font-size:clamp(17px,1.5vw,20px);line-height:1.5;color:#fff;text-shadow:0 2px 12px rgba(0,0,12,.7),0 0 2px rgba(0,0,12,.9)}
-.land .px.big{width:auto;padding:0 40px;min-width:220px;min-height:58px;font-size:18px}
-#scrLanding{background:linear-gradient(90deg,rgba(4,6,26,.62) 0,rgba(4,6,26,.3) 45%,transparent 70%)}
-@media (max-width:760px){#scrLanding{background:linear-gradient(0deg,rgba(4,6,26,.7) 0,rgba(4,6,26,.35) 60%,transparent);align-items:flex-end}.land{margin:0 0 8px;align-items:stretch}.land .px.big{width:100%}}
 </style>
 
 <div class="app" id="frame">
   <canvas id="room" aria-label="Cenário do rolê"></canvas>
 
-  <div class="intro" id="intro" role="status" aria-label="que baderna!">
-    <div class="ln" aria-hidden="true"><span class="word" id="introWord"></span><i class="caret"></i></div>
+  <div class="intro" id="intro" role="status" aria-label="Que baderna!">
+    <canvas id="introMouth" aria-hidden="true"></canvas>
+    <div class="qb-logo intro-logo" id="introLogo" role="img" aria-label="Que baderna!"></div>
     <p class="skip">toque para pular</p>
   </div>
   <div class="loading" id="loading" role="status" aria-label="Carregando"><div class="brand sm">The Other Place</div></div>
@@ -455,12 +525,47 @@ p{margin:0}
     </div>
   </section>
 
-  <!-- apresentação (antes do login) -->
+  <!-- apresentação (LP antes do login) -->
   <section class="screen" id="scrLanding" hidden aria-label="Apresentação">
-    <div class="land">
-      <div class="logo-slot" id="logoSlot"><span>QUE BADERNA!</span></div>
-      <p class="lead">Um cantinho em pixel art pra você e seus amigos. Converse por texto ou voz, ouça música junto e jogue sinuca, truco, pesca e mais.</p>
-      <button class="px hot big" id="landEnter" type="button">Entrar</button>
+    <div class="lp">
+      <header class="lp-top"><span class="lp-pill"><i></i>Salas de até 8 pessoas</span><button class="lp-enter" id="landEnter" type="button">Entrar</button></header>
+      <section class="lp-hero">
+        <div class="lp-copy">
+          <div class="qb-logo lp-logo" role="img" aria-label="Que baderna!"></div>
+          <h1>A bagunça que a gente gosta.</h1>
+          <p>Crie uma sala, mande o link e pronto: até <mark>8 pessoas</mark> pra ouvir música junto, jogar e bater papo com os amigos.</p>
+          <button class="lp-cta" id="landCta" type="button">Criar minha sala</button>
+        </div>
+        <figure class="lp-win" aria-label="Uma sala de verdade, com os bonecos do jogo">
+          <div class="lp-bar"><span>SALA_DA_RESENHA.EXE</span><b class="lp-hearts" aria-hidden="true"><i></i><i></i><i></i></b><em>5/8</em></div>
+          <div class="lp-view"><canvas id="lpRoom" width="720" height="460"></canvas><span class="lp-bub b1">chega mais!</span><span class="lp-bub b2">bota essa de novo</span><span class="lp-stick">voz<br>ao vivo!</span></div>
+          <div class="lp-now"><span data-i="note"></span><p><small>Tocando agora</small><b>Rádio da sala: cola um link e a galera ouve junto</b></p></div>
+        </figure>
+      </section>
+      <div class="lp-ticker" aria-hidden="true"><div class="track"><span>8 pessoas <u>★</u> música junto <u>★</u> jogos <u>★</u> bate-papo por texto e voz <u>★</u> sala aberta por 8 horas <u>★</u> boneco pixel <u>★</u> </span><span>8 pessoas <u>★</u> música junto <u>★</u> jogos <u>★</u> bate-papo por texto e voz <u>★</u> sala aberta por 8 horas <u>★</u> boneco pixel <u>★</u> </span></div></div>
+      <section class="lp-what">
+        <h2>Junta a galera e faz o que quiser.</h2>
+        <div class="lp-cards">
+          <article class="lp-card c1"><span class="ib" data-i="people"></span><h3>Salas com 8 pessoas</h3><p>Pequena do jeito certo: todo mundo se ouve. Cada sala fica aberta por 8 horas.</p></article>
+          <article class="lp-card c2"><span class="ib" data-i="note"></span><h3>Ouça música junto</h3><p>Uma rádio só pra sala toda. Cola o link do YouTube ou o nome da música e todo mundo ouve ao mesmo tempo.</p></article>
+          <article class="lp-card c3"><span class="ib" data-i="dice"></span><h3>Jogue</h3><p>Sinuca, truco, damas, xadrez, pesca e mais, no meio da conversa.</p></article>
+          <article class="lp-card c4"><span class="ib" data-i="chat"></span><h3>Bata papo</h3><p>Por texto ou por voz, com o seu boneco andando pela sala.</p></article>
+        </div>
+      </section>
+      <section class="lp-eight">
+        <div class="ring"><div class="ring2"><div class="ring3">
+          <h2><span class="n8">Só 8</span><br>por sala.</h2>
+          <p>Pequeno de propósito: todo mundo se ouve e ninguém fica de fora.</p>
+          <div class="lp-slots" id="lpSlots"></div>
+        </div></div></div>
+      </section>
+      <section class="lp-final">
+        <canvas class="fa l" id="lpAvL" width="110" height="150" aria-hidden="true"></canvas>
+        <h2>Bora fazer<br><span class="bd">Baderna?</span></h2>
+        <button class="lp-cta pink" id="landCta2" type="button">Criar minha sala</button>
+        <canvas class="fa r" id="lpAvR" width="110" height="150" aria-hidden="true"></canvas>
+      </section>
+      <footer class="lp-foot"><div class="qb-logo" role="img" aria-label="Que baderna!"></div><span>© 2026 QUE BADERNA!</span></footer>
     </div>
   </section>
 
