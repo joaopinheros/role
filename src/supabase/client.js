@@ -113,6 +113,12 @@ export async function connect({ url, key, ice }) {
         state.uid = r.uid;
         return { uid: r.uid, token: '', conta: r.conta };
       }
+      if (op === 'authGuest') {   // entrada rápida: só o nome (supabase/visitante.sql)
+        const r = await rpc('auth_guest', { p_nome: String(a.nome || ''), p_fig: a.fig || '' });
+        if (r.err) throw coded(r.err);
+        state.uid = r.uid;
+        return { uid: r.uid, token: '', conta: r.conta };
+      }
       throw coded('op');
     },
     async hello() { return { uid: state.uid }; },

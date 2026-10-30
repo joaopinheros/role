@@ -26,8 +26,8 @@ await c.query(`
   grant execute on function auth.uid() to anon, authenticated, service_role;
 `);
 const U = n => `${String(n).repeat(8)}-${String(n).repeat(4)}-${String(n).repeat(4)}-${String(n).repeat(4)}-${String(n).repeat(12)}`;
-const [A, B, C, D] = [1, 2, 3, 4].map(U);
-for (const u of [A, B, C, D]) await c.query('insert into auth.users values ($1)', [u]);
+const [A, B, C, D, E, F] = [1, 2, 3, 4, 5, 6].map(U);
+for (const u of [A, B, C, D, E, F]) await c.query('insert into auth.users values ($1)', [u]);
 const schema = fs.readFileSync(process.argv[3], 'utf8'), fm = fs.readFileSync(process.argv[4], 'utf8');
 await c.query(schema); await c.query(fm); await c.query(fm); await c.query(schema); await c.query(fm);
 console.log('schema + fm aplicados várias vezes: ok');
@@ -59,6 +59,15 @@ async function conta(uid, nome, usuario, tel) {
 }
 await conta(A, 'Ana', 'ana', '11911111111'); await conta(B, 'Beto', 'beto', '11922222222');
 await conta(C, 'Caio', 'caio', '11933333333'); await conta(D, 'Duda', 'duda', '11944444444');
+/* entrada rápida: visitante só com o nome */
+let g1 = await ok('visitante entra só com o nome', rpc(E, 'auth_guest', 'João Ávila', ''));
+assert.equal(g1.v.conta.nome, 'João Ávila'); assert.equal(g1.v.conta.usuario, 'joaoavila'); assert.equal(g1.v.conta.visitante, true);
+let g2 = await ok('outro visitante com o mesmo nome ganha outro usuário', rpc(F, 'auth_guest', 'João Ávila', ''));
+assert.notEqual(g2.v.conta.usuario, 'joaoavila');
+assert.equal((await rpc(E, 'hello')).v.conta.usuario, 'joaoavila');
+assert.equal((await rpc(A, 'hello')).v.conta.visitante, false);
+assert.equal((await rpc(E, 'auth_guest', 'x', '')).v.err, 'invalid'); console.log('ok    nome curto demais é recusado');
+await no('quem não está logado não entra', as(null, `select public.auth_guest('Zé', '')`, [], 'anon'), 'permission denied');
 await ok('A cria a sala', rpc(A, 'criar_role', 'sala12345', 'Rolê', '2026-11-01', '20:00', 'festa', true));
 await ok('B entra', rpc(B, 'entrar_role', 'sala12345'));
 await ok('D entra', rpc(D, 'entrar_role', 'sala12345'));
