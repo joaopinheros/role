@@ -310,6 +310,25 @@ function authVerify(c, a) {
   return { uid, token, conta: store.get(`data/users/${uid}/conta`) };
 }
 
+/* entrada rápida (estilo Gartic): só o nome do personagem. Cria uma conta de visitante, sem e-mail, celular nem código */
+function authGuest(c, a) {
+  if (slow(c.ip)) throw 'slow';
+  const nome = String(a.nome || '').trim().slice(0, 20);
+  if (nome.length < 2) throw 'invalid';
+  const base = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12);
+  let usuario = base.length >= 3 ? base : (base + crypto.randomInt(100, 999)).slice(0, 12);
+  for (let i = 0; store.get('perfis/' + usuario) && i < 30; i++) usuario = (base.slice(0, 12) + crypto.randomInt(10, 9999)).slice(0, 16);
+  if (!okUser(usuario) || store.get('perfis/' + usuario)) throw 'taken';
+  const uid = 'u' + crypto.randomBytes(9).toString('base64url');
+  const fig = isStr(a.fig, 600) ? a.fig : '';
+  store.set(`data/users/${uid}/conta`, { nome, usuario, email: '', tel: '', visitante: true, verificado: true, fig, criado: Date.now() });
+  store.set('perfis/' + usuario, { nome, fig, dono: uid });
+  const token = crypto.randomBytes(32).toString('base64url');
+  store.set(tokenKey(token), { uid, at: Date.now() });
+  bindUser(c, uid);
+  return { uid, token, conta: store.get(`data/users/${uid}/conta`) };
+}
+
 function bindUser(c, uid) {
   const conta = store.get(`data/users/${uid}/conta`);
   c.uid = uid;
@@ -439,6 +458,7 @@ wss.on('connection', (ws, req) => {
         }
         case 'authStart': return reply(id, await authStart(c, m));
         case 'authVerify': return reply(id, authVerify(c, m));
+        case 'authGuest': return reply(id, authGuest(c, m));
 
         case 'get': return canRead(c, p) ? reply(id, store.get(p)) : reply(id, null, 'perm');
         case 'list': return canRead(c, p) ? reply(id, store.list(p)) : reply(id, null, 'perm');

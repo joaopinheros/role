@@ -27,14 +27,10 @@ const errs = [];
 const VIEW = (process.env.VIEW || '1100x760').split('x').map(Number).reduce((w, h) => ({ width: w, height: h }));   // ex.: VIEW=1920x945
 
 async function signup(page, nome, user) {
-  await sleep(250);   // a tela de entrada tira o foco para o 1º campo 30 ms depois de abrir: espera isso passar antes de preencher
-  await page.waitForSelector('#scrLanding:not([hidden]), #scrAuth:not([hidden])'); if (await page.isVisible('#landEnter')) await page.click('#landEnter'); await page.fill('#suNome', nome); await page.fill('#suUser', user);
-  await page.fill('#suEmail', user + '@exemplo.com'); await page.fill('#suTel', '11' + (user.charCodeAt(0) % 2 ? '9' : '9') + rnd(8));
-  await sleep(120);   // dá tempo de os campos formatarem o que foi preenchido antes de enviar
-  await page.click('#fSignup button[type=submit]');
-  try { await page.waitForSelector('#smsText:not(:empty)'); }
-  catch (e) { console.log('   cadastro travou:', JSON.stringify(await page.evaluate(() => ({ err: document.querySelector('#suErr').textContent, auth: !document.querySelector('#scrAuth').hidden, nome: document.querySelector('#suNome').value, user: document.querySelector('#suUser').value, email: document.querySelector('#suEmail').value, tel: document.querySelector('#suTel').value })))); throw e; }
-  await page.fill('#vCode', (await page.textContent('#smsText')).match(/\d{4}/)[0]);
+  await sleep(250);
+  await page.waitForSelector('#scrLanding:not([hidden]), #scrAuth:not([hidden])'); if (await page.isVisible('#landEnter')) await page.click('#landEnter');
+  await page.fill('#gNome', nome);
+  await page.click('#fGuest button[type=submit]');
 }
 const inRoom = p => p.waitForFunction(() => !document.querySelector('#roomUI').hidden, null, { timeout: 20000 });
 const games = p => p.evaluate(() => window.__role.games());

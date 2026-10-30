@@ -710,6 +710,8 @@ p{margin:0}
   .instage .eye,.fmon .eye{display:none}
   .chathide:not(.instage):not(.fmon) .log,.chathide:not(.instage):not(.fmon) .chat-dock form{display:none}
 }
+/* entrada rápida: só o nome; o cadastro antigo fica escondido */
+#scrAuth .seg,#scrAuth #fSignup,#scrAuth #fLogin{display:none!important}
 </style>
 
 <div class="app" id="frame">
@@ -807,8 +809,13 @@ p{margin:0}
     <div class="auth-wrap">
     <div class="card">
       <h1>Bora pra Outro Lugar?</h1>
-      <p class="muted">Crie sua conta ou entre pra montar a sua sala e chamar a galera.</p>
+      <p class="muted">Escolhe um nome pro seu personagem e já entra. Sem cadastro.</p>
       <p class="banner" id="authBanner" hidden>Entre ou crie sua conta pra entrar no rolê <b id="authBannerName"></b>. O convite fica guardado.</p>
+      <form id="fGuest" style="display:flex;flex-direction:column;gap:14px" novalidate>
+        <div class="field"><label class="lbl" for="gNome">Nome do seu personagem</label><input id="gNome" maxlength="20" autocomplete="nickname" placeholder="Ex.: Bia" autocapitalize="words"></div>
+        <p class="err" id="gErr" hidden></p>
+        <button class="px hot big" type="submit">Entrar</button>
+      </form>
       <div class="seg" role="tablist" aria-label="Conta">
         <button class="segb" role="tab" id="tabSignup" aria-selected="true">Criar conta</button>
         <button class="segb" role="tab" id="tabLogin" aria-selected="false">Entrar</button>

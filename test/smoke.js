@@ -18,14 +18,10 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'role-'));
 const ok = (c, msg) => { if (!c) throw new Error('falhou: ' + msg); console.log('  ✓ ' + msg); };
 
 async function signup(page, nome, user, tel) {
-  await page.waitForSelector('#scrLanding:not([hidden]), #scrAuth:not([hidden])'); if (await page.isVisible('#landEnter')) await page.click('#landEnter'); await page.fill('#suNome', nome);
-  await page.fill('#suUser', user);
-  await page.fill('#suEmail', user + '@exemplo.com');
-  await page.fill('#suTel', tel);
-  await page.click('#fSignup button[type=submit]');
-  await page.waitForSelector('#smsText:not(:empty)');
-  const code = (await page.textContent('#smsText')).match(/\d{4}/)[0];
-  await page.fill('#vCode', code);
+  await new Promise(r => setTimeout(r, 250));
+  await page.waitForSelector('#scrLanding:not([hidden]), #scrAuth:not([hidden])'); if (await page.isVisible('#landEnter')) await page.click('#landEnter');
+  await page.fill('#gNome', nome);
+  await page.click('#fGuest button[type=submit]');
 }
 const inRoom = (p, wait) => wait ? p.waitForFunction(() => !document.querySelector('#roomUI').hidden) : p.evaluate(() => !document.querySelector('#roomUI').hidden);
 const shot = (p, n) => SHOTS && p.screenshot({ path: path.join(SHOTS, n + '.png') });

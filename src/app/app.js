@@ -263,6 +263,25 @@ $('#fSignup').addEventListener('submit',async e=>{e.preventDefault();
     PEND={tipo:'cadastro',uid,conta:{nome,usuario,email,tel},tel};errOn('#suErr');sendCode();
   }catch(err){errOn('#suErr','Não deu pra falar com o servidor agora. Tenta de novo.');console.warn(err);}
 });
+/* entrada rápida: só o nome do personagem */
+{const gn=$('#gNome');try{const l=localStorage.getItem('role-ultimo-nome');if(l)gn.value=l;}catch(e){}
+$('#fGuest').addEventListener('submit',async e=>{e.preventDefault();
+  const nome=gn.value.trim().slice(0,20);
+  if(nome.length<2)return errOn('#gErr','Coloca o nome do seu personagem (pelo menos 2 letras).');
+  const btn=e.target.querySelector('button[type=submit]');btn.disabled=true;errOn('#gErr');
+  try{
+    if(SRV){const r=await NET.call('authGuest',{nome,fig:encode(fig)});UID=r.uid;LS.set('role-auth',{uid:r.uid,token:r.token});await NET.hello(r.token);ME=r.conta;}
+    else{
+      const base=(nome.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,12));let usuario=base.length>=3?base:(base+ri(900)+100).slice(0,12);
+      for(let i=0;i<30;i++){const p=await DB.get('perfis/'+usuario);if(!p||p.dono===UID)break;usuario=(base.slice(0,12)+(ri(9990)+10)).slice(0,16);}
+      let uid=UID;if(!REMOTE){uid='local-'+genId(10);LS.set('role-uid',uid);}UID=uid;
+      const c={nome,usuario,email:'',tel:'',visitante:true,verificado:true,fig:encode(fig),criado:Date.now()};
+      await DB.set(contaPath(),c);await DB.set('perfis/'+usuario,{nome,fig:c.fig,dono:UID});ME=c;
+    }
+    try{localStorage.setItem('role-ultimo-nome',nome);}catch(x){}
+    const f=parse(ME.fig||'');if(f)fig=f;sessao.set(ME);PEND=null;afterAuth();
+  }catch(err){errOn('#gErr',{slow:'Muitas tentativas. Espera um minutinho.'}[err&&err.code]||'Não deu pra entrar agora. Tenta de novo.');console.warn(err);}
+  btn.disabled=false;});}
 $('#fLogin').addEventListener('submit',async e=>{e.preventDefault();
   const raw=$('#liId').value.trim().toLowerCase(),q=raw.includes('@')?raw:onlyDigits(raw);
   if(!(mailOk(q)||telOk(q)))return errOn('#liErr','Digita o e-mail ou o celular com DDD.');
@@ -303,7 +322,7 @@ function carUpd(){const l=$('#myRoles'),pv=$('#carPrev'),nx=$('#carNext');if(!l|
   const step=d=>{const c=l.firstElementChild,w=c?c.getBoundingClientRect().width+18:260;l.scrollBy({left:d*w*(l.clientWidth>w*2.2?2:1),behavior:RM?'auto':'smooth'});};
   $('#carPrev').addEventListener('click',()=>step(-1));$('#carNext').addEventListener('click',()=>step(1));
   l.addEventListener('scroll',carUpd,{passive:true});addEventListener('resize',carUpd);new MutationObserver(()=>setTimeout(carUpd,60)).observe(l,{childList:true});})();
-async function openHome(){go('#scrHome');$('#homeName').textContent=ME.nome;$('#homeUser').textContent='@'+ME.usuario;drawHomeAv();
+async function openHome(){go('#scrHome');$('#homeName').textContent=ME.nome;$('#homeUser').textContent=ME.visitante?'visitante':'@'+ME.usuario;drawHomeAv();
   const box=$('#myRoles');box.innerHTML='<div class="empty">Carregando…</div>';vitrine('churrasco',true);
   try{const mine=(await DB.list(`data/users/${UID}`)).filter(d=>d.id.startsWith('r_'));
     const roles=(await Promise.all(mine.map(async m=>{const r=await DB.get('roles/'+m.data.eid);return r&&{...r,eid:m.data.eid,papel:m.data.papel};}))).filter(Boolean).sort((a,b)=>(b.criado||0)-(a.criado||0));
