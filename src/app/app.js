@@ -248,6 +248,7 @@ async function openHome(){go('#scrHome');$('#homeName').textContent=ME.nome;$('#
   try{const mine=(await DB.list(`data/users/${UID}`)).filter(d=>d.id.startsWith('r_'));
     const roles=(await Promise.all(mine.map(async m=>{const r=await DB.get('roles/'+m.data.eid);return r&&{...r,eid:m.data.eid,papel:m.data.papel};}))).filter(Boolean).sort((a,b)=>(b.criado||0)-(a.criado||0));
     const vivos=roles.filter(r=>roomLeft(r)>0);   // sala encerrada some da lista
+    roles.filter(r=>roomLeft(r)<=0).forEach(r=>{try{DB.del(`data/users/${UID}/r_${r.eid}`).catch(()=>{});}catch(e){}});   // e o vínculo é apagado (no servidor/Supabase o apagar não é permitido: aí só some da tela)
     const cnt=$('#roomsCount');cnt.hidden=!vivos.length;cnt.textContent=vivos.length+(vivos.length===1?' no ar':' no ar');
     box.innerHTML='';if(!vivos.length){box.innerHTML='<div class="empty">Nenhuma sala ativa agora. Cria uma e chama a galera.</div>';return;}
     vivos.forEach(r=>{const row=document.createElement('div');row.className='rrow';row.style.setProperty('--cc',cartColor(r.cena));
@@ -324,7 +325,7 @@ async function enterRoom(eid,fresh){
   const[sx,sy]=spawnTile();me=makeAv(ME.nome,{...fig},sx,sy,{user:ME.usuario});npcSpawn();
   $('#rName').textContent=r.nome;roomClock();updDayBtn();
   $('#log').innerHTML='';chatSeen=new Set();joinedAt=Date.now();centerOn(...S(sx+.5,sy+.5).map((v,i)=>i?v-50:v));
-  addLog(null,fresh?`Você entrou em ${r.nome}. Bem-vindo!`:`Você está em ${r.nome}.`);spawnPets(eid);if(SCN.mixer)addLog(null,`Toca na mesa de som (ou no botão Som) pra soltar o ${MUSIC.name()}. Tem ${pets.map(p=>p.name).join(' e ')} passeando por aí.`);updSom();
+  addLog(null,fresh?`Você entrou em ${r.nome}. Bem-vindo!`:`Você está em ${r.nome}.`);spawnPets(eid);if(SCN.mixer)addLog(null,`Toca na mesa de som pra ligar a rádio. Tem ${pets.map(p=>p.name).join(' e ')} passeando por aí.`);updSom();
   unsubRole=DB.watchDoc('roles/'+eid,d=>{if(!d||mode!=='sala')return;const ch=d.cena!==CUR.cena||!!d.noite!==!!CUR.noite;CUR={eid,...d};if(ch){SCN=getScene(d.cena,d.noite);setTime(d.noite);updDayBtn();avatars.forEach(a=>{if(!walkable(a.gx,a.gy,a.gx,a.gy)){const[x,y]=freeNear(a.gx,a.gy,a);a.gx=a.fx=x;a.gy=a.fy=y;a.path=[];}});}});
   unsubChat=DB.watchColl(`roles/${eid}/chat`,list=>{list.forEach(({id,data:m})=>{if(chatSeen.has(id))return;chatSeen.add(id);
       if(m.k==='bot'){fmBotFromChat(id,m,m.at>=joinedAt-2000);return;}   // Rolê FM
@@ -512,12 +513,11 @@ cv.addEventListener('pointerup',e=>{const wasPinch=!!pinch;dropPt(e);if(!pts.siz
   const[x,y]=toWorld(e),[tx,ty]=tileAt(x,y);const pt=petAt(x,y);
   if(fmHit(e,x,y))return;
   if(pt){pt.heart=now+1400;pt.bubble={text:PET_ART[pt.type].talk,t:now};pt.path=[];return;}
-  if(SCN.mixer&&tx===SCN.mixer[0]&&ty===SCN.mixer[1]){toggleSom();const[fx,fy]=freeNear(tx,ty+1,me);if(Math.abs(me.gx-tx)+Math.abs(me.gy-ty)>2)walkTo(me,fx,fy);pushPres();return;}
+  if(SCN.mixer&&tx===SCN.mixer[0]&&ty===SCN.mixer[1]){ligaRadio();const[fx,fy]=freeNear(tx,ty+1,me);if(Math.abs(me.gx-tx)+Math.abs(me.gy-ty)>2)walkTo(me,fx,fy);pushPres();return;}
   if(gClickTile(tx,ty))return;
   if(walkTo(me,tx,ty))pushPres();});
-function updSom(){const b=$('#rSom');if(!b)return;b.setAttribute('aria-pressed',String(MUSIC.on));setBtn(b,'note',MUSIC.on?MUSIC.name():'Som');}
-function toggleSom(){const on=MUSIC.toggle();updSom();addLog(null,on?`Som ligado: ${MUSIC.name()}.`:'Som desligado.');}
-$('#rSom').addEventListener('click',toggleSom);
+function updSom(){}   // o botão Som saiu: quem toca é a rádio
+function ligaRadio(){if(!FM.on||!FM.ok){addLog(null,'A rádio ainda não está ligada neste servidor.');return;}fmActivate();if(!fmNp().video)addLog(null,'A rádio está vazia. Manda uma música com /music e cola o link ou o nome.');}
 
 /* ---------- chat de voz (modo Supabase): áudio direto entre as pessoas, até 8 por vez ---------- */
 let voz=null,vozSt={active:false,muted:false,members:[]},vozOff=null,vozPrev=new Set();
@@ -619,7 +619,7 @@ function frameLoop(t){
 }
 
 /* ================= início ================= */
-window.__role={show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loading'),false);vitrine.k=null;vitrine(id,n);zoom=z||.5;resize();centerOn(WW/2,WHt/2-40);},avs:()=>avatars.map(a=>({n:a.name,u:a.user,x:a.gx,y:a.gy,p:a.path.length,peer:a.peer})),
+window.__role={mesaXY:()=>{if(!SCN||!SCN.mixer)return null;const[wx,wy]=S(SCN.mixer[0]+.5,SCN.mixer[1]+.5),[sx,sy]=toScreen(wx,wy-12),r=cv.getBoundingClientRect();return[r.left+sx,r.top+sy];},show:(id,n,z)=>{SCREENS.forEach(x=>show($(x),false));show($('#loading'),false);vitrine.k=null;vitrine(id,n);zoom=z||.5;resize();centerOn(WW/2,WHt/2-40);},avs:()=>avatars.map(a=>({n:a.name,u:a.user,x:a.gx,y:a.gy,p:a.path.length,peer:a.peer})),
   gon:()=>({on:G.on,live:!!live,send:!!(live&&live.send),me:live&&live.me,acts:SCN&&SCN.acts&&SCN.acts.length}),
   scene:id=>{const c=getScene(id,false);return{gw:GW,gh:GH,blocked:[...c.blocked],seats:[...c.seats.keys()],soft:[...c.seats].filter(([,v])=>v.soft).map(([k])=>k),spawn:c.sc.spawn,acts:(c.acts||[]).map(v=>[v.id,v.x,v.y,v.w,v.d]),npcs:(c.npcs||[]).map(v=>[v.name,v.gx,v.gy,!!v.wander])};},
   cards:()=>{const c=cardsSheet(),k=3,o=document.createElement('canvas');o.width=c.width*k;o.height=c.height*k;const g=o.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(c,0,0,o.width,o.height);return o.toDataURL();},

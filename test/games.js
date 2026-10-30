@@ -425,6 +425,8 @@ async function solo(browser) {
     ok(/Restam 7h|Restam 8h/.test(await a.textContent('#rWhen')), 'o chip mostra quanto falta das 8 horas: ' + await a.textContent('#rWhen'));
     await a.evaluate(() => window.__role.expira());
     ok(!!await waitFor(() => a.isVisible('#scrHome'), 14000), 'passadas as 8 horas, todo mundo volta para o início');
+    await sleep(1200);
+    ok((await a.locator('#myRoles .rrow').count()) === 0, 'a sala encerrada some da lista de salas ativas');
     await Promise.all([a, b].map(p => p.context().close()));
   }
   {

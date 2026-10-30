@@ -123,9 +123,9 @@ async function principal(browser) {
   // computador: o dirigível no céu, com a capa; "Ouvir junto" toca no player e pausa o house
   ok(!!await waitFor(async () => (await fm(a)).visual.ceu, 45000), 'o dirigível aparece no céu (computador)');
   ok(!!await waitFor(async () => (await fm(a)).capa, 5000), 'a capa da música foi carregada');
-  await a.click('#rSom');
-  ok((await fm(a)).house, 'a dona liga o house da sala');
-  await a.click('#rFm');
+  ok((await a.locator('#rSom').count()) === 0, 'o botão Som (house) não existe mais');
+  { const xy = await a.evaluate(() => window.__role.mesaXY()); ok(!!xy, 'a sala tem mesa de som'); await a.mouse.click(xy[0], xy[1]); }
+  ok(!!await waitFor(async () => (await a.getAttribute('#rFm', 'aria-pressed')) === 'true', 4000), 'clicar na mesa de som liga a rádio (Ouvir junto)');
   ok(!!await waitFor(async () => { const f = await fm(a); return f.ytReady && f.yt && f.yt.vid === f.video; }, 8000), '"Ouvir junto": o player carrega a música da sala');
   ok(!(await fm(a)).house, 'o house pausa sozinho enquanto ouve');
   const box = await a.locator('#fmBox').boundingBox();
@@ -177,7 +177,6 @@ async function principal(browser) {
   await say(a, '/skip');
   ok(!!await waitFor(async () => (await fm(a)).status === 'parado', 5000), 'fila vazia: para de tocar');
   ok(!!await waitFor(() => logHas(b, /Fila vazia/), 4000), 'o bot avisa que o som da sala voltou');
-  ok(!!await waitFor(async () => (await fm(a)).house, 4000), 'e o house volta para quem estava ouvindo');
   ok(!(await a.isVisible('#fmBox')), 'sem música, o player some');
   await Promise.all([a, b, c].map(p => p.context().close()));
 }
