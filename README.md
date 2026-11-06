@@ -127,7 +127,7 @@ Dá para publicar o app só com o Pages e o banco no Supabase (Postgres). Serve 
 - O SMS é simulado: `app_config.sms_dev = 1` devolve o código na tela. Para SMS de verdade, envie o código por uma Edge Function e ponha `sms_dev = 0`.
 - A lotação de 8 pessoas só vale no cliente.
 - A sala ao vivo (canal de presença) não exige ser membro.
-- Painel admin, expulsar e banir pelo app, excluir conta e baixar dados (LGPD).
+- Expulsar e banir pelo app, excluir conta e baixar dados (LGPD). (O painel do dono já existe: veja "Painel do dono".)
 
 O servidor Node com Postgres próprio segue sendo o caminho de produção.
 
@@ -187,3 +187,13 @@ Configurações em `.env` (copie de `.env.example`).
 - **SMS:** sem `SMS_WEBHOOK_URL`, o código aparece na tela. Para produção, ligue um provedor de SMS (Twilio, Zenvia…) por um webhook seu.
 - **Banco:** o arquivo JSON aguenta bem um MVP e alguns milhares de rolês. Para crescer, troque `server/store.js` por Postgres ou SQLite mantendo os mesmos métodos (`get`, `set`, `update`, `list`, `add`).
 - **Instâncias:** use uma instância só do servidor. As salas ao vivo ficam em memória. Para escalar horizontalmente, use Redis pub/sub.
+
+## Painel do dono (/admin)
+
+Página só sua, em `https://seu-site/admin`: quem está em cada sala agora (nomes e quem está na voz), salas ativas, música tocando e quanto cada uma foi pulada, contas novas e os últimos 7 dias. Não mostra o texto das conversas.
+
+1. No Supabase (SQL Editor), rode `supabase/admin.sql` (depois do schema, fm e entrada-rapida).
+2. Defina a senha, também no SQL Editor (nunca no código): `select public.admin_definir_senha('uma senha longa só sua');`
+3. Faça o deploy e abra `/admin`. Cada aparelho fica liberado por 30 dias. Trocar a senha desconecta todos.
+
+Teste do SQL: `node test/sql/admin.test.mjs <pasta-temporária>` (precisa de `npm i --no-save embedded-postgres pg`). Para só ver o desenho com dados de mentira: abra `src/admin/admin.html` num build sem Supabase com `?demo`.

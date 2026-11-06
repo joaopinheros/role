@@ -46,5 +46,20 @@ if (url && key) {
 } else {
   console.log('[pages] sem SUPABASE_URL/SUPABASE_PUBLISHABLE_KEY: modo local (dados só no navegador)');
 }
+
+// painel do dono (/admin): página à parte, com a própria senha (supabase/admin.sql). Fica fora do app: quem joga não baixa nada dele.
+{
+  esbuild.buildSync({
+    entryPoints: [path.join(ROOT, 'src', 'admin', 'admin.js')], outfile: path.join(OUT, 'admin.js'),
+    bundle: true, minify: true, format: 'iife', target: 'es2019', platform: 'browser', legalComments: 'none',
+  });
+  const aver = require('crypto').createHash('md5').update(fs.readFileSync(path.join(OUT, 'admin.js'))).digest('hex').slice(0, 10);
+  const acfg = url && key ? `<script>window.ADMIN_CFG=${JSON.stringify({ url, key }).replace(/</g, '\u003c')}</script>` : '';
+  const ahtml = fs.readFileSync(path.join(ROOT, 'src', 'admin', 'admin.html'), 'utf8')
+    .replace('<!--ADMIN_CFG-->', () => acfg).replace('<!--ADMIN_JS-->', () => `<script src="/admin.js?v=${aver}"></script>`);
+  fs.writeFileSync(path.join(OUT, 'admin.html'), ahtml);
+  const hdr = '  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-store\n';
+  fs.writeFileSync(path.join(OUT, '_headers'), '/admin\n' + hdr + '/admin.html\n' + hdr);
+}
 fs.writeFileSync(path.join(OUT, 'index.html'), html);
 console.log('[pages] dist-pages/ pronto');

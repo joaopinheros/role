@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Painel · O Outro Lugar</title>
+<link rel="icon" href="/favicon-32.png">
+<style>
+:root{--bg:#0d0d10;--card:#16161b;--line:#26262e;--fg:#f4f1ea;--mute:#9a97a3;--g:#4ee07a;--y:#ffe14d;--p:#ff3d9a;--v:#7048ff;--o:#ff6a1a;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 'Atkinson Hyperlegible Next',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+body{padding:0 max(16px,env(safe-area-inset-left)) 56px max(16px,env(safe-area-inset-right))}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1240px;margin:0 auto}
+.num{font-variant-numeric:tabular-nums}
+
+/* topo */
+.top{display:flex;align-items:center;gap:14px;padding:18px 0;flex-wrap:wrap;position:sticky;top:0;z-index:5;background:linear-gradient(var(--bg) 80%,transparent)}
+.brand{font:900 20px/1 Impact,'Arial Black',sans-serif;letter-spacing:.02em;text-transform:uppercase}
+.brand b{color:var(--g)}
+.live{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:13px;margin-left:auto}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--g);box-shadow:0 0 0 0 rgba(78,224,122,.7);animation:pulse 2s infinite}
+.dot.off{background:var(--o);animation:none}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(78,224,122,0)}100%{box-shadow:0 0 0 0 rgba(78,224,122,0)}}
+.btn{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px}
+.btn:hover{border-color:var(--g)}
+.btn.hot{background:var(--g);border-color:var(--g);color:#0d0d10}
+
+/* login */
+.login{max-width:380px;margin:14vh auto 0;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:14px}
+.login h1{margin:0;font:900 26px/1.05 Impact,'Arial Black',sans-serif;text-transform:uppercase}
+.login p{margin:0;color:var(--mute);font-size:14px}
+.login input{background:#0d0d10;border:2px solid var(--line);border-radius:12px;color:var(--fg);padding:12px 14px;font:inherit;min-height:46px}
+.login input:focus{outline:none;border-color:var(--g)}
+.err{color:var(--p);font-size:14px;min-height:20px;margin:0}
+
+/* números */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 16px 14px;min-width:0}
+.tile .k{color:var(--mute);font-size:12px;letter-spacing:.07em;text-transform:uppercase;font-weight:700}
+.tile .n{font:900 44px/1.05 Impact,'Arial Black',sans-serif;margin:6px 0 2px}
+.tile .s{color:var(--mute);font-size:13px}
+.tile.main{border-color:var(--g);background:linear-gradient(160deg,#16231b,var(--card) 70%)}
+.tile.main .n{color:var(--g)}
+
+h2{font:800 13px/1 system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);margin:34px 0 12px;display:flex;align-items:center;gap:10px}
+h2 small{font-weight:400;letter-spacing:0;text-transform:none;font-size:13px}
+
+/* salas */
+.rooms{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+.room{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0;border-top:5px solid var(--cc,#555)}
+.room.empty{opacity:.62}
+.rh{display:flex;gap:10px;align-items:flex-start}
+.rh h3{margin:0;font-size:17px;line-height:1.2;overflow-wrap:anywhere}
+.meta{color:var(--mute);font-size:13px}
+.occ{margin-left:auto;text-align:right;flex:none}
+.occ .big{font:900 34px/1 Impact,'Arial Black',sans-serif}
+.occ .big small{font-size:16px;color:var(--mute)}
+.seats{display:flex;gap:3px;justify-content:flex-end;margin-top:5px}
+.seats i{width:9px;height:9px;border-radius:2px;background:var(--line)}
+.seats i.on{background:var(--g)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-height:28px}
+.chip{background:#0d0d10;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;display:flex;align-items:center;gap:6px;max-width:100%}
+.chip .u{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip .t{color:var(--mute);font-size:12px}
+.chip.voz{border-color:var(--v)}
+.chip.voz::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--v);flex:none}
+.none{color:var(--mute);font-size:13px;padding:4px 0}
+.song{background:#0d0d10;border-radius:12px;padding:10px 12px;font-size:14px;min-width:0}
+.song .tt{display:flex;gap:8px;align-items:baseline}
+.song .tt b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.song .tt span{color:var(--mute);font-size:12px;flex:none}
+.bar{height:5px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--y);width:0}
+.song.off{color:var(--mute)}
+.stats{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--mute)}
+.stats b{color:var(--fg)}
+details summary{cursor:pointer;color:var(--mute);font-size:13px}
+details ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.tick{display:inline-block;width:16px;color:var(--g)}.tick.skip{color:var(--p)}
+
+/* listas */
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0}
+.box h3{margin:0 0 10px;font-size:14px;color:var(--mute);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:7px 6px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--mute);font-weight:700;font-size:12px}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right;white-space:nowrap}
+td.t{max-width:0;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pct{display:inline-block;min-width:44px;text-align:right}
+.mini{display:inline-block;width:56px;height:6px;background:var(--line);border-radius:3px;vertical-align:middle;margin-left:6px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--g)}
+.feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;font-size:14px}
+.feed li{display:flex;gap:8px;align-items:baseline;min-width:0}
+.feed .x{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.feed .w{color:var(--mute);font-size:12px;flex:none}
+
+/* 7 dias */
+.days{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.spark{display:flex;align-items:flex-end;gap:6px;height:84px;margin-top:6px}
+.spark div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%;min-width:0}
+.spark i{display:block;width:100%;border-radius:4px 4px 0 0;background:var(--c);min-height:2px}
+.spark small{font-size:10px;color:var(--mute)}
+.spark span{font-size:11px;color:var(--fg)}
+.foot{color:var(--mute);font-size:13px;margin-top:34px;max-width:78ch}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--y);color:#111;padding:8px 16px;border-radius:999px;font-weight:700;font-size:14px}
+[hidden]{display:none!important}
+@media (max-width:520px){.rooms,.cols{grid-template-columns:1fr}.tile .n{font-size:36px}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top" id="top" hidden>
+    <span class="brand">O Outro <b>Lugar</b> · Painel</span>
+    <span class="live"><span class="dot" id="dot"></span><span id="liveTxt">conectando…</span></span>
+    <button class="btn" id="refresh" type="button">Atualizar</button>
+    <button class="btn" id="out" type="button">Sair</button>
+  </header>
+
+  <form class="login" id="login" hidden>
+    <h1>Painel do dono</h1>
+    <p id="loginMsg">Digite a senha do painel.</p>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="Senha" aria-label="Senha do painel">
+    <p class="err" id="loginErr" role="alert"></p>
+    <button class="btn hot" type="submit">Entrar</button>
+  </form>
+
+  <p class="login" id="semCfg" hidden>Este site foi publicado sem o Supabase, então não há o que mostrar aqui.</p>
+
+  <main id="dash" hidden>
+    <section class="tiles" id="tiles" aria-label="Resumo"></section>
+    <h2>Salas ao vivo <small id="roomsNote"></small></h2>
+    <section class="rooms" id="rooms"></section>
+    <h2>Músicas <small>últimas 24 horas</small></h2>
+    <section class="cols">
+      <div class="box"><h3>Mais tocadas</h3><div id="top10"></div></div>
+      <div class="box"><h3>Tocando por último</h3><ul class="feed" id="feed"></ul></div>
+    </section>
+    <h2>Últimos 7 dias</h2>
+    <section class="days" id="days"></section>
+    <h2>Gente nova</h2>
+    <section class="box"><div id="novas"></div></section>
+    <p class="foot">
+      <b>Nas salas agora</b> vem da presença em tempo real, então é exato (um aparelho = uma pessoa). <b>No site</b> conta quem usou o app nos últimos minutos e é aproximado.
+      Ainda não existe um botão de curtir: o sinal mais próximo de "a galera gostou" é a música tocar até o fim, e "pulada" é o contrário.
+      O texto das conversas não aparece aqui.
+    </p>
+  </main>
+</div>
+<div class="toast" id="toast" hidden></div>
+<!--ADMIN_CFG-->
+<!--ADMIN_JS-->
+</body>
+</html>
